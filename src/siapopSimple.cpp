@@ -31,51 +31,45 @@
 #include <cmath>
 #include <gsl/gsl_randist.h>
 
-#include "simple/simpleGlobalStructs.h"
-#include "simple/simpleCloneList.h"
-#include "simple/simpleParameterList.h"
+#include "simpleGlobalStructs.h"
+#include "simpleCloneList.h"
+#include "simpleParameterList.h"
 
 // structure contains all global parameters used in multiple source files
 GlobalParameters gpsimp;
 
+//’ SIApop for non-mutating processes that uses Binomial Neg. Binomial
+//' method to simulate for exact times.
+//’
+//’ @param input input character vector of input file
+//’ @param output_dir input character vector of output location
+//’ @param ancestor_file input character vector of ancestor file
 // [[Rcpp::export]]
-int siapopSimple(Rcpp::CharacterVector input)
+int siapopSimple(Rcpp::Nullable<Rcpp::CharacterVector> input = R_NilValue,
+                 Rcpp::Nullable<Rcpp::CharacterVector> output_dir = R_NilValue,
+                 Rcpp::Nullable<Rcpp::CharacterVector> ancestor_file = R_NilValue)
 {
-
-  // for timing total simulation - FOR TESTING
-  auto t1 = std::chrono::high_resolution_clock::now();
 
   //  declaring random number generator and setting seed
   gpsimp.rng = gsl_rng_alloc(gsl_rng_mt19937);
   gpsimp.seed = std::chrono::high_resolution_clock::now().time_since_epoch().count();
 
   /*
-    VARIABLE INPUT AND CONVERSION
+   VARIABLE INPUT AND CONVERSION
   */
   // parsing arguments in command line by searching for argument options
-  char *input_params = input[0];
-  char *ancestor_file = input[1];
   // default output is current directory
-  char *output_folder = input[2];
-
-/*
-  for (int i = 1; i < argc; i++)
+  const char *output_folder;
+  if( output_dir.isNull() )
   {
-    if (i + 1 != argc)
-    { // Check that we haven't finished parsing arguments
-        if (strcmp(argv[i], "-in") == 0) // input file
-        {
-          input_params = argv[i + 1];
-        } else if (strcmp(argv[i], "-out") == 0) // output location
-        {
-          output_folder = argv[i + 1];
-        } else if (strcmp(argv[i], "-anc") == 0) // ancestor file
-        {
-          ancestor_file = argv[i + 1];
-        }
-    }
+    output_folder = "./";
   }
-*/
+  else
+  {
+    std::vector<std::string> output_dir_ = Rcpp::as<std::vector <std::string> > (output_dir);
+    output_folder = output_dir_[0].c_str();
+  }
+
 
   // declare and open output stream for simulation statistics
   char fn[100];
@@ -93,8 +87,11 @@ int siapopSimple(Rcpp::CharacterVector input)
 
 
   // parsing through the input file and converting/adding to parameter list
-  if( input_params != NULL )
+  if( input.isNotNull() )
   {
+    std::vector<std::string> input_ = Rcpp::as<std::vector <std::string> > (input);
+    const char* input_params = input_[0].c_str();
+
     std::string s = input_params;
     std::ifstream infile(input_params);
     if(infile.is_open())
@@ -157,12 +154,13 @@ int siapopSimple(Rcpp::CharacterVector input)
   // Beginning of simulation that has "sim" number of runs
   for (int sim = 1; sim <= gpsimp.num_sims; sim++)
   {
+    Rcpp::checkUserInterrupt();
     // Define CloneList population and initialize variables;
     SimpleCloneList population;
     population.init();
     population.tot_cell_count = 0;
 
-    if( ancestor_file == NULL ) // if no ancestor file exists
+    if( ancestor_file.isNull() ) // if no ancestor file exists
     {
       // go through all ancestors and initialize clones for each
       for(int ance__clone_count = 1; ance__clone_count <= gpsimp.ancestor_clones; ance__clone_count++)
@@ -198,14 +196,17 @@ int siapopSimple(Rcpp::CharacterVector input)
     }
     else // ancestor file exists to read from
     {
-      std::cout << "Reading ancestor file...";
+      Rcpp::Rcout << "Reading ancestor file...";
 
       // import first line of file to a vector of keys
       std::vector<std::string> ancestor_keys;
       std::vector<std::string>::iterator it;
 
-      std::string a = ancestor_file;
-      std::ifstream ancfile(ancestor_file);
+
+      std::vector<std::string> ancestor_file_ = Rcpp::as<std::vector <std::string> > (ancestor_file);
+      const char *ancestors = ancestor_file_[0].c_str();
+      std::string a = ancestors;
+      std::ifstream ancfile(ancestors);
 
       if(ancfile.is_open())
       {
@@ -273,7 +274,7 @@ int siapopSimple(Rcpp::CharacterVector input)
       population.DeleteList();
       count_extinct++;
       gpsimp.num_sims++; // increase number of sims
-      std::cout << "Population went extinct. Restarting.\n";
+      Rcpp::Rcout << "Population went extinct. Restarting.\n";
       continue;
     }
 
@@ -283,9 +284,9 @@ int siapopSimple(Rcpp::CharacterVector input)
       population.SampleAndTraverse(sample_data, sim, gpsimp.sample_size, gpsimp.num_samples);
     }
     // Output of end state with clone info
-    std::cout << "Traversing and outputting run " << sim << "\n";
+    Rcpp::Rcout << "Traversing and outputting run " << sim << "\n";
     population.Traverse(clonedata, sim);
-    std::cout << "Traversal Done\n";
+    Rcpp::Rcout << "Traversal Done\n";
 
     population.DeleteList();
 
@@ -300,11 +301,6 @@ int siapopSimple(Rcpp::CharacterVector input)
   clonedata.close();
   sample_data.close();
   sim_stats.close();
-
-  auto t2 = std::chrono::high_resolution_clock::now();
-  std::cout <<
-      std::chrono::duration_cast<std::chrono::milliseconds>(t2-t1).count() <<
-      "milliseconds\n";
 
   return 0;
 }

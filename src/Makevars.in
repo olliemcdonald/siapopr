@@ -2,14 +2,6 @@
 GSL_CFLAGS = @GSL_CFLAGS@
 GSL_LIBS   = @GSL_LIBS@
 
-SOURCES=$(wildcard simple/*.cpp constant/*.cpp timedep/*.cpp)
-OBJECTS = siapopSimple.o siapopConstant.o siapopTimeDep.o $(SOURCES:.cpp=.o)
-
 # combine with standard arguments for R
 PKG_CPPFLAGS = $(GSL_CFLAGS) -I.
 PKG_LIBS = $(GSL_LIBS)
-
-all: $(SHLIB)
-
-clean:
-	@rm -f $(OBJECTS)

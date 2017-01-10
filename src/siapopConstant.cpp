@@ -18,8 +18,8 @@
  *
  * =============================================================================
  */
- #include <RcppGSL.h>
- #include <Rcpp.h>
+#include <RcppGSL.h>
+#include <Rcpp.h>
 
 #include <iostream>
 #include <fstream>
@@ -31,21 +31,25 @@
 #include <cmath>
 #include <gsl/gsl_randist.h>
 
-#include "constant/constantGlobalStructs.h"
-#include "constant/constantCloneList.h"
-#include "constant/constantParameterList.h"
+#include "constantGlobalStructs.h"
+#include "constantCloneList.h"
+#include "constantParameterList.h"
 
 // structure contains all global parameters used in multiple source files
 GlobalParameters gpcons;
 // Function class ptr defined in main() but used in clonelist.cpp
 ConstantCloneList::NewCloneFunction* NewConstantClone;
 
+//’ SIApop for time-homogeneous populations
+//’
+//’ @param input input character vector of input file
+//’ @param output_dir input character vector of output location
+//’ @param ancestor_file input character vector of ancestor file
 // [[Rcpp::export]]
-int siapopConstant(Rcpp::CharacterVector input)
+int siapopConstant(Rcpp::Nullable<Rcpp::CharacterVector> input = R_NilValue,
+                   Rcpp::Nullable<Rcpp::CharacterVector> output_dir = R_NilValue,
+                   Rcpp::Nullable<Rcpp::CharacterVector> ancestor_file = R_NilValue)
 {
-
-  // for timing total simulation - FOR TESTING
-  auto t1 = std::chrono::high_resolution_clock::now();
 
   //  declaring random number generator and setting seed
   gpcons.rng = gsl_rng_alloc(gsl_rng_mt19937);
@@ -55,28 +59,17 @@ int siapopConstant(Rcpp::CharacterVector input)
     VARIABLE INPUT AND CONVERSION
   */
   // parsing arguments in command line by searching for argument options
-  char *input_params = input[0];
-  char *ancestor_file = input[1];
   // default output is current directory
-  char *output_folder = input[2];
-
-/*
-  for (int i = 1; i < argc; i++)
+  const char *output_folder;
+  if( output_dir.isNull() )
   {
-    if (i + 1 != argc)
-    { // Check that we haven't finished parsing arguments
-        if (strcmp(argv[i], "-in") == 0) // input file
-        {
-          input_params = argv[i + 1];
-        } else if (strcmp(argv[i], "-out") == 0) // output location
-        {
-          output_folder = argv[i + 1];
-        } else if (strcmp(argv[i], "-anc") == 0) // ancestor file
-        {
-          ancestor_file = argv[i + 1];
-        }
-    }
-  }*/
+    output_folder = "./";
+  }
+  else
+  {
+    std::vector<std::string> output_dir_ = Rcpp::as<std::vector <std::string> > (output_dir);
+    output_folder = output_dir_[0].c_str();
+  }
 
 
   // declare and open output stream for simulation statistics
@@ -94,8 +87,11 @@ int siapopConstant(Rcpp::CharacterVector input)
 
 
   // parsing through the input file and converting/adding to parameter list
-  if( input_params != NULL )
+  if( input.isNotNull() )
   {
+    std::vector<std::string> input_ = Rcpp::as<std::vector <std::string> > (input);
+    const char* input_params = input_[0].c_str();
+
     std::string s = input_params;
     std::ifstream infile(input_params);
     if(infile.is_open())
@@ -300,7 +296,7 @@ int siapopConstant(Rcpp::CharacterVector input)
       NewConstantClone = new ConstantCloneList::NewCloneNoParams(population);
     }
 
-    if( ancestor_file == NULL ) // if no ancestor file exists
+    if( ancestor_file.isNull() ) // if no ancestor file exists
     {
       // total rate for SSA is equal to number of individuals alive times
       // respective rates
@@ -330,7 +326,7 @@ int siapopConstant(Rcpp::CharacterVector input)
     }
     else // ancestor file exists to read from
     {
-      std::cout << "Reading ancestor file...";
+      Rcpp::Rcout << "Reading ancestor file...";
 
       population.tot_rate = 0;
       population.tot_cell_count = 0;
@@ -339,8 +335,10 @@ int siapopConstant(Rcpp::CharacterVector input)
       std::vector<std::string> ancestor_keys;
       std::vector<std::string>::iterator it;
 
-      std::string a = ancestor_file;
-      std::ifstream ancfile(ancestor_file);
+      std::vector<std::string> ancestor_file_ = Rcpp::as<std::vector <std::string> > (ancestor_file);
+      const char *ancestors = ancestor_file_[0].c_str();
+      std::string a = ancestors;
+      std::ifstream ancfile(ancestors);
 
       if(ancfile.is_open())
       {
@@ -390,18 +388,19 @@ int siapopConstant(Rcpp::CharacterVector input)
             ancestor_map.clear();
         }
       }
-      std::cout << "Ancestor File Read...";
+      Rcpp::Rcout << "Ancestor File Read...";
     }
 
-    std::cout << "Output Ancestor Population...";
+    Rcpp::Rcout << "Output Ancestor Population...";
     population.Traverse(timedata, sim, current_time, gpcons.trace_ancestry, gpcons.count_alleles);
-    std::cout << "Ancestor Output Written...\n";
+    Rcpp::Rcout << "Ancestor Output Written...\n";
 
     // Begin single simulation with while loop that exists when hit max time, max pop, or extinction
     while ( (population.tot_cell_count < gpcons.max_pop) &&
             (population.tot_cell_count > 0) &&
             (current_time < gpcons.tot_life) )
     {
+      Rcpp::checkUserInterrupt();
       // Advance Simulation Time (choose next event time)
       rand_next_time = population.AdvanceTime(current_time);
 
@@ -429,7 +428,7 @@ int siapopConstant(Rcpp::CharacterVector input)
       /*
       if((population.tot_cell_count % 50000) == 0)
       {
-        std::cout << "Time: " << current_time << "\t size: " << population.tot_cell_count << "\n";
+        Rcpp::Rcout << "Time: " << current_time << "\t size: " << population.tot_cell_count << "\n";
       }
       //*/
     }
@@ -440,7 +439,7 @@ int siapopConstant(Rcpp::CharacterVector input)
       population.DeleteList();
       count_extinct++;
       gpcons.num_sims++; // increase number of sims
-      std::cout << "Population went extinct. Restarting.\n";
+      Rcpp::Rcout << "Population went extinct. Restarting.\n";
       continue;
     }
 
@@ -462,9 +461,9 @@ int siapopConstant(Rcpp::CharacterVector input)
     // Trim tree if threshold is higher. Otherwise, Traverse
     population.TreeTrim(gpcons.detection_threshold, gpcons.max_pop);
     // Output of end state with clone info
-    std::cout << "Traversing and outputting run " << sim << "\n";
+    Rcpp::Rcout << "Traversing and outputting run " << sim << "\n";
     population.Traverse(clonedata, sim, gpcons.count_alleles);
-    std::cout << "Traversal Done\n";
+    Rcpp::Rcout << "Traversal Done\n";
 
     population.DeleteList();
 
@@ -484,10 +483,6 @@ int siapopConstant(Rcpp::CharacterVector input)
   sample_data.close();
   sim_stats.close();
 
-  auto t2 = std::chrono::high_resolution_clock::now();
-  std::cout <<
-      std::chrono::duration_cast<std::chrono::milliseconds>(t2-t1).count() <<
-      "milliseconds\n";
 
   return 0;
 }

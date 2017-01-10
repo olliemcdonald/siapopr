@@ -31,10 +31,10 @@
 #include <string>
 #include <gsl/gsl_randist.h>
 
-#include "timedep/timedepGlobalStructs.h"
-#include "timedep/timedepCloneList.h"
-#include "timedep/timedepParameterList.h"
-#include "timedep/timedepRateFunctions.h"
+#include "timedepGlobalStructs.h"
+#include "timedepCloneList.h"
+#include "timedepParameterList.h"
+#include "timedepRateFunctions.h"
 
 // structure contains all global parameters used in multiple source files
 GlobalParameters gptime;
@@ -46,11 +46,16 @@ gsl_integration_workspace *workspace = gsl_integration_workspace_alloc(1000);
 // Pointer to Function class which will point to an instance of one based on parameters
 TDCloneList::NewCloneFunction* NewTDClone;
 
+//’ SIApop for time-dependent processes.
+//’
+//’ @param input input character vector of input file
+//’ @param output_dir input character vector of output location
+//’ @param ancestor_file input character vector of ancestor file
 // [[Rcpp::export]]
-int siapopTimeDep(Rcpp::CharacterVector input)
+int siapopTimeDep(Rcpp::Nullable<Rcpp::CharacterVector> input = R_NilValue,
+                  Rcpp::Nullable<Rcpp::CharacterVector> output_dir = R_NilValue,
+                  Rcpp::Nullable<Rcpp::CharacterVector> ancestor_file = R_NilValue)
 {
-  // timer for total simulation time - FOR TESTING
-  auto t1 = std::chrono::high_resolution_clock::now();
 
   // track total error from integration - FOR TESTING
   gptime.tot_error = 0;
@@ -63,29 +68,16 @@ int siapopTimeDep(Rcpp::CharacterVector input)
     VARIABLE INPUT AND CONVERSION
   */
   // parsing arguments in command line by searching for argument options
-  char *input_params = input[0];
-  char *ancestor_file = input[1];
-  // default output is current directory
-  char *output_folder = input[2];
-
-/*
-  for (int i = 1; i < argc; i++)
+  const char *output_folder;
+  if( output_dir.isNull() )
   {
-    if (i + 1 != argc)
-    { // Check that we haven't finished parsing arguments
-        if (strcmp(argv[i], "-in") == 0) // input file
-        {
-          input_params = argv[i + 1];
-        } else if (strcmp(argv[i], "-out") == 0) // output location
-        {
-          output_folder = argv[i + 1];
-        } else if (strcmp(argv[i], "-anc") == 0) // ancestor file
-        {
-          ancestor_file = argv[i + 1];
-        }
-    }
+    output_folder = "./";
   }
-*/
+  else
+  {
+    std::vector<std::string> output_dir_ = Rcpp::as<std::vector <std::string> > (output_dir);
+    output_folder = output_dir_[0].c_str();
+  }
 
 
   // declare and open output stream for simulation statistics
@@ -102,8 +94,11 @@ int siapopTimeDep(Rcpp::CharacterVector input)
   params.init();
 
   // parsing through the input file and converting/adding to parameter list
-  if( input_params != NULL )
+  if( input.isNotNull() )
   {
+    std::vector<std::string> input_ = Rcpp::as<std::vector <std::string> > (input);
+    const char* input_params = input_[0].c_str();
+
     std::string s = input_params;
     std::ifstream infile(input_params);
     if(infile.is_open())
@@ -319,7 +314,7 @@ int siapopTimeDep(Rcpp::CharacterVector input)
     }
 
 
-    if( ancestor_file == NULL ) // if no ancestor file exists
+    if( ancestor_file.isNull() ) // if no ancestor file exists
     {
       /*
         total rate for time-homogeneous population should be the max for the
@@ -336,7 +331,7 @@ int siapopTimeDep(Rcpp::CharacterVector input)
       // crude global max finder just to give us a homogeneous rate value
       td_birth_params.homogeneous_rate = MaximizeRate(B_max, gptime.start_time, gptime.tot_life, 1000);
       td_death_params.homogeneous_rate = MaximizeRate(D_max, gptime.start_time, gptime.tot_life, 1000);
-      std::cout << "default max birth rate:\t" << td_birth_params.homogeneous_rate << "\t" <<
+      Rcpp::Rcout << "default max birth rate:\t" << td_birth_params.homogeneous_rate << "\t" <<
                    "default max death rate:\t" << td_death_params.homogeneous_rate << "\n";
 
 
@@ -377,7 +372,7 @@ int siapopTimeDep(Rcpp::CharacterVector input)
     }
     else // ancestor file exists to read from
     {
-      std::cout << "Reading ancestor file...\n";
+      Rcpp::Rcout << "Reading ancestor file...\n";
 
       population.tot_rate_homog = 0;
       population.tot_rate = 0;
@@ -387,8 +382,10 @@ int siapopTimeDep(Rcpp::CharacterVector input)
       std::vector<std::string> ancestor_keys;
       std::vector<std::string>::iterator it;
 
-      std::string a = ancestor_file;
-      std::ifstream ancfile(ancestor_file);
+      std::vector<std::string> ancestor_file_ = Rcpp::as<std::vector <std::string> > (ancestor_file);
+      const char *ancestors = ancestor_file_[0].c_str();
+      std::string a = ancestors;
+      std::ifstream ancfile(ancestors);
 
       if(ancfile.is_open())
       {
@@ -480,7 +477,7 @@ int siapopTimeDep(Rcpp::CharacterVector input)
             ancestor->death_params.homogeneous_rate = MaximizeRate((ancestor->D), gptime.start_time, gptime.tot_life, 1000);
             //(ancestor->D).params = &(ancestor->death_params);
 
-            std::cout << "ancestor " << ancestor->clone_id << " max birth rate:\t" << ancestor->birth_params.homogeneous_rate << "\t" <<
+            Rcpp::Rcout << "ancestor " << ancestor->clone_id << " max birth rate:\t" << ancestor->birth_params.homogeneous_rate << "\t" <<
                          "ancestor " << ancestor->clone_id << " max death rate:\t" << ancestor->death_params.homogeneous_rate << "\n";
 
 
@@ -497,19 +494,20 @@ int siapopTimeDep(Rcpp::CharacterVector input)
             ancestor_map.clear();
         }
       }
-      std::cout << "Ancestor File Read...";
+      Rcpp::Rcout << "Ancestor File Read...";
     }
 
-    std::cout << "Output Ancestor Population...";
+    Rcpp::Rcout << "Output Ancestor Population...";
     population.Traverse(timedata, sim, current_time, gptime.trace_ancestry, gptime.count_alleles);
-    std::cout << "Initial Traverse Done\n";
+    Rcpp::Rcout << "Initial Traverse Done\n";
 
     // Begin single simulation with while loop that exists when hit max time, max pop, or extinction
     while ( (population.tot_cell_count < gptime.max_pop) &&
             (population.tot_cell_count > 0) &&
             (current_time < gptime.tot_life) )
     {
-      //std::cout << current_time << "\n";
+      Rcpp::checkUserInterrupt();
+      //Rcpp::Rcout << current_time << "\n";
       // Get next event time by advancing with adaptive thinning
       rand_next_time = population.AdvanceTime(current_time);
 
@@ -537,7 +535,7 @@ int siapopTimeDep(Rcpp::CharacterVector input)
       /*
       if((population.tot_cell_count % 50000) == 0)
       {
-        std::cout << "Time: " << current_time << "\t size: " << population.tot_cell_count << "\n";
+        Rcpp::Rcout << "Time: " << current_time << "\t size: " << population.tot_cell_count << "\n";
       }
       //*/
     }
@@ -548,7 +546,7 @@ int siapopTimeDep(Rcpp::CharacterVector input)
       population.DeleteList();
       count_extinct++;
       gptime.num_sims++; // increase number of sims
-      std::cout << "Population went extinct. Restarting.\n";
+      Rcpp::Rcout << "Population went extinct. Restarting.\n";
       continue;
     }
 
@@ -570,9 +568,9 @@ int siapopTimeDep(Rcpp::CharacterVector input)
     // Trim tree if threshold is higher. Otherwise, Traverse
     population.TreeTrim(gptime.detection_threshold, gptime.max_pop);
     // Output of end state with clone info
-    std::cout << "Traversing and outputting run " << sim << "\n";
+    Rcpp::Rcout << "Traversing and outputting run " << sim << "\n";
     population.Traverse(clonedata, sim, gptime.count_alleles);
-    std::cout << "Traversal Done\n";
+    Rcpp::Rcout << "Traversal Done\n";
 
     population.DeleteList();
 
@@ -592,11 +590,6 @@ int siapopTimeDep(Rcpp::CharacterVector input)
   timedata.close();
   sample_data.close();
   sim_stats.close();
-
-  auto t2 = std::chrono::high_resolution_clock::now();
-  std::cout <<
-      std::chrono::duration_cast<std::chrono::milliseconds>(t2-t1).count() <<
-      "milliseconds\n";
 
   return 0;
 }

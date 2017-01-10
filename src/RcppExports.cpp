@@ -7,35 +7,41 @@
 using namespace Rcpp;
 
 // siapopConstant
-int siapopConstant(Rcpp::CharacterVector input);
-RcppExport SEXP siapopr_siapopConstant(SEXP inputSEXP) {
+int siapopConstant(Rcpp::Nullable<Rcpp::CharacterVector> input, Rcpp::Nullable<Rcpp::CharacterVector> output_dir, Rcpp::Nullable<Rcpp::CharacterVector> ancestor_file);
+RcppExport SEXP siapopr_siapopConstant(SEXP inputSEXP, SEXP output_dirSEXP, SEXP ancestor_fileSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< Rcpp::CharacterVector >::type input(inputSEXP);
-    rcpp_result_gen = Rcpp::wrap(siapopConstant(input));
+    Rcpp::traits::input_parameter< Rcpp::Nullable<Rcpp::CharacterVector> >::type input(inputSEXP);
+    Rcpp::traits::input_parameter< Rcpp::Nullable<Rcpp::CharacterVector> >::type output_dir(output_dirSEXP);
+    Rcpp::traits::input_parameter< Rcpp::Nullable<Rcpp::CharacterVector> >::type ancestor_file(ancestor_fileSEXP);
+    rcpp_result_gen = Rcpp::wrap(siapopConstant(input, output_dir, ancestor_file));
     return rcpp_result_gen;
 END_RCPP
 }
 // siapopSimple
-int siapopSimple(Rcpp::CharacterVector input);
-RcppExport SEXP siapopr_siapopSimple(SEXP inputSEXP) {
+int siapopSimple(Rcpp::Nullable<Rcpp::CharacterVector> input, Rcpp::Nullable<Rcpp::CharacterVector> output_dir, Rcpp::Nullable<Rcpp::CharacterVector> ancestor_file);
+RcppExport SEXP siapopr_siapopSimple(SEXP inputSEXP, SEXP output_dirSEXP, SEXP ancestor_fileSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< Rcpp::CharacterVector >::type input(inputSEXP);
-    rcpp_result_gen = Rcpp::wrap(siapopSimple(input));
+    Rcpp::traits::input_parameter< Rcpp::Nullable<Rcpp::CharacterVector> >::type input(inputSEXP);
+    Rcpp::traits::input_parameter< Rcpp::Nullable<Rcpp::CharacterVector> >::type output_dir(output_dirSEXP);
+    Rcpp::traits::input_parameter< Rcpp::Nullable<Rcpp::CharacterVector> >::type ancestor_file(ancestor_fileSEXP);
+    rcpp_result_gen = Rcpp::wrap(siapopSimple(input, output_dir, ancestor_file));
     return rcpp_result_gen;
 END_RCPP
 }
 // siapopTimeDep
-int siapopTimeDep(Rcpp::CharacterVector input);
-RcppExport SEXP siapopr_siapopTimeDep(SEXP inputSEXP) {
+int siapopTimeDep(Rcpp::Nullable<Rcpp::CharacterVector> input, Rcpp::Nullable<Rcpp::CharacterVector> output_dir, Rcpp::Nullable<Rcpp::CharacterVector> ancestor_file);
+RcppExport SEXP siapopr_siapopTimeDep(SEXP inputSEXP, SEXP output_dirSEXP, SEXP ancestor_fileSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< Rcpp::CharacterVector >::type input(inputSEXP);
-    rcpp_result_gen = Rcpp::wrap(siapopTimeDep(input));
+    Rcpp::traits::input_parameter< Rcpp::Nullable<Rcpp::CharacterVector> >::type input(inputSEXP);
+    Rcpp::traits::input_parameter< Rcpp::Nullable<Rcpp::CharacterVector> >::type output_dir(output_dirSEXP);
+    Rcpp::traits::input_parameter< Rcpp::Nullable<Rcpp::CharacterVector> >::type ancestor_file(ancestor_fileSEXP);
+    rcpp_result_gen = Rcpp::wrap(siapopTimeDep(input, output_dir, ancestor_file));
     return rcpp_result_gen;
 END_RCPP
 }
