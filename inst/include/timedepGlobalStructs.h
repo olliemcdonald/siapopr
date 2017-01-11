@@ -47,8 +47,6 @@ struct GlobalParameters
   double mutation_prob;
   bool trace_ancestry;
   bool count_alleles;
-  double B_max;
-  double D_max;
   gsl_rng* rng;
   double seed;
   double tot_error;

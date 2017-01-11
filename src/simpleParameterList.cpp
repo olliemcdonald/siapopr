@@ -54,7 +54,6 @@ void SimpleParameterList::init()
 {
     //default values
     insert(std::make_pair("tot_life", "40000"));
-    insert(std::make_pair("max_pop", "10000"));
     insert(std::make_pair("ancestors", "1"));
     insert(std::make_pair("ancestor_clones", "1"));
     insert(std::make_pair("num_sims", "1"));

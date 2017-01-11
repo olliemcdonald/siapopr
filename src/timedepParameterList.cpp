@@ -83,10 +83,8 @@ void TDParameterList::init()
     //insert(std::make_pair("epistatic_driver_prob", "0"));
     insert(std::make_pair("epistatic_mutation_thresh", "1"));
     insert(std::make_pair("epistatic_multiplier", "1"));
-    insert(std::make_pair("B_max", "1.00")); // Max value for birth rate
-    insert(std::make_pair("D_max", "1.00")); // Max value for death rate
     insert(std::make_pair("birth_function", "0"));
     insert(std::make_pair("death_function", "0"));
-    insert(std::make_pair("td_birth_params", "1 0 1"));
-    insert(std::make_pair("td_death_params", "1 0 1"));
+    insert(std::make_pair("birth_coefs", "1 0 1"));
+    insert(std::make_pair("death_coefs", "1 0 1"));
 }

@@ -1,25 +1,6 @@
-/*
- * =============================================================================
- *
- *       Filename:  SIApop.cpp
- *
- *    Description: Birth-Death-Mutation process simulation for infinite-allele
- *                 model with random fitness contributions using Gillespie
- *                 Algorithm. Imports data, runs SSA and outputs to designated
- *                 folder.
- *
- *        Version:  1.0
- *        Created:  08/24/2016 16:50:27
- *       Revision:  none
- *       Compiler:  gcc
- *
- *         Author:  Thomas McDonald (), mcdonald@jimmy.harvard.edu
- *   Organization:  DFCI
- *
- * =============================================================================
- */
- #include <RcppGSL.h>
- #include <Rcpp.h>
+#include <RcppGSL.h>
+#include <Rcpp.h>
+#include <Rinternals.h>
 
 #include <iostream>
 #include <fstream>
@@ -38,16 +19,27 @@
 // structure contains all global parameters used in multiple source files
 GlobalParameters gpsimp;
 
-//' SIApop for non-mutating processes
+//' SIApop for non-mutating processes. Runs an exact process by simulating
+//' binomial and negative binomial random values at each time step.
 //'
 //' @param input input character vector of input file
 //' @param output_dir input character vector of output location
 //' @param ancestor_file input character vector of ancestor file
 //' @export
 // [[Rcpp::export]]
-int siapopSimple(Rcpp::Nullable<Rcpp::CharacterVector> input = R_NilValue,
-                 Rcpp::Nullable<Rcpp::CharacterVector> output_dir = R_NilValue,
-                 Rcpp::Nullable<Rcpp::CharacterVector> ancestor_file = R_NilValue)
+int siapopSimple(double tot_life = 40000.0,
+                 int ancestors = 1,
+                 int ancestor_clones = 1,
+                 int num_sims = 1,
+                 int num_samples = 0,
+                 int sample_size = 0,
+                 bool allow_extinction = true,
+                 double detection_threshold = 0.0,
+                 double birth_rate = 1.5,
+                 double death_rate = 1.0,
+                 SEXP input_file = R_NilValue,
+                 SEXP output_dir = R_NilValue,
+                 SEXP ancestor_file = R_NilValue)
 {
 
   //  declaring random number generator and setting seed
@@ -60,14 +52,13 @@ int siapopSimple(Rcpp::Nullable<Rcpp::CharacterVector> input = R_NilValue,
   // parsing arguments in command line by searching for argument options
   // default output is current directory
   const char *output_folder;
-  if( output_dir.isNull() )
+  if( Rf_isNull(output_dir) )
   {
     output_folder = "./";
   }
   else
   {
-    std::vector<std::string> output_dir_ = Rcpp::as<std::vector <std::string> > (output_dir);
-    output_folder = output_dir_[0].c_str();
+    output_folder = CHAR(Rf_asChar(output_dir));
   }
 
 
@@ -80,17 +71,19 @@ int siapopSimple(Rcpp::Nullable<Rcpp::CharacterVector> input = R_NilValue,
   sim_stats.precision(8);
 
 
-  // declare and initialize parameter list for simulation
-  SimpleParameterList params;
-  params.init();
+
   int count_extinct = 0;
 
 
+  // if the input_file path exists, use this to import variables
   // parsing through the input file and converting/adding to parameter list
-  if( input.isNotNull() )
+  if( !Rf_isNull(input_file) )
   {
-    std::vector<std::string> input_ = Rcpp::as<std::vector <std::string> > (input);
-    const char* input_params = input_[0].c_str();
+    // declare and initialize parameter list for simulation
+    SimpleParameterList params;
+    params.init();
+
+    const char* input_params = CHAR(Rf_asChar(input_file));
 
     std::string s = input_params;
     std::ifstream infile(input_params);
@@ -103,30 +96,42 @@ int siapopSimple(Rcpp::Nullable<Rcpp::CharacterVector> input = R_NilValue,
             params.SplitAndFill(s);
         }
     }
-  }
 
   for(std::map<std::string, std::string>::iterator it=params.begin(); it!=params.end(); ++it)
   {
     sim_stats << it->first << ", " << it->second << "\n";
   }
 
-  // convert all parameters imported from file into respective values in gpsimp
-  params.convert("tot_life", gpsimp.tot_life);
-  params.convert("max_pop", gpsimp.max_pop);
-  params.convert("ancestors", gpsimp.ancestors);
-  params.convert("ancestor_clones", gpsimp.ancestor_clones);
-  params.convert("num_sims", gpsimp.num_sims);
-  params.convert("num_samples", gpsimp.num_samples);
-  params.convert("sample_size", gpsimp.sample_size);
-  params.convert("detection_threshold", gpsimp.detection_threshold);
-  params.convert("allow_extinction", gpsimp.allow_extinction);
-  params.convert("birth_rate", gpsimp.birth_rate);
-  params.convert("death_rate", gpsimp.death_rate);
+    // convert all parameters imported from file into respective values in gpsimp
+    params.convert("tot_life", gpsimp.tot_life);
+    params.convert("ancestors", gpsimp.ancestors);
+    params.convert("ancestor_clones", gpsimp.ancestor_clones);
+    params.convert("num_sims", gpsimp.num_sims);
+    params.convert("num_samples", gpsimp.num_samples);
+    params.convert("sample_size", gpsimp.sample_size);
+    params.convert("detection_threshold", gpsimp.detection_threshold);
+    params.convert("allow_extinction", gpsimp.allow_extinction);
+    params.convert("birth_rate", gpsimp.birth_rate);
+    params.convert("death_rate", gpsimp.death_rate);
 
-  /*
-    END OF VARIABLE INPUT AND CONVERSION
-  */
-
+    /*
+      END OF VARIABLE INPUT AND CONVERSION
+    */
+  }
+  else
+  {
+    // convert all parameters imported from file into respective values in gpsimp
+    gpsimp.tot_life = tot_life;
+    gpsimp.ancestors = ancestors;
+    gpsimp.ancestor_clones = ancestor_clones;
+    gpsimp.num_sims = num_sims;
+    gpsimp.num_samples = num_samples;
+    gpsimp.sample_size = sample_size;
+    gpsimp.detection_threshold = detection_threshold;
+    gpsimp.allow_extinction = allow_extinction;
+    gpsimp.birth_rate = birth_rate;
+    gpsimp.death_rate = death_rate;
+  }
 
   // declare and open other output streams for time and end of sim clone list
   std::ofstream clonedata;
@@ -160,7 +165,7 @@ int siapopSimple(Rcpp::Nullable<Rcpp::CharacterVector> input = R_NilValue,
     population.init();
     population.tot_cell_count = 0;
 
-    if( ancestor_file.isNull() ) // if no ancestor file exists
+    if( Rf_isNull(ancestor_file) ) // if no ancestor file exists
     {
       // go through all ancestors and initialize clones for each
       for(int ance__clone_count = 1; ance__clone_count <= gpsimp.ancestor_clones; ance__clone_count++)
@@ -203,8 +208,7 @@ int siapopSimple(Rcpp::Nullable<Rcpp::CharacterVector> input = R_NilValue,
       std::vector<std::string>::iterator it;
 
 
-      std::vector<std::string> ancestor_file_ = Rcpp::as<std::vector <std::string> > (ancestor_file);
-      const char *ancestors = ancestor_file_[0].c_str();
+      const char *ancestors = CHAR(Rf_asChar(ancestor_file));
       std::string a = ancestors;
       std::ifstream ancfile(ancestors);
 

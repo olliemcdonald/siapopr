@@ -1,23 +1,3 @@
-/*
- * =============================================================================
- *
- *       Filename:  SIApop.cpp
- *
- *    Description: Birth-Death-Mutation process simulation for infinite-allele
- *                 model with random fitness contributions using Gillespie
- *                 Algorithm. Imports data, runs SSA and outputs to designated
- *                 folder.
- *
- *        Version:  1.0
- *        Created:  08/24/2016 16:50:27
- *       Revision:  none
- *       Compiler:  gcc
- *
- *         Author:  Thomas McDonald (), mcdonald@jimmy.harvard.edu
- *   Organization:  DFCI
- *
- * =============================================================================
- */
 #include <RcppGSL.h>
 #include <Rcpp.h>
 #include <Rinternals.h>
@@ -41,14 +21,47 @@ GlobalParameters gpcons;
 // Function class ptr defined in main() but used in clonelist.cpp
 ConstantCloneList::NewCloneFunction* NewConstantClone;
 
-//' SIApop for time-homogeneous populations
+//' SIApop for time-homogeneous populations. Simulates a
+//' Birth-Death-Mutation process simulation for infinite-allele
+//' model with random fitness contributions using Gillespie Algorithm.
 //'
 //' @param input_file input character vector of input file
 //' @param output_dir input character vector of output location
 //' @param ancestor_file input character vector of ancestor file
 //' @export
 // [[Rcpp::export]]
-int siapopConstant(SEXP input_file = R_NilValue,
+int siapopConstant(double tot_life = 40000.0,
+                   int max_pop = 10000,
+                   double start_time = 0.0,
+                   int ancestors = 1,
+                   int ancestor_clones = 1,
+                   int num_sims = 1,
+                   bool allow_extinction = true,
+                   bool is_custom_model = false,
+                   int num_samples = 0,
+                   int sample_size = 0,
+                   double detection_threshold = 0.0,
+                   double observation_frequency = 0.0,
+                   SEXP observation_times = R_NilValue,
+                   double birth_rate = 1.5,
+                   double death_rate = 1.0,
+                   double mutation_prob = 0.0,
+                   double alpha_fitness = 0.0,
+                   double beta_fitness = 0.0,
+                   double pass_prob = 1.0,
+                   double upper_fitness = 0.0,
+                   double lower_fitness = 0.0,
+                   double alpha_mutation = 0.0,
+                   double beta_mutation = 0.0,
+                   bool trace_ancestry = true,
+                   bool count_alleles = true,
+                   double punctuated_prob = 0.0,
+                   double poisson_param = 1.0,
+                   double punctuated_multiplier = 1.0,
+                   double punctuated_advantageous_prob = 1.0,
+                   double epistatic_mutation_thresh = 1.0,
+                   double epistatic_multiplier = 1.0,
+                   SEXP input_file = R_NilValue,
                    SEXP output_dir = R_NilValue,
                    SEXP ancestor_file = R_NilValue)
 {
@@ -81,15 +94,20 @@ int siapopConstant(SEXP input_file = R_NilValue,
   sim_stats.setf(std::ios::fixed);
   sim_stats.precision(8);
 
+  FitnessParameters fit_params;
+  MutationParameters mut_params;
+  PunctuationParameters punct_params;
+  EpistaticParameters epi_params;
+  std::vector<double> observation_times_;
 
-  // declare and initialize parameter list for simulation
-  ConstantParameterList params;
-  params.init();
-
-
+  // if the input_file path exists, use this to import variables
   // parsing through the input file and converting/adding to parameter list
   if( !Rf_isNull(input_file) )
   {
+    // declare and initialize parameter list for simulation
+    ConstantParameterList params;
+    params.init();
+
     const char* input_params = CHAR(Rf_asChar(input_file));
 
     std::string s = input_params;
@@ -103,92 +121,177 @@ int siapopConstant(SEXP input_file = R_NilValue,
             params.SplitAndFill(s);
         }
     }
-  }
 
-  for(std::map<std::string, std::string>::iterator it=params.begin(); it!=params.end(); ++it)
-  {
-    sim_stats << it->first << ", " << it->second << "\n";
-  }
-
-  // convert all parameters imported from file into respective values in gpcons
-  params.convert("tot_life", gpcons.tot_life);
-  params.convert("max_pop", gpcons.max_pop);
-  params.convert("start_time", gpcons.start_time);
-  params.convert("ancestors", gpcons.ancestors);
-  params.convert("ancestor_clones", gpcons.ancestor_clones);
-  params.convert("num_sims", gpcons.num_sims);
-  params.convert("num_samples", gpcons.num_samples);
-  params.convert("sample_size", gpcons.sample_size);
-  params.convert("detection_threshold", gpcons.detection_threshold);
-  params.convert("observation_frequency", gpcons.observation_frequency);
-  if (gpcons.observation_frequency == 0) gpcons.observation_frequency = gpcons.tot_life;
-
-  std::vector<double> observation_times;
-  params.ParseVector("observation_times", observation_times);
-  if (observation_times.size() == 0)
-  {
-    int num_obs =  ceil(gpcons.tot_life / gpcons.observation_frequency);
-    for (int i = 1; i <= num_obs; i++)
+    for(std::map<std::string, std::string>::iterator it=params.begin(); it!=params.end(); ++it)
     {
-      observation_times.push_back(i * gpcons.observation_frequency);
+      sim_stats << it->first << ", " << it->second << "\n";
     }
+
+    // convert all parameters imported from file into respective values in gpcons
+    params.convert("tot_life", gpcons.tot_life);
+    params.convert("max_pop", gpcons.max_pop);
+    params.convert("start_time", gpcons.start_time);
+    params.convert("ancestors", gpcons.ancestors);
+    params.convert("ancestor_clones", gpcons.ancestor_clones);
+    params.convert("num_sims", gpcons.num_sims);
+    params.convert("num_samples", gpcons.num_samples);
+    params.convert("sample_size", gpcons.sample_size);
+    params.convert("detection_threshold", gpcons.detection_threshold);
+    params.convert("observation_frequency", gpcons.observation_frequency);
+    if (gpcons.observation_frequency == 0) gpcons.observation_frequency = gpcons.tot_life;
+
+    params.ParseVector("observation_times", observation_times_);
+    if (observation_times_.size() == 0)
+    {
+      int num_obs =  ceil(gpcons.tot_life / gpcons.observation_frequency);
+      for (int i = 1; i <= num_obs; i++)
+      {
+        observation_times_.push_back(i * gpcons.observation_frequency);
+      }
+    }
+    if(observation_times_.back() != gpcons.tot_life) observation_times_.push_back(gpcons.tot_life);
+
+
+    params.convert("allow_extinction", gpcons.allow_extinction);
+    params.convert("trace_ancestry", gpcons.trace_ancestry);
+    params.convert("count_alleles", gpcons.count_alleles);
+    params.convert("birth_rate", gpcons.birth_rate);
+    params.convert("death_rate", gpcons.death_rate);
+    params.convert("mutation_prob", gpcons.mutation_prob);
+    params.convert("is_custom_model", gpcons.is_custom_model);
+
+
+    params.convert("alpha_fitness", fit_params.alpha_fitness);
+    params.convert("beta_fitness", fit_params.beta_fitness);
+    params.convert("pass_prob", fit_params.pass_prob);
+    params.convert("upper_fitness", fit_params.upper_fitness);
+    params.convert("lower_fitness", fit_params.lower_fitness);
+    fit_params.is_randfitness = false;
+    if( ((fit_params.alpha_fitness > 0 && fit_params.beta_fitness > 0) ||
+        (fit_params.upper_fitness != fit_params.lower_fitness)) &&
+        (fit_params.pass_prob < 1) )
+    {
+      fit_params.is_randfitness = true;
+    }
+
+    params.convert("alpha_mutation", mut_params.alpha_mutation);
+    params.convert("beta_mutation", mut_params.beta_mutation);
+    params.convert("pass_prob", mut_params.pass_prob);
+    mut_params.is_mutator = false;
+    if( (mut_params.alpha_mutation > 0 && mut_params.beta_mutation > 0) &&
+        (mut_params.pass_prob < 1) )
+    {
+      mut_params.is_mutator = true;
+    }
+
+    params.convert("punctuated_prob", punct_params.punctuated_prob);
+    params.convert("poisson_param", punct_params.poisson_param);
+    params.convert("punctuated_multiplier", punct_params.punctuated_multiplier);
+    params.convert("punctuated_advantageous_prob", punct_params.punctuated_advantageous_prob);
+    punct_params.is_punctuated = punct_params.punctuated_prob > 0;
+
+
+    params.convert("epistatic_mutation_thresh", epi_params.epistatic_mutation_thresh);
+    params.convert("epistatic_multiplier", epi_params.epistatic_multiplier);
+    epi_params.is_epistasis = epi_params.epistatic_mutation_thresh > 0;
+    if (epi_params.epistatic_multiplier == 1.0)
+    {
+      epi_params.is_epistasis = false;
+    }
+    /*
+      END OF VARIABLE INPUT AND CONVERSION FROM input_file
+    */
   }
-  if(observation_times.back() != gpcons.tot_life) observation_times.push_back(gpcons.tot_life);
-
-
-  params.convert("allow_extinction", gpcons.allow_extinction);
-  params.convert("trace_ancestry", gpcons.trace_ancestry);
-  params.convert("count_alleles", gpcons.count_alleles);
-  params.convert("birth_rate", gpcons.birth_rate);
-  params.convert("death_rate", gpcons.death_rate);
-  params.convert("mutation_prob", gpcons.mutation_prob);
-  params.convert("is_custom_model", gpcons.is_custom_model);
-
-  FitnessParameters fit_params;
-  params.convert("alpha_fitness", fit_params.alpha_fitness);
-  params.convert("beta_fitness", fit_params.beta_fitness);
-  params.convert("pass_prob", fit_params.pass_prob);
-  params.convert("upper_fitness", fit_params.upper_fitness);
-  params.convert("lower_fitness", fit_params.lower_fitness);
-  fit_params.is_randfitness = false;
-  if( ((fit_params.alpha_fitness > 0 && fit_params.beta_fitness > 0) ||
-      (fit_params.upper_fitness != fit_params.lower_fitness)) &&
-      (fit_params.pass_prob < 1) )
+  else
   {
-    fit_params.is_randfitness = true;
+    // convert all parameters imported from file into respective values in gpcons
+    gpcons.tot_life = tot_life;
+    gpcons.max_pop = max_pop;
+    gpcons.start_time = start_time;
+    gpcons.ancestors = ancestors;
+    gpcons.ancestor_clones = ancestor_clones;
+    gpcons.num_sims = num_sims;
+    gpcons.num_samples = num_samples;
+    gpcons.sample_size = sample_size;
+    gpcons.detection_threshold = detection_threshold;
+    gpcons.observation_frequency = observation_frequency;
+    if ( observation_frequency == 0)
+    {
+      gpcons.observation_frequency = gpcons.tot_life;
+    }
+
+    if ( Rf_isNull(observation_times) )
+    {
+      int num_obs =  ceil(gpcons.tot_life / gpcons.observation_frequency);
+      for (int i = 1; i <= num_obs; i++)
+      {
+        observation_times_.push_back(i * gpcons.observation_frequency);
+      }
+    }
+    else
+    {
+      int obs_time_length = Rf_length(observation_times);
+      observation_times_.resize(obs_time_length);
+
+      observation_times = Rf_coerceVector(observation_times, REALSXP);
+      for(int iter = 0; iter < obs_time_length; ++iter)
+      {
+        observation_times_[iter] = REAL(observation_times)[iter];
+      }
+    }
+    if(observation_times_.back() != gpcons.tot_life)
+    {
+      observation_times_.push_back(gpcons.tot_life);
+    }
+
+    gpcons.allow_extinction = allow_extinction;
+    gpcons.trace_ancestry = trace_ancestry;
+    gpcons.count_alleles = count_alleles;
+    gpcons.birth_rate = birth_rate;
+    gpcons.death_rate = death_rate;
+    gpcons.mutation_prob = mutation_prob;
+    gpcons.is_custom_model = is_custom_model;
+
+    fit_params.alpha_fitness = alpha_fitness;
+    fit_params.beta_fitness = beta_fitness;
+    fit_params.pass_prob = pass_prob;
+    fit_params.upper_fitness = upper_fitness;
+    fit_params.lower_fitness = lower_fitness;
+    fit_params.is_randfitness = false;
+    if( ((fit_params.alpha_fitness > 0 && fit_params.beta_fitness > 0) ||
+        (fit_params.upper_fitness != fit_params.lower_fitness)) &&
+        (fit_params.pass_prob < 1) )
+    {
+      fit_params.is_randfitness = true;
+    }
+
+    mut_params.alpha_mutation = alpha_mutation;
+    mut_params.beta_mutation = beta_mutation;
+    mut_params.pass_prob = pass_prob;
+    mut_params.is_mutator = false;
+    if( (mut_params.alpha_mutation > 0 && mut_params.beta_mutation > 0) &&
+        (mut_params.pass_prob < 1) )
+    {
+      mut_params.is_mutator = true;
+    }
+
+    punct_params.punctuated_prob = punctuated_prob;
+    punct_params.poisson_param = poisson_param;
+    punct_params.punctuated_multiplier = punctuated_multiplier;
+    punct_params.punctuated_advantageous_prob = punctuated_advantageous_prob;
+    punct_params.is_punctuated = punct_params.punctuated_prob > 0;
+
+    epi_params.epistatic_mutation_thresh = epistatic_mutation_thresh;
+    epi_params.epistatic_multiplier = epistatic_multiplier;
+    epi_params.is_epistasis = epi_params.epistatic_mutation_thresh > 0;
+    if (epi_params.epistatic_multiplier == 1.0)
+    {
+      epi_params.is_epistasis = false;
+    }
+    /*
+      END OF VARIABLE INPUT AND CONVERSION
+    */
   }
-
-  MutationParameters mut_params;
-  params.convert("alpha_mutation", mut_params.alpha_mutation);
-  params.convert("beta_mutation", mut_params.beta_mutation);
-  params.convert("pass_prob", mut_params.pass_prob);
-  mut_params.is_mutator = false;
-  if( (mut_params.alpha_mutation > 0 && mut_params.beta_mutation > 0) &&
-      (mut_params.pass_prob < 1) )
-  {
-    mut_params.is_mutator = true;
-  }
-
-  PunctuationParameters punct_params;
-  params.convert("punctuated_prob", punct_params.punctuated_prob);
-  params.convert("poisson_param", punct_params.poisson_param);
-  params.convert("punctuated_multiplier", punct_params.punctuated_multiplier);
-  params.convert("punctuated_advantageous_prob", punct_params.punctuated_advantageous_prob);
-  punct_params.is_punctuated = punct_params.punctuated_prob > 0;
-
-
-  EpistaticParameters epi_params;
-  params.convert("epistatic_mutation_thresh", epi_params.epistatic_mutation_thresh);
-  params.convert("epistatic_multiplier", epi_params.epistatic_multiplier);
-  epi_params.is_epistasis = epi_params.epistatic_mutation_thresh > 0;
-  if (epi_params.epistatic_multiplier == 1.0)
-  {
-    epi_params.is_epistasis = false;
-  }
-  /*
-    END OF VARIABLE INPUT AND CONVERSION
-  */
-
 
   // declare and open other output streams for time and end of sim clone list
   std::ofstream clonedata;
@@ -410,13 +513,13 @@ int siapopConstant(SEXP input_file = R_NilValue,
       current_time = current_time + rand_next_time;
 
       // Method to output data at designated observation times
-      while(current_time > observation_times[curr_observation])
+      while(current_time > observation_times_[curr_observation])
       {
-        if( (current_time < observation_times[curr_observation + 1]) ||
-            (observation_times.size() == curr_observation + 1) )
+        if( (current_time < observation_times_[curr_observation + 1]) ||
+            (observation_times_.size() == curr_observation + 1) )
         {
-          population.Traverse(timedata, sim, observation_times[curr_observation], gpcons.trace_ancestry, gpcons.count_alleles);
-          if((observation_times.size() == curr_observation + 1))
+          population.Traverse(timedata, sim, observation_times_[curr_observation], gpcons.trace_ancestry, gpcons.count_alleles);
+          if((observation_times_.size() == curr_observation + 1))
           {
             break;
           }

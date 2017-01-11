@@ -24,7 +24,6 @@
 struct GlobalParameters
 {
   double tot_life;
-  int max_pop;
   int ancestors;
   int ancestor_clones;
   int num_sims;

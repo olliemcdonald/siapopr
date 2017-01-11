@@ -1,25 +1,6 @@
-/*
- * =============================================================================
- *
- *       Filename:  SIApop.cpp
- *
- *    Description: Time-Dependent Birth-Death-Mutation process simulation for
- *                 infinite-allele model with random fitness contributions using
- *                 Gillespie Algorithm. Imports data, runs SSA and outputs to
- *                 designated folder.
- *
- *        Version:  1.0
- *        Created:  08/24/2016 16:50:27
- *       Revision:  none
- *       Compiler:  gcc
- *
- *         Author:  Thomas McDonald (), mcdonald@jimmy.harvard.edu
- *   Organization:  DFCI
- *
- * =============================================================================
- */
- #include <RcppGSL.h>
- #include <Rcpp.h>
+#include <RcppGSL.h>
+#include <Rcpp.h>
+#include <Rinternals.h>
 
 #include <iostream>
 #include <fstream>
@@ -46,16 +27,51 @@ gsl_integration_workspace *workspace = gsl_integration_workspace_alloc(1000);
 // Pointer to Function class which will point to an instance of one based on parameters
 TDCloneList::NewCloneFunction* NewTDClone;
 
-//' SIApop for time-dependent processes.
+//' SIApop for time-dependent processes. Time-Dependent Birth-Death-Mutation process
+//' simulation for infinite-allele model with random fitness contributions using
+//' Gillespie Algorithm. Imports data, runs SSA and outputs to designated folder.
 //'
 //' @param input input character vector of input file
 //' @param output_dir input character vector of output location
 //' @param ancestor_file input character vector of ancestor file
 //' @export
 // [[Rcpp::export]]
-int siapopTimeDep(Rcpp::Nullable<Rcpp::CharacterVector> input = R_NilValue,
-                  Rcpp::Nullable<Rcpp::CharacterVector> output_dir = R_NilValue,
-                  Rcpp::Nullable<Rcpp::CharacterVector> ancestor_file = R_NilValue)
+int siapopTimeDep(double tot_life = 40000.0,
+                  int max_pop = 10000,
+                  double start_time = 0.0,
+                  int ancestors = 1,
+                  int ancestor_clones = 1,
+                  int num_sims = 1,
+                  bool allow_extinction = true,
+                  bool is_custom_model = false,
+                  int num_samples = 0,
+                  int sample_size = 0,
+                  double detection_threshold = 0.0,
+                  double observation_frequency = 0.0,
+                  SEXP observation_times = R_NilValue,
+                  int birth_function = 0,
+                  Rcpp::NumericVector birth_coefs = Rcpp::NumericVector::create(1.0, 0.0, 1.0),
+                  int death_function = 0,
+                  Rcpp::NumericVector  death_coefs = Rcpp::NumericVector::create(1.0, 0.0, 1.0),
+                  double mutation_prob = 0.0,
+                  double alpha_fitness = 0.0,
+                  double beta_fitness = 0.0,
+                  double pass_prob = 1.0,
+                  double upper_fitness = 0.0,
+                  double lower_fitness = 0.0,
+                  double alpha_mutation = 0.0,
+                  double beta_mutation = 0.0,
+                  bool trace_ancestry = true,
+                  bool count_alleles = true,
+                  double punctuated_prob = 0.0,
+                  double poisson_param = 1.0,
+                  double punctuated_multiplier = 1.0,
+                  double punctuated_advantageous_prob = 1.0,
+                  double epistatic_mutation_thresh = 1.0,
+                  double epistatic_multiplier = 1.0,
+                  SEXP input_file = R_NilValue,
+                  SEXP output_dir = R_NilValue,
+                  SEXP ancestor_file = R_NilValue)
 {
 
   // track total error from integration - FOR TESTING
@@ -70,14 +86,13 @@ int siapopTimeDep(Rcpp::Nullable<Rcpp::CharacterVector> input = R_NilValue,
   */
   // parsing arguments in command line by searching for argument options
   const char *output_folder;
-  if( output_dir.isNull() )
+  if( Rf_isNull(output_dir) )
   {
     output_folder = "./";
   }
   else
   {
-    std::vector<std::string> output_dir_ = Rcpp::as<std::vector <std::string> > (output_dir);
-    output_folder = output_dir_[0].c_str();
+    output_folder = CHAR(Rf_asChar(output_dir));
   }
 
 
@@ -89,16 +104,22 @@ int siapopTimeDep(Rcpp::Nullable<Rcpp::CharacterVector> input = R_NilValue,
   sim_stats.setf(std::ios::fixed);
   sim_stats.precision(8);
 
-
-  // declare and initialize parameter list for simulation
-  TDParameterList params;
-  params.init();
+  FitnessParameters fit_params;
+  MutationParameters mut_params;
+  PunctuationParameters punct_params;
+  EpistaticParameters epi_params;
+  TimeDependentParameters td_birth_params;
+  TimeDependentParameters td_death_params;
+  std::vector<double> observation_times_;
 
   // parsing through the input file and converting/adding to parameter list
-  if( input.isNotNull() )
+  if( !Rf_isNull(input_file) )
   {
-    std::vector<std::string> input_ = Rcpp::as<std::vector <std::string> > (input);
-    const char* input_params = input_[0].c_str();
+    // declare and initialize parameter list for simulation
+    TDParameterList params;
+    params.init();
+
+    const char* input_params = CHAR(Rf_asChar(input_file));
 
     std::string s = input_params;
     std::ifstream infile(input_params);
@@ -111,101 +132,203 @@ int siapopTimeDep(Rcpp::Nullable<Rcpp::CharacterVector> input = R_NilValue,
             params.SplitAndFill(s);
         }
     }
-  }
 
-  for(std::map<std::string, std::string>::iterator it=params.begin(); it!=params.end(); ++it)
-  {
-    sim_stats << it->first << ", " << it->second << "\n";
-  }
-
-  // convert all parameters imported from file into respective values in gptime
-  params.convert("tot_life", gptime.tot_life);
-  params.convert("max_pop", gptime.max_pop);
-  params.convert("start_time", gptime.start_time);
-  params.convert("ancestors", gptime.ancestors);
-  params.convert("ancestor_clones", gptime.ancestor_clones);
-  params.convert("num_sims", gptime.num_sims);
-  params.convert("num_samples", gptime.num_samples);
-  params.convert("sample_size", gptime.sample_size);
-  params.convert("detection_threshold", gptime.detection_threshold);
-  params.convert("observation_frequency", gptime.observation_frequency);
-  if (gptime.observation_frequency == 0) gptime.observation_frequency = gptime.tot_life;
-
-  std::vector<double> observation_times;
-  params.ParseVector("observation_times", observation_times);
-  if (observation_times.size() == 0)
-  {
-    int num_obs =  ceil(gptime.tot_life / gptime.observation_frequency);
-    for (int i = 1; i <= num_obs; i++)
+    for(std::map<std::string, std::string>::iterator it=params.begin(); it!=params.end(); ++it)
     {
-      observation_times.push_back(i * gptime.observation_frequency);
+      sim_stats << it->first << ", " << it->second << "\n";
     }
+
+    // convert all parameters imported from file into respective values in gptime
+    params.convert("tot_life", gptime.tot_life);
+    params.convert("max_pop", gptime.max_pop);
+    params.convert("start_time", gptime.start_time);
+    params.convert("ancestors", gptime.ancestors);
+    params.convert("ancestor_clones", gptime.ancestor_clones);
+    params.convert("num_sims", gptime.num_sims);
+    params.convert("num_samples", gptime.num_samples);
+    params.convert("sample_size", gptime.sample_size);
+    params.convert("detection_threshold", gptime.detection_threshold);
+    params.convert("observation_frequency", gptime.observation_frequency);
+    if (gptime.observation_frequency == 0)
+    {
+      gptime.observation_frequency = gptime.tot_life;
+    }
+
+    std::vector<double> observation_times;
+    params.ParseVector("observation_times", observation_times);
+    if (observation_times.size() == 0)
+    {
+      int num_obs =  ceil(gptime.tot_life / gptime.observation_frequency);
+      for (int i = 1; i <= num_obs; i++)
+      {
+        observation_times.push_back(i * gptime.observation_frequency);
+      }
+    }
+    if(observation_times.back() != gptime.tot_life) observation_times.push_back(gptime.tot_life);
+
+
+    params.convert("allow_extinction", gptime.allow_extinction);
+    params.convert("trace_ancestry", gptime.trace_ancestry);
+    params.convert("count_alleles", gptime.count_alleles);
+    params.convert("mutation_prob", gptime.mutation_prob);
+
+    params.convert("alpha_fitness", fit_params.alpha_fitness);
+    params.convert("beta_fitness", fit_params.beta_fitness);
+    params.convert("pass_prob", fit_params.pass_prob);
+    params.convert("upper_fitness", fit_params.upper_fitness);
+    params.convert("lower_fitness", fit_params.lower_fitness);
+    fit_params.is_randfitness = false;
+    if( ((fit_params.alpha_fitness > 0 && fit_params.beta_fitness > 0) ||
+        (fit_params.upper_fitness != fit_params.lower_fitness)) &&
+        (fit_params.pass_prob < 1) )
+    {
+      fit_params.is_randfitness = true;
+    }
+
+    params.convert("alpha_mutation", mut_params.alpha_mutation);
+    params.convert("beta_mutation", mut_params.beta_mutation);
+    params.convert("pass_prob", mut_params.pass_prob);
+    mut_params.is_mutator = false;
+    if( (mut_params.alpha_mutation > 0 && mut_params.beta_mutation > 0) &&
+        (mut_params.pass_prob < 1) )
+    {
+      mut_params.is_mutator = true;
+    }
+
+    params.convert("punctuated_prob", punct_params.punctuated_prob);
+    params.convert("poisson_param", punct_params.poisson_param);
+    params.convert("punctuated_multiplier", punct_params.punctuated_multiplier);
+    params.convert("punctuated_advantageous_prob", punct_params.punctuated_advantageous_prob);
+    punct_params.is_punctuated = punct_params.punctuated_prob > 0;
+
+    params.convert("epistatic_mutation_thresh", epi_params.epistatic_mutation_thresh);
+    params.convert("epistatic_multiplier", epi_params.epistatic_multiplier);
+    epi_params.is_epistasis = epi_params.epistatic_mutation_thresh > 0;
+    if (epi_params.epistatic_multiplier == 1.0)
+    {
+      epi_params.is_epistasis = false;
+    }
+
+
+    params.convert("birth_function", td_birth_params.type);
+    params.ParseVector("birth_coefs", td_birth_params.coefs);
+    td_birth_params.homogeneous_rate = 1;
+    td_birth_params.additional_rate = 0;
+
+    params.convert("death_function", td_death_params.type);
+    params.ParseVector("death_coefs", td_death_params.coefs);
+    td_death_params.homogeneous_rate = 1;
+    td_death_params.additional_rate = 0;
+
+    /*
+      END OF VARIABLE INPUT AND CONVERSION
+    */
   }
-  if(observation_times.back() != gptime.tot_life) observation_times.push_back(gptime.tot_life);
-
-
-  params.convert("allow_extinction", gptime.allow_extinction);
-  params.convert("trace_ancestry", gptime.trace_ancestry);
-  params.convert("count_alleles", gptime.count_alleles);
-  params.convert("mutation_prob", gptime.mutation_prob);
-
-  FitnessParameters fit_params;
-  params.convert("alpha_fitness", fit_params.alpha_fitness);
-  params.convert("beta_fitness", fit_params.beta_fitness);
-  params.convert("pass_prob", fit_params.pass_prob);
-  params.convert("upper_fitness", fit_params.upper_fitness);
-  params.convert("lower_fitness", fit_params.lower_fitness);
-  fit_params.is_randfitness = false;
-  if( ((fit_params.alpha_fitness > 0 && fit_params.beta_fitness > 0) ||
-      (fit_params.upper_fitness != fit_params.lower_fitness)) &&
-      (fit_params.pass_prob < 1) )
+  else
   {
-    fit_params.is_randfitness = true;
+    // convert all parameters imported from file into respective values in gptime
+    gptime.tot_life = tot_life;
+    gptime.max_pop = max_pop;
+    gptime.start_time = start_time;
+    gptime.ancestors = ancestors;
+    gptime.ancestor_clones = ancestor_clones;
+    gptime.num_sims = num_sims;
+    gptime.num_samples = num_samples;
+    gptime.sample_size = sample_size;
+    gptime.detection_threshold = detection_threshold;
+    gptime.observation_frequency = observation_frequency;
+    if ( observation_frequency == 0)
+    {
+      gptime.observation_frequency = gptime.tot_life;
+    }
+
+    if ( Rf_isNull(observation_times) )
+    {
+      int num_obs =  ceil(gptime.tot_life / gptime.observation_frequency);
+      for (int i = 1; i <= num_obs; i++)
+      {
+        observation_times_.push_back(i * gptime.observation_frequency);
+      }
+    }
+    else
+    {
+      int obs_time_length = Rf_length(observation_times);
+      observation_times_.resize(obs_time_length);
+
+      observation_times = Rf_coerceVector(observation_times, REALSXP);
+      for(int iter = 0; iter < obs_time_length; ++iter)
+      {
+        observation_times_[iter] = REAL(observation_times)[iter];
+      }
+    }
+    if(observation_times_.back() != gptime.tot_life)
+    {
+      observation_times_.push_back(gptime.tot_life);
+    }
+
+    gptime.allow_extinction = allow_extinction;
+    gptime.trace_ancestry = trace_ancestry;
+    gptime.count_alleles = count_alleles;
+    gptime.mutation_prob = mutation_prob;
+    gptime.is_custom_model = is_custom_model;
+
+    fit_params.alpha_fitness = alpha_fitness;
+    fit_params.beta_fitness = beta_fitness;
+    fit_params.pass_prob = pass_prob;
+    fit_params.upper_fitness = upper_fitness;
+    fit_params.lower_fitness = lower_fitness;
+    fit_params.is_randfitness = false;
+    if( ((fit_params.alpha_fitness > 0 && fit_params.beta_fitness > 0) ||
+        (fit_params.upper_fitness != fit_params.lower_fitness)) &&
+        (fit_params.pass_prob < 1) )
+    {
+      fit_params.is_randfitness = true;
+    }
+
+    mut_params.alpha_mutation = alpha_mutation;
+    mut_params.beta_mutation = beta_mutation;
+    mut_params.pass_prob = pass_prob;
+    mut_params.is_mutator = false;
+    if( (mut_params.alpha_mutation > 0 && mut_params.beta_mutation > 0) &&
+        (mut_params.pass_prob < 1) )
+    {
+      mut_params.is_mutator = true;
+    }
+
+    punct_params.punctuated_prob = punctuated_prob;
+    punct_params.poisson_param = poisson_param;
+    punct_params.punctuated_multiplier = punctuated_multiplier;
+    punct_params.punctuated_advantageous_prob = punctuated_advantageous_prob;
+    punct_params.is_punctuated = punct_params.punctuated_prob > 0;
+
+    epi_params.epistatic_mutation_thresh = epistatic_mutation_thresh;
+    epi_params.epistatic_multiplier = epistatic_multiplier;
+    epi_params.is_epistasis = epi_params.epistatic_mutation_thresh > 0;
+    if (epi_params.epistatic_multiplier == 1.0)
+    {
+      epi_params.is_epistasis = false;
+    }
+
+    td_birth_params.type = birth_function;
+    for(int iter = 0; iter < birth_coefs.length(); ++iter)
+    {
+      td_birth_params.coefs.push_back(birth_coefs[iter]);
+    }
+    td_birth_params.homogeneous_rate = 1;
+    td_birth_params.additional_rate = 0;
+
+    td_death_params.type = death_function;
+    for(int iter = 0; iter < death_coefs.length(); ++iter)
+    {
+      td_death_params.coefs.push_back(death_coefs[iter]);
+    }
+    td_death_params.homogeneous_rate = 1;
+    td_death_params.additional_rate = 0;
+
+    /*
+      END OF VARIABLE INPUT AND CONVERSION
+    */
   }
-
-  MutationParameters mut_params;
-  params.convert("alpha_mutation", mut_params.alpha_mutation);
-  params.convert("beta_mutation", mut_params.beta_mutation);
-  params.convert("pass_prob", mut_params.pass_prob);
-  mut_params.is_mutator = false;
-  if( (mut_params.alpha_mutation > 0 && mut_params.beta_mutation > 0) &&
-      (mut_params.pass_prob < 1) )
-  {
-    mut_params.is_mutator = true;
-  }
-
-  PunctuationParameters punct_params;
-  params.convert("punctuated_prob", punct_params.punctuated_prob);
-  params.convert("poisson_param", punct_params.poisson_param);
-  params.convert("punctuated_multiplier", punct_params.punctuated_multiplier);
-  params.convert("punctuated_advantageous_prob", punct_params.punctuated_advantageous_prob);
-  punct_params.is_punctuated = punct_params.punctuated_prob > 0;
-
-  EpistaticParameters epi_params;
-  params.convert("epistatic_mutation_thresh", epi_params.epistatic_mutation_thresh);
-  params.convert("epistatic_multiplier", epi_params.epistatic_multiplier);
-  epi_params.is_epistasis = epi_params.epistatic_mutation_thresh > 0;
-  if (epi_params.epistatic_multiplier == 1.0)
-  {
-    epi_params.is_epistasis = false;
-  }
-
-
-  TimeDependentParameters td_birth_params;
-  params.convert("birth_function", td_birth_params.type);
-  params.ParseVector("td_birth_params", td_birth_params.coefs);
-  td_birth_params.homogeneous_rate = 1;
-  td_birth_params.additional_rate = 0;
-
-  TimeDependentParameters td_death_params;
-  params.convert("death_function", td_death_params.type);
-  params.ParseVector("td_death_params", td_death_params.coefs);
-  td_death_params.homogeneous_rate = 1;
-  td_death_params.additional_rate = 0;
-
-  /*
-    END OF VARIABLE INPUT AND CONVERSION
-  */
 
   // declare and open other output streams for time and end of sim clone list
   std::ofstream clonedata;
@@ -315,7 +438,7 @@ int siapopTimeDep(Rcpp::Nullable<Rcpp::CharacterVector> input = R_NilValue,
     }
 
 
-    if( ancestor_file.isNull() ) // if no ancestor file exists
+    if( Rf_isNull(ancestor_file) ) // if no ancestor file exists
     {
       /*
         total rate for time-homogeneous population should be the max for the
@@ -383,8 +506,7 @@ int siapopTimeDep(Rcpp::Nullable<Rcpp::CharacterVector> input = R_NilValue,
       std::vector<std::string> ancestor_keys;
       std::vector<std::string>::iterator it;
 
-      std::vector<std::string> ancestor_file_ = Rcpp::as<std::vector <std::string> > (ancestor_file);
-      const char *ancestors = ancestor_file_[0].c_str();
+      const char *ancestors = CHAR(Rf_asChar(ancestor_file));
       std::string a = ancestors;
       std::ifstream ancfile(ancestors);
 
@@ -519,13 +641,13 @@ int siapopTimeDep(Rcpp::Nullable<Rcpp::CharacterVector> input = R_NilValue,
       current_time = current_time + rand_next_time;
 
       // Method to output data at designated observation times
-      while(current_time > observation_times[curr_observation])
+      while(current_time > observation_times_[curr_observation])
       {
-        if( (current_time < observation_times[curr_observation + 1]) ||
-            (observation_times.size() == curr_observation + 1) )
+        if( (current_time < observation_times_[curr_observation + 1]) ||
+            (observation_times_.size() == curr_observation + 1) )
         {
-          population.Traverse(timedata, sim, observation_times[curr_observation], gptime.trace_ancestry, gptime.count_alleles);
-          if((observation_times.size() == curr_observation + 1))
+          population.Traverse(timedata, sim, observation_times_[curr_observation], gptime.trace_ancestry, gptime.count_alleles);
+          if((observation_times_.size() == curr_observation + 1))
           {
             break;
           }
