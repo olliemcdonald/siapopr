@@ -40,11 +40,12 @@ GlobalParameters gpcons;
 // Function class ptr defined in main() but used in clonelist.cpp
 ConstantCloneList::NewCloneFunction* NewConstantClone;
 
-//’ SIApop for time-homogeneous populations
-//’
-//’ @param input input character vector of input file
-//’ @param output_dir input character vector of output location
-//’ @param ancestor_file input character vector of ancestor file
+//' SIApop for time-homogeneous populations
+//'
+//' @param input input character vector of input file
+//' @param output_dir input character vector of output location
+//' @param ancestor_file input character vector of ancestor file
+//' @export
 // [[Rcpp::export]]
 int siapopConstant(Rcpp::Nullable<Rcpp::CharacterVector> input = R_NilValue,
                    Rcpp::Nullable<Rcpp::CharacterVector> output_dir = R_NilValue,

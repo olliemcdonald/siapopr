@@ -46,11 +46,12 @@ gsl_integration_workspace *workspace = gsl_integration_workspace_alloc(1000);
 // Pointer to Function class which will point to an instance of one based on parameters
 TDCloneList::NewCloneFunction* NewTDClone;
 
-//’ SIApop for time-dependent processes.
-//’
-//’ @param input input character vector of input file
-//’ @param output_dir input character vector of output location
-//’ @param ancestor_file input character vector of ancestor file
+//' SIApop for time-dependent processes.
+//'
+//' @param input input character vector of input file
+//' @param output_dir input character vector of output location
+//' @param ancestor_file input character vector of ancestor file
+//' @export
 // [[Rcpp::export]]
 int siapopTimeDep(Rcpp::Nullable<Rcpp::CharacterVector> input = R_NilValue,
                   Rcpp::Nullable<Rcpp::CharacterVector> output_dir = R_NilValue,

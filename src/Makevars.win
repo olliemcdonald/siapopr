@@ -1,24 +1,3 @@
-SOURCES1=$(wildcard simple/*.cpp)
-SOURCES2=$(wildcard constant/*.cpp)
-SOURCES3=$(wildcard timedep/*.cpp)
-OBJECTS = siapopSimple.o siapopConstant.o siapopTimeDep.o
-OBJS1 = $(SOURCES1:.cpp=.o)
-OBJS2 = $(SOURCES2:.cpp=.o)
-OBJS3 = $(SOURCES3:.cpp=.o)
-
 ## This assumes that the LIB_GSL variable points to working GSL libraries
-PKG_CPPFLAGS=-I$(LIB_GSL)/include -v
+PKG_CXXFLAGS=-I$(LIB_GSL)/include -I../inst/include
 PKG_LIBS=-L$(LIB_GSL)/lib -lgsl
-
-all: libSn1.a libSn2.a libSn3.a $(SHLIB)
-
-$(SHLIB): libSn1.a libSn2.a libSn3.a $(OBJECTS)
-libSn1.a: $(OBJS1)
-libSn2.a: $(OBJS2)
-libSn3.a: $(OBJS3)
-
-clean:
-  @rm -f $(SHLIB) $(OBJECTS)
-  @rm -f $(OBJS1)
-  @rm -f $(OBJS2)
-  @rm -f $(OBJS3)

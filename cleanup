@@ -1,5 +1,3 @@
-#!/bin/sh
-
 rm -f  config.log config.status confdefs.h \
        src/*.o src/*.so src/Makevars src/symbols.rds \
        inst/doc/*.blg inst/doc/*.bbl \

@@ -38,12 +38,12 @@
 // structure contains all global parameters used in multiple source files
 GlobalParameters gpsimp;
 
-//’ SIApop for non-mutating processes that uses Binomial Neg. Binomial
-//' method to simulate for exact times.
-//’
-//’ @param input input character vector of input file
-//’ @param output_dir input character vector of output location
-//’ @param ancestor_file input character vector of ancestor file
+//' SIApop for non-mutating processes
+//'
+//' @param input input character vector of input file
+//' @param output_dir input character vector of output location
+//' @param ancestor_file input character vector of ancestor file
+//' @export
 // [[Rcpp::export]]
 int siapopSimple(Rcpp::Nullable<Rcpp::CharacterVector> input = R_NilValue,
                  Rcpp::Nullable<Rcpp::CharacterVector> output_dir = R_NilValue,
