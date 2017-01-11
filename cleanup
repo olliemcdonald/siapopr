@@ -4,6 +4,7 @@ rm -f  config.log config.status confdefs.h \
        */*~ *~
 rm -rf autom4te.cache inst/doc/*/auto
 
+rm -f clonedata.txt sim_stats.txt timedata.txt
 
 #(cd vignettes && \
 #    rm -f siapop*.log siapop*.aux siapop*.out siapop*.tex siapop*.pdf *.blg *.bbl)

@@ -20,6 +20,7 @@
  */
 #include <RcppGSL.h>
 #include <Rcpp.h>
+#include <Rinternals.h>
 
 #include <iostream>
 #include <fstream>
@@ -42,14 +43,14 @@ ConstantCloneList::NewCloneFunction* NewConstantClone;
 
 //' SIApop for time-homogeneous populations
 //'
-//' @param input input character vector of input file
+//' @param input_file input character vector of input file
 //' @param output_dir input character vector of output location
 //' @param ancestor_file input character vector of ancestor file
 //' @export
 // [[Rcpp::export]]
-int siapopConstant(Rcpp::Nullable<Rcpp::CharacterVector> input = R_NilValue,
-                   Rcpp::Nullable<Rcpp::CharacterVector> output_dir = R_NilValue,
-                   Rcpp::Nullable<Rcpp::CharacterVector> ancestor_file = R_NilValue)
+int siapopConstant(SEXP input_file = R_NilValue,
+                   SEXP output_dir = R_NilValue,
+                   SEXP ancestor_file = R_NilValue)
 {
 
   //  declaring random number generator and setting seed
@@ -62,14 +63,13 @@ int siapopConstant(Rcpp::Nullable<Rcpp::CharacterVector> input = R_NilValue,
   // parsing arguments in command line by searching for argument options
   // default output is current directory
   const char *output_folder;
-  if( output_dir.isNull() )
+  if( Rf_isNull(output_dir) )
   {
     output_folder = "./";
   }
   else
   {
-    std::vector<std::string> output_dir_ = Rcpp::as<std::vector <std::string> > (output_dir);
-    output_folder = output_dir_[0].c_str();
+    output_folder = CHAR(Rf_asChar(output_dir));
   }
 
 
@@ -88,10 +88,9 @@ int siapopConstant(Rcpp::Nullable<Rcpp::CharacterVector> input = R_NilValue,
 
 
   // parsing through the input file and converting/adding to parameter list
-  if( input.isNotNull() )
+  if( !Rf_isNull(input_file) )
   {
-    std::vector<std::string> input_ = Rcpp::as<std::vector <std::string> > (input);
-    const char* input_params = input_[0].c_str();
+    const char* input_params = CHAR(Rf_asChar(input_file));
 
     std::string s = input_params;
     std::ifstream infile(input_params);
@@ -297,7 +296,7 @@ int siapopConstant(Rcpp::Nullable<Rcpp::CharacterVector> input = R_NilValue,
       NewConstantClone = new ConstantCloneList::NewCloneNoParams(population);
     }
 
-    if( ancestor_file.isNull() ) // if no ancestor file exists
+    if( Rf_isNull(ancestor_file) ) // if no ancestor file exists
     {
       // total rate for SSA is equal to number of individuals alive times
       // respective rates
@@ -336,8 +335,7 @@ int siapopConstant(Rcpp::Nullable<Rcpp::CharacterVector> input = R_NilValue,
       std::vector<std::string> ancestor_keys;
       std::vector<std::string>::iterator it;
 
-      std::vector<std::string> ancestor_file_ = Rcpp::as<std::vector <std::string> > (ancestor_file);
-      const char *ancestors = ancestor_file_[0].c_str();
+      const char *ancestors = CHAR(Rf_asChar(ancestor_file));
       std::string a = ancestors;
       std::ifstream ancfile(ancestors);
 

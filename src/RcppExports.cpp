@@ -7,14 +7,14 @@
 using namespace Rcpp;
 
 // siapopConstant
-int siapopConstant(Rcpp::Nullable<Rcpp::CharacterVector> input, Rcpp::Nullable<Rcpp::CharacterVector> output_dir, Rcpp::Nullable<Rcpp::CharacterVector> ancestor_file);
+int siapopConstant(SEXP input, SEXP output_dir, SEXP ancestor_file);
 RcppExport SEXP siapopr_siapopConstant(SEXP inputSEXP, SEXP output_dirSEXP, SEXP ancestor_fileSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< Rcpp::Nullable<Rcpp::CharacterVector> >::type input(inputSEXP);
-    Rcpp::traits::input_parameter< Rcpp::Nullable<Rcpp::CharacterVector> >::type output_dir(output_dirSEXP);
-    Rcpp::traits::input_parameter< Rcpp::Nullable<Rcpp::CharacterVector> >::type ancestor_file(ancestor_fileSEXP);
+    Rcpp::traits::input_parameter< SEXP >::type input(inputSEXP);
+    Rcpp::traits::input_parameter< SEXP >::type output_dir(output_dirSEXP);
+    Rcpp::traits::input_parameter< SEXP >::type ancestor_file(ancestor_fileSEXP);
     rcpp_result_gen = Rcpp::wrap(siapopConstant(input, output_dir, ancestor_file));
     return rcpp_result_gen;
 END_RCPP
