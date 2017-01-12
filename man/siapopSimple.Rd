@@ -2,18 +2,24 @@
 % Please edit documentation in R/RcppExports.R
 \name{siapopSimple}
 \alias{siapopSimple}
-\title{SIApop for non-mutating processes}
+\title{SIApop for non-mutating processes. Runs an exact process by simulating
+binomial and negative binomial random values at each time step.}
 \usage{
-siapopSimple(input = NULL, output_dir = NULL, ancestor_file = NULL)
+siapopSimple(tot_life = 40000, ancestors = 1L, ancestor_clones = 1L,
+  num_sims = 1L, num_samples = 0L, sample_size = 0L,
+  allow_extinction = TRUE, detection_threshold = 0, birth_rate = 1.5,
+  death_rate = 1, input_file = NULL, output_dir = NULL,
+  ancestor_file = NULL)
 }
 \arguments{
-\item{input}{input character vector of input file}
-
 \item{output_dir}{input character vector of output location}
 
 \item{ancestor_file}{input character vector of ancestor file}
+
+\item{input}{input character vector of input file}
 }
 \description{
-SIApop for non-mutating processes
+SIApop for non-mutating processes. Runs an exact process by simulating
+binomial and negative binomial random values at each time step.
 }
 

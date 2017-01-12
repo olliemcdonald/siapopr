@@ -4,7 +4,7 @@
 \alias{import_timedata}
 \title{Import time course data as list of data frames by simulation number}
 \usage{
-import_timedata(filedir)
+import_timedata(filename = "./timedata")
 }
 \arguments{
 \item{filedir}{folder directory containing clonedata.txt}

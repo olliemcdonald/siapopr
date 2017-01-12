@@ -4,7 +4,8 @@
 \alias{import_siapop}
 \title{Import all data from a simulation and outputs a list}
 \usage{
-import_siapop(filedir)
+import_siapop(filedir, clonedata_file = NULL, timedata_file = NULL,
+  sampledata_file = NULL, simdata_file = NULL)
 }
 \arguments{
 \item{filedir}{folder directory containing siapop output}

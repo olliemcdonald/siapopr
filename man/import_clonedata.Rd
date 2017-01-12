@@ -4,7 +4,7 @@
 \alias{import_clonedata}
 \title{Import clone data as list of data frames by simulation number}
 \usage{
-import_clonedata(filedir)
+import_clonedata(filename = "./clonedata")
 }
 \arguments{
 \item{filedir}{folder directory containing clonedata.txt}

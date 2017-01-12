@@ -2,18 +2,35 @@
 % Please edit documentation in R/RcppExports.R
 \name{siapopTimeDep}
 \alias{siapopTimeDep}
-\title{SIApop for time-dependent processes.}
+\title{SIApop for time-dependent processes. Time-Dependent Birth-Death-Mutation process
+simulation for infinite-allele model with random fitness contributions using
+Gillespie Algorithm. Imports data, runs SSA and outputs to designated folder.}
 \usage{
-siapopTimeDep(input = NULL, output_dir = NULL, ancestor_file = NULL)
+siapopTimeDep(tot_life = 40000, max_pop = 10000L, start_time = 0,
+  ancestors = 1L, ancestor_clones = 1L, num_sims = 1L,
+  allow_extinction = TRUE, is_custom_model = FALSE, num_samples = 0L,
+  sample_size = 0L, detection_threshold = 0, observation_frequency = 0,
+  observation_times = NULL, birth_function = 0L,
+  birth_coefs = as.numeric(c(1, 0, 1)), death_function = 0L,
+  death_coefs = as.numeric(c(1, 0, 1)), mutation_prob = 0,
+  alpha_fitness = 0, beta_fitness = 0, pass_prob = 1, upper_fitness = 0,
+  lower_fitness = 0, alpha_mutation = 0, beta_mutation = 0,
+  trace_ancestry = TRUE, count_alleles = TRUE, punctuated_prob = 0,
+  poisson_param = 1, punctuated_multiplier = 1,
+  punctuated_advantageous_prob = 1, epistatic_mutation_thresh = 1,
+  epistatic_multiplier = 1, input_file = NULL, output_dir = NULL,
+  ancestor_file = NULL)
 }
 \arguments{
-\item{input}{input character vector of input file}
-
 \item{output_dir}{input character vector of output location}
 
 \item{ancestor_file}{input character vector of ancestor file}
+
+\item{input}{input character vector of input file}
 }
 \description{
-SIApop for time-dependent processes.
+SIApop for time-dependent processes. Time-Dependent Birth-Death-Mutation process
+simulation for infinite-allele model with random fitness contributions using
+Gillespie Algorithm. Imports data, runs SSA and outputs to designated folder.
 }
 
