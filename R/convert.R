@@ -76,9 +76,9 @@
 #' @param reduce if true we label a clone by its number rather than the list of ancestors
 #'
 #'
-#' @return .create_adj_matrix - returns an edge list for the population
+#' @return .create_edge.list - returns an edge list for the population
 #' @export
-.create_adj_matrix <- function(id_list, reduce = TRUE){
+.create_edge.list <- function(id_list, reduce = TRUE){
   # "0" is reserved for the root - rename any 0 allele to x0x
   id_list <- .split_replace_collapse(id_list, "0", "x0x")
 
@@ -92,6 +92,43 @@
   }
   edgelist
 
+}
+
+##------------------------------------------------------------------------
+#' Creates an adjacency matrix from a sample from SIApop
+#'
+#' @param samp SIApop single sample
+#'
+#'
+#' @return create_sample_adj_matrix - returns an adjacency matrix for a sample
+#' @export
+create_sample_adj_matrix <- function(samp){
+  if(length(unique(samp$sample_number)) > 1){
+    warning("More than 1 sample present. Consider subsetting")
+  }
+
+  names <- rep(samp$unique_id, samp$number_obs)
+  alleles <- unique(unlist(strsplit(names, ">")))
+
+  adj_matrix <- sapply(alleles, function(allele) sapply(strsplit(names,">"), function(idlist)  allele %in% idlist))
+  row.names(adj_matrix) <- make.names(names, unique = TRUE)
+  return(adj_matrix)
+}
+
+##------------------------------------------------------------------------
+#' Creates an adjacency matrix from a population run from SIApop
+#'
+#' @param clone_data SIApop single simulation
+#'
+#'
+#' @return create_sample_adj_matrix - returns an adjacency matrix for a sample
+#' @export
+create_adj_matrix <- function(clone_data){
+  names <- clone_data$unique_id
+  alleles <- unique(unlist(strsplit(names, ">")))
+  adj_matrix <- sapply(alleles, function(allele) sapply(strsplit(names,">"), function(idlist)  allele %in% idlist))
+  row.names(adj_matrix) <- names
+  return(adj_matrix)
 }
 
 ##------------------------------------------------------------------------
@@ -193,7 +230,7 @@ convert_ggmuller <- function(time_data, threshold = 0.001, timepoints = NULL, fr
                 filter(maxfreq >= threshold))$unique_id
 
 
-  edgelist <- .create_adj_matrix(to_keep, reduce = reduce)
+  edgelist <- .create_edge.list(to_keep, reduce = reduce)
 
 #  time_data <- time_data %>% select(time, unique_id, numcells)
   pop_df <- time_data %>% filter(unique_id %in% to_keep) %>%
@@ -253,7 +290,7 @@ convert_igraph <- function(clonedata, threshold = 0.01, size = NULL, color = NUL
 
   clonedata <- clonedata %>% filter(unique_id %in% to_keep)
 
-  edgelist <- .create_adj_matrix(to_keep)
+  edgelist <- .create_edge.list(to_keep)
   edgelist <- edgelist[edgelist$Parent != 0,]
 
   birth_times <- sapply(edgelist$Identity, .parent_age_at_split, edgelist, clonedata$initialtime)
