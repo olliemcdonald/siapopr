@@ -1,3 +1,5 @@
+#' .pop_off
+#'
 #' pops off last instance of pattern in a string
 #'
 #' @param string - character string where matches are sought.
@@ -12,6 +14,8 @@
 }
 
 ##------------------------------------------------------------------------
+#' .pop
+#'
 #' pops off last element of a string after final pattern in a vector
 #'
 #' @param string - character string where matches are sought.
@@ -25,11 +29,14 @@
 }
 
 ##------------------------------------------------------------------------
+#' .match_parents
+#'
 #' matches an allele index to the respective parent index
 #'
 #' @param ids - vector of allele ids.
 #'
-#' @return .match_parents - returns a vector of parent indices where 0 indicates an ancestor
+#' @return .match_parents - returns a vector of parent indices where 0 indicates
+#'  an ancestor
 #' @export
 .match_parents <- function(ids){
   parents <- unlist(lapply(ids, .pop_off, ">"))
@@ -38,8 +45,10 @@
 }
 
 ##------------------------------------------------------------------------
-# replaces an element of a vector with a particular pattern with the
-# replacement given
+#' .replace
+#'
+#' replaces an element of a vector with a particular pattern with the
+#' replacement given
 #'
 #' @param vec - character vector
 #' @param pattern - character element to search for
@@ -53,6 +62,8 @@
 }
 
 ##------------------------------------------------------------------------
+#' .split_replace_collapse
+#'
 #' for a list of clone ids each separated by ">" a specific allele can be
 #' searched for and replaced by splitting the elements of a vector,
 #' replacing individual elements, and collapsing the list back to a vector
@@ -70,11 +81,13 @@
 }
 
 ##------------------------------------------------------------------------
+#' .create_edge_list
+#'
 #' Converts data to Muller_df object in package ggmuller for plotting
 #'
 #' @param id_list list of clone ids
-#' @param reduce if true we label a clone by its number rather than the list of ancestors
-#'
+#' @param reduce if true we label a clone by its number rather than the list of
+#'  ancestors
 #'
 #' @return .create_edge.list - returns an edge list for the population
 #' @export
@@ -95,43 +108,8 @@
 }
 
 ##------------------------------------------------------------------------
-#' Creates an adjacency matrix from a sample from SIApop
+#' .parent_age_at_split
 #'
-#' @param samp SIApop single sample
-#'
-#'
-#' @return create_sample_adj_matrix - returns an adjacency matrix for a sample
-#' @export
-create_sample_adj_matrix <- function(samp){
-  if(length(unique(samp$sample_number)) > 1){
-    warning("More than 1 sample present. Consider subsetting")
-  }
-
-  names <- rep(samp$unique_id, samp$number_obs)
-  alleles <- unique(unlist(strsplit(names, ">")))
-
-  adj_matrix <- sapply(alleles, function(allele) sapply(strsplit(names,">"), function(idlist)  allele %in% idlist))
-  row.names(adj_matrix) <- make.names(names, unique = TRUE)
-  return(adj_matrix)
-}
-
-##------------------------------------------------------------------------
-#' Creates an adjacency matrix from a population run from SIApop
-#'
-#' @param clone_data SIApop single simulation
-#'
-#'
-#' @return create_sample_adj_matrix - returns an adjacency matrix for a sample
-#' @export
-create_adj_matrix <- function(clone_data){
-  names <- clone_data$unique_id
-  alleles <- unique(unlist(strsplit(names, ">")))
-  adj_matrix <- sapply(alleles, function(allele) sapply(strsplit(names,">"), function(idlist)  allele %in% idlist))
-  row.names(adj_matrix) <- names
-  return(adj_matrix)
-}
-
-##------------------------------------------------------------------------
 #' Gets the parents age of an individual from an edgelist and the vector of birth times
 #'
 #' @param Identity character vector of identity of a clone
@@ -153,63 +131,172 @@ create_adj_matrix <- function(clone_data){
   return(birth_time - Parent_birth_time)
 }
 
+##------------------------------------------------------------------------
+#' create_sample_adj_matrix
+#'
+#' Creates an adjacency matrix from a sample of SIApop. The adjacency matrix
+#' assumes rows are individuals and columns are alleles and returns a TRUE
+#' in the i,j element of the matrix if individual sample i contains allele j.
+#'
+#' The adjacency matrix create allows conversion a distance matrix for the
+#' creation of phylogenetic trees with package \code{ape} or converted to a
+#' \code{phyDat} object in the \code{phanghorn} package.
+#'
+#' @param samp SIApop single sample data frame containing a column for the
+#'  unique id (\code{unique_id}) and number of samples for each id
+#'  (\code{number_obs}).
+#'
+#' @return create_sample_adj_matrix - returns an adjacency matrix for a sample
+#' @export
+#' @examples
+#' \dontrun{
+#' # simulate process and import
+#' siapopConstant(seed = 17, max_pop = 1000, mutation_prob = 0.05,
+#'                observation_frequency = 1, detection_threshold = 0.005,
+#'                num_samples = 1, sample_size = 100)
+#' samp_data <- import_sampledata('./sampledata.txt')$`1`
+#' create_sample_adj_matrix(samp_data)
+#' }
+create_sample_adj_matrix <- function(samp){
+  if(length(unique(samp$sample_number)) > 1){
+    warning("More than 1 sample present. Consider subsetting")
+  }
+
+  names <- rep(samp$unique_id, samp$number_obs)
+  alleles <- unique(unlist(strsplit(names, ">")))
+
+  adj_matrix <- sapply(alleles, function(allele) sapply(strsplit(names,">"),
+    function(idlist)  allele %in% idlist))
+  row.names(adj_matrix) <- make.names(names, unique = TRUE)
+  return(adj_matrix)
+}
 
 ##------------------------------------------------------------------------
-#' Converts data to fish object in package fishplot for plotting
+#' create_adj_matrix
+#'
+#' Creates an adjacency matrix from a population of SIApop. The adjacency matrix
+#' assumes rows are individuals and columns are alleles and returns a TRUE
+#' in the i,j element of the matrix if individual sample i contains allele j.
+#'
+#' The adjacency matrix create allows conversion a distance matrix for the
+#' creation of phylogenetic trees with package \code{ape} or converted to a
+#' \code{phyDat} object in the \code{phanghorn} package.
+#'
+#' @param clone_data SIApop single simulation data frame containing a column
+#'  for the unique id (\code{unique_id}) and number of samples for each id
+#'  (\code{number_obs}).
+#'
+#' @return create_adj_matrix - returns an adjacency matrix for a sample
+#' @export
+#' @examples
+#' \dontrun{
+#' # simulate process and import
+#' siapopConstant(seed = 17, max_pop = 1000, mutation_prob = 0.05,
+#'                observation_frequency = 1, detection_threshold = 0.005,
+#'                num_samples = 1, sample_size = 100)
+#' clone_data <- import_clonedata('./clonedata.txt')$`1`
+#' create_adj_matrix(clone_data)
+#' }
+create_adj_matrix <- function(clone_data){
+  names <- clone_data$unique_id
+  alleles <- unique(unlist(strsplit(names, ">")))
+  adj_matrix <- sapply(alleles, function(allele) sapply(strsplit(names,">"),
+    function(idlist)  allele %in% idlist))
+  row.names(adj_matrix) <- names
+  return(adj_matrix)
+}
+
+
+##------------------------------------------------------------------------
+#' convert_fishplot
+#'
+#' Converts time data from a data frame to a fish object in package 'fishplot'
+#' for plotting.
 #'
 #' @param time_data dataframe of time course data
 #' @param timepoints timepoints to use
 #' @param threshold minimum allele frequency to count a clone at
 #'
-#'
 #' @return convert_fishplot - returns a fish object for use with fishPlot()
 #' @export
+#' @examples
+#' \dontrun{
+#' siapopConstant(seed = 17, max_pop = 1000, mutation_prob = 0.05,
+#'                observation_frequency = 1, detection_threshold = 0.005,
+#'                num_samples = 1, sample_size = 100)
+#' time_data <- import_timedata('./timedata.txt')$`1`
+#' fish <- convert_fishplot(time_data, timepoints = 1:10)
+#' fishPlot(fish)
+#' }
 convert_fishplot <- function(time_data, threshold = 0.0001, timepoints = NULL){
 
-  if(is.null(timepoints)) timepoints <- unique(time_data$time)
+  if (requireNamespace("fishplot", quietly = FALSE)) {
 
-  max_cell_count <- max((time_data %>% group_by(time) %>%
-                         summarize(numcells = sum(numcells)))$numcells)
+    if(is.null(timepoints)) timepoints <- unique(time_data$time)
 
-  time_data <- time_data %>% filter(time %in% timepoints) %>%
-    select(time, unique_id, allelefreq)
+    max_cell_count <- max((time_data %>% group_by(time) %>%
+                           dplyr::summarize(numcells = sum(numcells)))$numcells)
+
+    time_data <- time_data %>% dplyr::filter(time %in% timepoints) %>%
+      select(time, unique_id, allelefreq)
 
 
+    to_keep <- (time_data %>% dplyr::mutate(allelefreq =
+                                              allelefreq / max_cell_count) %>%
+                  dplyr::group_by(unique_id) %>%
+                  dplyr::summarize(maxfreq = max(allelefreq)) %>%
+                  dplyr::filter(maxfreq > threshold))$unique_id
 
-  to_keep <- (time_data %>% mutate(allelefreq = allelefreq / max_cell_count) %>%
-                group_by(unique_id) %>% summarize(maxfreq = max(allelefreq)) %>%
-                filter(maxfreq > threshold))$unique_id
+    parents <- .match_parents(to_keep)
 
-  parents <- .match_parents(to_keep)
+    time_data <- time_data %>% dplyr::filter(unique_id %in% to_keep) %>%
+      dplyr::mutate(allelefreq = allelefreq / max_cell_count * 100)
 
-  time_data <- time_data %>% filter(unique_id %in% to_keep) %>%
-    mutate(allelefreq = allelefreq / max_cell_count * 100)
+    frac.table <- as.matrix((time_data %>%
+                               tidyr::spread(time, allelefreq, fill = 0))[,-1])
 
-  frac.table <- as.matrix((time_data %>% spread(time, allelefreq, fill = 0))[,-1])
-
-  fish = createFishObject(frac.table, parents, timepoints = timepoints,
-                          col = rainbow(nrow(frac.table)),
-                          clone.labels = to_keep)
-  fish = layoutClones(fish)
-  return(fish)
+    fish = fishplot::createFishObject(frac.table, parents,
+                                      timepoints = timepoints,
+                                      col = rainbow(nrow(frac.table)),
+                                      clone.labels = to_keep)
+    fish = fishplot::layoutClones(fish)
+    return(fish)
+  }
+  else{
+    stop("package 'fishplot' can be installed with
+          devtools::install_github(\"chrisamiller/fishplot\")")
+  }
 }
 
 ##------------------------------------------------------------------------
-#' Converts data to Muller_df object in package ggmuller for plotting
+#' convert_ggmuller
+#'
+#' Converts time data to a Muller_df object in package 'ggmuller' for plotting.
 #'
 #' @param time_data dataframe of time course data
 #' @param timepoints timepoints to use
 #' @param threshold minimum allele frequency to count a clone at
 #' @param freqplot if TRUE then plot as a frequency relative to each time point
-#' @param reduce if TRUE then reduce clone names to their final ID rather than their ancestry
+#' @param reduce if TRUE then reduce clone names to their final ID rather than
+#'  their ancestry
 #'
 #'
-#' @return convert_fishplot - returns a fish object for use with fishPlot()
+#' @return convert_ggmuller - returns a Muller_df tibble for Muller_plot
 #' @export
-convert_ggmuller <- function(time_data, threshold = 0.001, timepoints = NULL, freqplot = FALSE, reduce = TRUE, ...){
+#' @examples
+#' \dontrun{
+#' siapopConstant(seed = 17, max_pop = 1000, mutation_prob = 0.05,
+#'                observation_frequency = 1, detection_threshold = 0.005,
+#'                num_samples = 1, sample_size = 100)
+#'  time_data <- import_timedata('./timedata.txt')$`1`
+#'  mullerdf <- convert_ggmuller(time_data)
+#'  ggmuller::Muller_plot(mullerdf)
+#' }
+convert_ggmuller <- function(time_data, threshold = 0.001, timepoints = NULL,
+                             freqplot = FALSE, reduce = TRUE, ...){
 
   if(is.null(timepoints)) timepoints <- unique(time_data$time)
-  time_data <- time_data %>% filter(time %in% timepoints)
+  time_data <- time_data %>% dplyr::filter(time %in% timepoints)
 
   ##################################################################
   ### if want to call allelefreq as freq w.r.t total number of cells
@@ -224,30 +311,32 @@ convert_ggmuller <- function(time_data, threshold = 0.001, timepoints = NULL, fr
   ##################################################################
 
   to_keep <- (time_data %>% group_by(time) %>%
-                mutate(allelefreq = allelefreq / sum(numcells)) %>%
+                dplyr::mutate(allelefreq = allelefreq / sum(numcells)) %>%
                 ungroup %>% group_by(unique_id) %>%
-                summarize(maxfreq = max(allelefreq)) %>%
-                filter(maxfreq >= threshold))$unique_id
+                dplyr::summarize(maxfreq = max(allelefreq)) %>%
+                dplyr::filter(maxfreq >= threshold))$unique_id
 
 
   edgelist <- .create_edge.list(to_keep, reduce = reduce)
 
-#  time_data <- time_data %>% select(time, unique_id, numcells)
-  pop_df <- time_data %>% filter(unique_id %in% to_keep) %>%
-    rename(Generation = time, Identity = unique_id, Population = numcells)
+  pop_df <- time_data %>% dplyr::filter(unique_id %in% to_keep) %>%
+    dplyr::rename(Generation = time, Identity = unique_id,
+                  Population = numcells)
 
   if(reduce) pop_df$Identity <- sapply(pop_df$Identity, .pop, ">")
 
   max_cell_count <- max((pop_df %>% group_by(Generation) %>%
-                           summarize(numcells = sum(Population)))$numcells)
+                           dplyr::summarize(numcells =
+                                              sum(Population)))$numcells)
 
 
-  dummy_ancestor <- data.frame(Generation = -1, Identity = "0", Population = 0, stringsAsFactors = F)
-  pop_df <- bind_rows(dummy_ancestor, pop_df)
+  dummy_ancestor <- data.frame(Generation = -1, Identity = "0",
+                               Population = 0, stringsAsFactors = F)
+  pop_df <- dplyr::bind_rows(dummy_ancestor, pop_df)
   pop2 <- pop_df
-  pop_df <- pop_df %>% select(Generation, Identity, Population)
+  pop_df <- pop_df %>% dplyr::select(Generation, Identity, Population)
 
-  pop_df <- pop_df %>% spread(Identity, Population, fill = 0)
+  pop_df <- pop_df %>% tidyr::spread(Identity, Population, fill = 0)
 
   if(freqplot) {
     pop_df$'0' <- 0
@@ -255,84 +344,95 @@ convert_ggmuller <- function(time_data, threshold = 0.001, timepoints = NULL, fr
     pop_df$'0' <- max_cell_count - rowSums(pop_df[,-1]) + 1e-8
   }
 
-  pop_df <- pop_df %>% gather(Identity, "Population", -1) %>%
-    arrange(Generation)
-  pop_df <- pop_df %>% left_join(pop2)
+  pop_df <- pop_df %>% tidyr::gather(Identity, "Population", -1) %>%
+    dplyr::arrange(Generation)
+  pop_df <- pop_df %>% dplyr::left_join(pop2)
 
-  return(list(edgelist = edgelist, pop_df = pop_df))
-}
-
-##------------------------------------------------------------------------
-#' Wrapper to convert from list containing edgelist and pop_df to Muller_df
-#'
-#' @param Muller_list list as output from convert_ggmuller containing edge list and pop_df
-#'
-#' @return create_Muller_df - returns a Muller_df tibble for Muller_plot
-#' @export
-create_Muller_df <- function(Muller_list){
-  get_Muller_df(Muller_list$edgelist, Muller_list$pop_df)
+  if (requireNamespace("ggmuller", quietly = FALSE)) {
+    return(ggmuller::get_Muller_df(edgelist, pop_df))
+  }
+  else{
+    stop("package 'ggmuller' can be installed with
+         devtools::install_github(\"robjohnnoble/ggmuller\")")
+  }
 }
 
 
 ##------------------------------------------------------------------------
-#' Converts data to igraph in tree layout to view the genetree at a specific time
+#' convert_igraph
 #'
-#' @param clonedata dataframe of a single timepoint
+#' Converts data to igraph in tree layout to view the gene tree at the final
+#' time or a specific time (if importing the time data)
+#'
+#' @param clonedata data frame of a single timepoint
 #' @param threshold minimum allele frequency to count a clone at
-#'
 #'
 #' @return convert_igraph - returns an igraph object
 #' @export
+#' @examples
+#' \dontrun{
+#' siapopConstant(seed = 17, max_pop = 1000, mutation_prob = 0.05,
+#'                observation_frequency = 1, detection_threshold = 0.005,
+#'                num_samples = 1, sample_size = 100)
+#' clone_data <- import_clonedata('./clonedata.txt')$`1`
+#' clonegraph <- convert_igraph(clone_data)
+#' plot(clonegraph)
+#' }
 convert_igraph <- function(clonedata, threshold = 0.01, size = NULL, color = NULL){
+  if (requireNamespace("igraph", quietly = FALSE)) {
 
-  to_keep <- (clonedata %>% mutate(allelefreq = allelefreq / sum(allelefreq)) %>%
-                filter(allelefreq >= threshold))$unique_id
+    to_keep <- (clonedata %>%
+                  dplyr::mutate(allelefreq = allelefreq / sum(allelefreq)) %>%
+                  dplyr::filter(allelefreq >= threshold))$unique_id
 
-  clonedata <- clonedata %>% filter(unique_id %in% to_keep)
+    clonedata <- clonedata %>% dplyr::filter(unique_id %in% to_keep)
 
-  edgelist <- .create_edge.list(to_keep)
-  edgelist <- edgelist[edgelist$Parent != 0,]
+    edgelist <- .create_edge.list(to_keep)
+    edgelist <- edgelist[edgelist$Parent != 0,]
 
-  birth_times <- sapply(edgelist$Identity, .parent_age_at_split, edgelist, clonedata$initialtime)
-  nodes <- sapply(clonedata$unique_id, .pop, ">")
-  birth_times <- max(clonedata$initialtime) - clonedata$initialtime
+    birth_times <- sapply(edgelist$Identity, .parent_age_at_split, edgelist,
+                          clonedata$initialtime)
+    nodes <- sapply(clonedata$unique_id, .pop, ">")
+    birth_times <- max(clonedata$initialtime) - clonedata$initialtime
 
-  genetree_graph <- graph.data.frame(edgelist)
-  genetree_graph <- add_layout_(genetree_graph, as_tree())
-  graph_attr(genetree_graph, "layout")[,2] <- birth_times[match(as_ids(V(genetree_graph)), nodes)]
+    genetree_graph <- graph.data.frame(edgelist)
+    genetree_graph <- add_layout_(genetree_graph, as_tree())
+    graph_attr(genetree_graph, "layout")[,2] <-
+      birth_times[match(as_ids(V(genetree_graph)), nodes)]
 
-  if(!is.null(color)){
-    if(color == "fitness"){
-      value <- clonedata$birthrate - clonedata$deathrate
-      value <- value[match(as_ids(V(genetree_graph)), nodes)]
-    } else if(color == "age"){
-      value <- clonedata$initialtime
-      value <- value[match(as_ids(V(genetree_graph)), nodes)]
+    if(!is.null(color)){
+      if(color == "fitness"){
+        value <- clonedata$birthrate - clonedata$deathrate
+        value <- value[match(as_ids(V(genetree_graph)), nodes)]
+      } else if(color == "age"){
+        value <- clonedata$initialtime
+        value <- value[match(as_ids(V(genetree_graph)), nodes)]
 
-    } else if(color == "count"){
-      value <- clonedata$numcells
-      value <- value[match(as_ids(V(genetree_graph)), nodes)]
-    } else{
-      stop("no applicable variable for color")
+      } else if(color == "count"){
+        value <- clonedata$numcells
+        value <- value[match(as_ids(V(genetree_graph)), nodes)]
+      } else{
+        stop("no applicable variable for color")
+      }
+
+      num_sequence <- seq(min(value), max(value), length.out = 100)
+      col_sequence <- colorRampPalette(c("blue", "red"))(100)
+      cols <- sapply(value, function(x) which.min(abs(num_sequence - x)))
+
+      vertex_attr(genetree_graph, "color") <- col_sequence[cols]
     }
 
-    num_sequence <- seq(min(value), max(value), length.out = 100)
-    col_sequence <- colorRampPalette(c("blue", "red"))(100)
-    cols <- sapply(value, function(x) which.min(abs(num_sequence - x)))
-
-    vertex_attr(genetree_graph, "color") <- col_sequence[cols]
-  }
-
-  if(!is.null(size)){
-    if(size == "count"){
-      value <- log10(clonedata$numcells)
-      value <- value[match(as_ids(V(genetree_graph)), nodes)]
-    } else {
-      stop("no applicable variable for size")
+    if(!is.null(size)){
+      if(size == "count"){
+        value <- log10(clonedata$numcells)
+        value <- value[match(as_ids(V(genetree_graph)), nodes)]
+      } else {
+        stop("no applicable variable for size")
+      }
+      num_sequence <- seq(min(value), max(value), length.out = 5)
+      sizes <- sapply(value, function(x) which.min(abs(num_sequence - x)))
+      vertex_attr(genetree_graph, "size") <- num_sequence[sizes]
     }
-    num_sequence <- seq(min(value), max(value), length.out = 5)
-    sizes <- sapply(value, function(x) which.min(abs(num_sequence - x)))
-    vertex_attr(genetree_graph, "size") <- num_sequence[sizes]
+    return(genetree_graph)
   }
-  return(genetree_graph)
 }

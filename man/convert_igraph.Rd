@@ -2,12 +2,12 @@
 % Please edit documentation in R/convert.R
 \name{convert_igraph}
 \alias{convert_igraph}
-\title{Converts data to igraph in tree layout to view the genetree at a specific time}
+\title{convert_igraph}
 \usage{
 convert_igraph(clonedata, threshold = 0.01, size = NULL, color = NULL)
 }
 \arguments{
-\item{clonedata}{dataframe of a single timepoint}
+\item{clonedata}{data frame of a single timepoint}
 
 \item{threshold}{minimum allele frequency to count a clone at}
 }
@@ -15,6 +15,17 @@ convert_igraph(clonedata, threshold = 0.01, size = NULL, color = NULL)
 convert_igraph - returns an igraph object
 }
 \description{
-Converts data to igraph in tree layout to view the genetree at a specific time
+Converts data to igraph in tree layout to view the gene tree at the final
+time or a specific time (if importing the time data)
+}
+\examples{
+\dontrun{
+siapopConstant(seed = 17, max_pop = 1000, mutation_prob = 0.05,
+               observation_frequency = 1, detection_threshold = 0.005,
+               num_samples = 1, sample_size = 100)
+clone_data <- import_clonedata('./clonedata.txt')$`1`
+clonegraph <- convert_igraph(clone_data)
+plot(clonegraph)
+}
 }
 

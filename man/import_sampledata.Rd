@@ -15,4 +15,12 @@ sim_data - A list of variables for all simulations
 \description{
 Import single cell samples
 }
+\examples{
+\dontrun{
+siapopConstant(seed = 17, max_pop = 1000, mutation_prob = 0.05,
+               observation_frequency = 1, detection_threshold = 0.005,
+               num_samples = 1, sample_size = 100)
+sample_data <- import_sampledata('./sampledata.txt')
+}
+}
 

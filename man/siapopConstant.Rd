@@ -2,9 +2,7 @@
 % Please edit documentation in R/RcppExports.R
 \name{siapopConstant}
 \alias{siapopConstant}
-\title{SIApop for time-homogeneous populations. Simulates a
-Birth-Death-Mutation process simulation for infinite-allele
-model with random fitness contributions using Gillespie Algorithm.}
+\title{siapopConstant}
 \usage{
 siapopConstant(tot_life = 40000, max_pop = 10000L, start_time = 0,
   ancestors = 1L, ancestor_clones = 1L, num_sims = 1L,
@@ -16,10 +14,99 @@ siapopConstant(tot_life = 40000, max_pop = 10000L, start_time = 0,
   beta_mutation = 0, trace_ancestry = TRUE, count_alleles = TRUE,
   punctuated_prob = 0, poisson_param = 1, punctuated_multiplier = 1,
   punctuated_advantageous_prob = 1, epistatic_mutation_thresh = 1,
-  epistatic_multiplier = 1, input_file = NULL, output_dir = NULL,
-  ancestor_file = NULL)
+  epistatic_multiplier = 1, seed = NULL, input_file = NULL,
+  output_dir = NULL, ancestor_file = NULL)
 }
 \arguments{
+\item{tot_life}{total lifetime to run a simulation for}
+
+\item{max_pop}{maximum population to stop simulation}
+
+\item{start_time}{time index to begin each simulation}
+
+\item{ancestors}{number of ancestors in a clone to initialize simulation}
+
+\item{ancestor_clones}{number of ancestor clones each containing
+\code{ancestors} individuals to initialize simulation with}
+
+\item{num_sims}{number of simulations to run}
+
+\item{allow_extinction}{if TRUE then each simulation restarts when
+extinction occurs. The run counter is incremented and the data is still
+recorded in \emph{timedata.txt}}
+
+\item{is_custom_model}{(not implemented yet) allows user to provide a shared
+object file to advance the clone}
+
+\item{num_samples}{number of single cell samples to take from each
+simulation}
+
+\item{sample_size}{size of each sample of single cells}
+
+\item{detection_threshold}{minimum threshold to report clones. If a clone is
+below minimum its number is added to its parent count.}
+
+\item{observation_frequency}{the frequency of time to output the current
+population to \emph{timedata.txt}}
+
+\item{observation_times}{a vector of specific time points to output the
+current population to \emph{timedata.txt}}
+
+\item{birth_rate}{ancestor birth rate}
+
+\item{death_rate}{ancestor birth rate}
+
+\item{mutation_prob}{ancestor mutation probability, probability that a
+daughter is a new mutant allele}
+
+\item{alpha_fitness}{fitness distribution (right-side) rate parameter. When
+a new clone arises, the fitness of the new clone is a double exponential
+with the positive side having rate \code{alpha}}
+
+\item{beta_fitness}{fitness distribution (left-side) rate parameter. When a
+new clone arises, the fitness of the new clone is a double exponential
+with the negative side having rate \code{beta}}
+
+\item{pass_prob}{probability of no change in fitness}
+
+\item{upper_fitness}{upper bound to fitness distribution}
+
+\item{lower_fitness}{lower bound to fitness distribution}
+
+\item{alpha_mutation}{mutation distribution alpha parameter. A new clone
+can have a new mutation rate coming from a distribution with parameters
+\code{alpha} and \code{beta}.}
+
+\item{beta_mutation}{mutation distribution beta parameter. A new clone can
+have a new mutation rate coming from a distribution with parameters
+\code{alpha} and \code{beta}}
+
+\item{trace_ancestry}{if \code{TRUE} then \emph{clonedata.txt} reports the
+parent clone id and time}
+
+\item{count_alleles}{if \code{TRUE} then reports the number of cells with
+allele equal to the final id of the clone. For example, a single ancestor
+should have an allele frequency equal to the sum of the current living
+population.}
+
+\item{punctuated_prob}{probability that a new clone has a burst of multiple
+mutations}
+
+\item{poisson_param}{parameter of a poisson distribution used to determine
+the number of mutations in a new clone given a burst occurs}
+
+\item{punctuated_multiplier}{= given a burst occurs in the new clone, the
+fitness is multiplied by this amount to affect the fitness distribution.}
+
+\item{punctuated_advantageous_prob}{the probability that a punctuated clone
+has a positive fitness}
+
+\item{epistatic_mutation_thresh}{= number of mutations before an epistatic
+event occurs affecting the fitness}
+
+\item{epistatic_multiplier}{= given an epistatic event occurs, the fitness
+is multiplied by this amount}
+
 \item{input_file}{input character vector of input file}
 
 \item{output_dir}{input character vector of output location}
@@ -29,6 +116,44 @@ siapopConstant(tot_life = 40000, max_pop = 10000L, start_time = 0,
 \description{
 SIApop for time-homogeneous populations. Simulates a
 Birth-Death-Mutation process simulation for infinite-allele
-model with random fitness contributions using Gillespie Algorithm.
+model with random fitness contributions using the Gillespie Algorithm and
+outputs data to the location of \code{output_dir}.
+}
+\details{
+The infinite-allele birth death process assumes anytime a mutation that
+occurs, it is unique and not seen in the population. \code{siapopConstant}
+can generates an infinite-allele birth-death time homogeneous process along
+with additional scenarios that affect new clones.
+
+A fitness distribution is provided so that the birth rate of new clones is
+additive with the additional fitness coming from this distribution. The
+mutation distribution has a similar effect on the mutation rate of a new
+clone. The punctuated parameters assume a new clone may arise that contains
+multiple new alleles instead of a single new allele. These clones have
+different fitnesses as well and a Poisson number of new alleles. The
+epistatic parameters refer to a simple epistatic model where a change in
+fitness occurs in a clone when it reaches \code{epistatic_mutation_thresh}
+total mutations.
+
+The process can be run with defaults that result in a simple model without
+mutations. The defaults for most parameters that would affect fitness of
+new clones are set such that they have no effect on the process.
+
+Simulations are output as text files and input can be in the form of text
+files or a comma-delimeted input file. Currently input for the ancestors
+requires a text file.
+}
+\examples{
+\dontrun{
+# Use default values
+siapopConstant()
+siapopConstant(outputdir = "./")
+siapopConstant(ancestor_file = "./ancestors.txt")
+siapopConstant(tot_life = 10, max_pop = 1000, birth_rate = 1.1,
+               death_rate = 0.99, mutation_prob = 0.01,
+               allow_extinction = FALSE, num_sims = 1, num_samples = 1,
+               alpha_fitness = 100, beta_fitness = 100,
+               sample_size = 100, observation_times = c(1, 5, 10))
+}
 }
 

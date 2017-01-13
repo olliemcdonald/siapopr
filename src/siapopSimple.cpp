@@ -19,12 +19,52 @@
 // structure contains all global parameters used in multiple source files
 GlobalParameters gpsimp;
 
-//' SIApop for non-mutating processes. Runs an exact process by simulating
-//' binomial and negative binomial random values at each time step.
+//' siapopSimple
 //'
+//' SIApop for non-mutating processes. Runs an exact process by simulating
+//' binomial and negative binomial random values at each time step. The process
+//' is only ran for a total length of time since the simulation is exact during
+//' that time instead of running until a specific population size.
+//'
+//' Simple birth-death processes can be simulated exactly by generating a
+//' binomial random variable to determine the number of ancestors of a specific
+//' clone that give rise to descendant, then a negative binomial random
+//' variable to determine the total number of descendant that arise out of those
+//' replicating ancestors. This can be done for each ancestor clone with
+//' various rates. Mutation is not permitted in this scheme.
+//'
+//' Simulations are output as text files and input can be in the form of text
+//' files or a comma-delimeted input file. Currently input for the ancestors
+//' requires a text file.
+//'
+//' @param tot_life total lifetime to run a simulation for
+//' @param ancestors number of ancestors in a clone to initialize simulation
+//' @param ancestor_clones number of ancestor clones each containing
+//'   \code{ancestors} individuals to initialize simulation with
+//' @param num_sims number of simulations to run
+//' @param allow_extinction if TRUE then each simulation restarts when
+//'   extinction occurs. The run counter is incremented and the data is still
+//'     recorded in \emph{timedata.txt}
+//' @param num_samples number of single cell samples to take from each
+//'   simulation
+//' @param sample_size size of each sample of single cells
+//' @param detection_threshold minimum threshold to report clones. If a clone is
+//'   below minimum its number is added to its parent count.
 //' @param input input character vector of input file
 //' @param output_dir input character vector of output location
 //' @param ancestor_file input character vector of ancestor file
+//' @param birth_rate ancestor birth rate
+//' @param death_rate ancestor birth rate
+//' @examples
+//' \dontrun{
+//' # Use default values
+//' siapopSimple()
+//' siapopSimple(input_file = "./input.txt, "output_dir = "./",
+//'              ancestor_file = "ancestors.txt")
+//' siapopSimple(tot_life = 5, ancestors = 10, ancestor_clones = 5,
+//'              num_sims = 1, allow_extinction = FALSE,
+//'              detection_threshold = 0, birth_rate = 1.1, death_rate = 1)
+//' }
 //' @export
 // [[Rcpp::export]]
 int siapopSimple(double tot_life = 40000.0,
@@ -37,6 +77,7 @@ int siapopSimple(double tot_life = 40000.0,
                  double detection_threshold = 0.0,
                  double birth_rate = 1.5,
                  double death_rate = 1.0,
+                 SEXP seed = R_NilValue,
                  SEXP input_file = R_NilValue,
                  SEXP output_dir = R_NilValue,
                  SEXP ancestor_file = R_NilValue)
@@ -44,8 +85,14 @@ int siapopSimple(double tot_life = 40000.0,
 
   //  declaring random number generator and setting seed
   gpsimp.rng = gsl_rng_alloc(gsl_rng_mt19937);
-  gpsimp.seed = std::chrono::high_resolution_clock::now().time_since_epoch().count();
-
+  if( Rf_isNull(seed) )
+  {
+    gpsimp.seed = std::chrono::high_resolution_clock::now().time_since_epoch().count();
+  }
+  else
+  {
+    gpsimp.seed = Rf_asInteger(seed);
+  }
   /*
    VARIABLE INPUT AND CONVERSION
   */

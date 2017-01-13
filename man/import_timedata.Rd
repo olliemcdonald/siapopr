@@ -2,7 +2,7 @@
 % Please edit documentation in R/import.R
 \name{import_timedata}
 \alias{import_timedata}
-\title{Import time course data as list of data frames by simulation number}
+\title{import_timedata}
 \usage{
 import_timedata(filename = "./timedata")
 }
@@ -14,5 +14,13 @@ time_data - A list of data frames for each simulation
 }
 \description{
 Import time course data as list of data frames by simulation number
+}
+\examples{
+\dontrun{
+siapopConstant(seed = 17, max_pop = 1000, mutation_prob = 0.05,
+               observation_frequency = 1, detection_threshold = 0.005,
+               num_samples = 1, sample_size = 100)
+time_data <- import_timedata('./timedata.txt')
+}
 }
 

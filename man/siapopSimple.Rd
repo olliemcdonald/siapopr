@@ -2,16 +2,40 @@
 % Please edit documentation in R/RcppExports.R
 \name{siapopSimple}
 \alias{siapopSimple}
-\title{SIApop for non-mutating processes. Runs an exact process by simulating
-binomial and negative binomial random values at each time step.}
+\title{siapopSimple}
 \usage{
 siapopSimple(tot_life = 40000, ancestors = 1L, ancestor_clones = 1L,
   num_sims = 1L, num_samples = 0L, sample_size = 0L,
   allow_extinction = TRUE, detection_threshold = 0, birth_rate = 1.5,
-  death_rate = 1, input_file = NULL, output_dir = NULL,
+  death_rate = 1, seed = NULL, input_file = NULL, output_dir = NULL,
   ancestor_file = NULL)
 }
 \arguments{
+\item{tot_life}{total lifetime to run a simulation for}
+
+\item{ancestors}{number of ancestors in a clone to initialize simulation}
+
+\item{ancestor_clones}{number of ancestor clones each containing
+\code{ancestors} individuals to initialize simulation with}
+
+\item{num_sims}{number of simulations to run}
+
+\item{num_samples}{number of single cell samples to take from each
+simulation}
+
+\item{sample_size}{size of each sample of single cells}
+
+\item{allow_extinction}{if TRUE then each simulation restarts when
+extinction occurs. The run counter is incremented and the data is still
+  recorded in \emph{timedata.txt}}
+
+\item{detection_threshold}{minimum threshold to report clones. If a clone is
+below minimum its number is added to its parent count.}
+
+\item{birth_rate}{ancestor birth rate}
+
+\item{death_rate}{ancestor birth rate}
+
 \item{output_dir}{input character vector of output location}
 
 \item{ancestor_file}{input character vector of ancestor file}
@@ -20,6 +44,31 @@ siapopSimple(tot_life = 40000, ancestors = 1L, ancestor_clones = 1L,
 }
 \description{
 SIApop for non-mutating processes. Runs an exact process by simulating
-binomial and negative binomial random values at each time step.
+binomial and negative binomial random values at each time step. The process
+is only ran for a total length of time since the simulation is exact during
+that time instead of running until a specific population size.
+}
+\details{
+Simple birth-death processes can be simulated exactly by generating a
+binomial random variable to determine the number of ancestors of a specific
+clone that give rise to descendant, then a negative binomial random
+variable to determine the total number of descendant that arise out of those
+replicating ancestors. This can be done for each ancestor clone with
+various rates. Mutation is not permitted in this scheme.
+
+Simulations are output as text files and input can be in the form of text
+files or a comma-delimeted input file. Currently input for the ancestors
+requires a text file.
+}
+\examples{
+\dontrun{
+# Use default values
+siapopSimple()
+siapopSimple(input_file = "./input.txt, "output_dir = "./",
+             ancestor_file = "ancestors.txt")
+siapopSimple(tot_life = 5, ancestors = 10, ancestor_clones = 5,
+             num_sims = 1, allow_extinction = FALSE,
+             detection_threshold = 0, birth_rate = 1.1, death_rate = 1)
+}
 }
 

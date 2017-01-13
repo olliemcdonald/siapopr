@@ -21,13 +21,109 @@ GlobalParameters gpcons;
 // Function class ptr defined in main() but used in clonelist.cpp
 ConstantCloneList::NewCloneFunction* NewConstantClone;
 
+//' siapopConstant
+//'
 //' SIApop for time-homogeneous populations. Simulates a
 //' Birth-Death-Mutation process simulation for infinite-allele
-//' model with random fitness contributions using Gillespie Algorithm.
+//' model with random fitness contributions using the Gillespie Algorithm and
+//' outputs data to the location of \code{output_dir}.
 //'
+//' The infinite-allele birth death process assumes anytime a mutation that
+//' occurs, it is unique and not seen in the population. \code{siapopConstant}
+//' can generates an infinite-allele birth-death time homogeneous process along
+//' with additional scenarios that affect new clones.
+//'
+//' A fitness distribution is provided so that the birth rate of new clones is
+//' additive with the additional fitness coming from this distribution. The
+//' mutation distribution has a similar effect on the mutation rate of a new
+//' clone. The punctuated parameters assume a new clone may arise that contains
+//' multiple new alleles instead of a single new allele. These clones have
+//' different fitnesses as well and a Poisson number of new alleles. The
+//' epistatic parameters refer to a simple epistatic model where a change in
+//' fitness occurs in a clone when it reaches \code{epistatic_mutation_thresh}
+//' total mutations.
+//'
+//' The process can be run with defaults that result in a simple model without
+//' mutations. The defaults for most parameters that would affect fitness of
+//' new clones are set such that they have no effect on the process.
+//'
+//' Simulations are output as text files and input can be in the form of text
+//' files or a comma-delimeted input file. Currently input for the ancestors
+//' requires a text file.
+//'
+//' @param tot_life total lifetime to run a simulation for
+//' @param max_pop maximum population to stop simulation
+//' @param start_time time index to begin each simulation
+//' @param ancestors number of ancestors in a clone to initialize simulation
+//' @param ancestor_clones number of ancestor clones each containing
+//'   \code{ancestors} individuals to initialize simulation with
+//' @param num_sims number of simulations to run
+//' @param allow_extinction if TRUE then each simulation restarts when
+//'   extinction occurs. The run counter is incremented and the data is still
+//'   recorded in \emph{timedata.txt}
+//' @param is_custom_model (not implemented yet) allows user to provide a shared
+//'   object file to advance the clone
+//' @param num_samples number of single cell samples to take from each
+//'   simulation
+//' @param sample_size size of each sample of single cells
+//' @param detection_threshold minimum threshold to report clones. If a clone is
+//'   below minimum its number is added to its parent count.
+//' @param observation_frequency the frequency of time to output the current
+//'   population to \emph{timedata.txt}
+//' @param observation_times a vector of specific time points to output the
+//'   current population to \emph{timedata.txt}
+//' @param birth_rate ancestor birth rate
+//' @param death_rate ancestor birth rate
+//' @param mutation_prob ancestor mutation probability, probability that a
+//' daughter is a new mutant allele
+//' @param alpha_fitness fitness distribution (right-side) rate parameter. When
+//'   a new clone arises, the fitness of the new clone is a double exponential
+//'   with the positive side having rate \code{alpha}
+//' @param beta_fitness fitness distribution (left-side) rate parameter. When a
+//'   new clone arises, the fitness of the new clone is a double exponential
+//'   with the negative side having rate \code{beta}
+//' @param pass_prob probability of no change in fitness
+//' @param upper_fitness upper bound to fitness distribution
+//' @param lower_fitness lower bound to fitness distribution
+//' @param alpha_mutation mutation distribution alpha parameter. A new clone
+//'   can have a new mutation rate coming from a distribution with parameters
+//'   \code{alpha} and \code{beta}.
+//' @param beta_mutation mutation distribution beta parameter. A new clone can
+//'   have a new mutation rate coming from a distribution with parameters
+//'   \code{alpha} and \code{beta}
+//' @param trace_ancestry if \code{TRUE} then \emph{clonedata.txt} reports the
+//'   parent clone id and time
+//' @param count_alleles if \code{TRUE} then reports the number of cells with
+//'   allele equal to the final id of the clone. For example, a single ancestor
+//'   should have an allele frequency equal to the sum of the current living
+//'   population.
+//' @param punctuated_prob probability that a new clone has a burst of multiple
+//'   mutations
+//' @param poisson_param parameter of a poisson distribution used to determine
+//'   the number of mutations in a new clone given a burst occurs
+//' @param punctuated_multiplier = given a burst occurs in the new clone, the
+//'   fitness is multiplied by this amount to affect the fitness distribution.
+//' @param punctuated_advantageous_prob the probability that a punctuated clone
+//'   has a positive fitness
+//' @param epistatic_mutation_thresh = number of mutations before an epistatic
+//'   event occurs affecting the fitness
+//' @param epistatic_multiplier = given an epistatic event occurs, the fitness
+//'   is multiplied by this amount
 //' @param input_file input character vector of input file
 //' @param output_dir input character vector of output location
 //' @param ancestor_file input character vector of ancestor file
+//' @examples
+//' \dontrun{
+//' # Use default values
+//' siapopConstant()
+//' siapopConstant(outputdir = "./")
+//' siapopConstant(ancestor_file = "./ancestors.txt")
+//' siapopConstant(tot_life = 10, max_pop = 1000, birth_rate = 1.1,
+//'                death_rate = 0.99, mutation_prob = 0.01,
+//'                allow_extinction = FALSE, num_sims = 1, num_samples = 1,
+//'                alpha_fitness = 100, beta_fitness = 100,
+//'                sample_size = 100, observation_times = c(1, 5, 10))
+//' }
 //' @export
 // [[Rcpp::export]]
 int siapopConstant(double tot_life = 40000.0,
@@ -61,15 +157,24 @@ int siapopConstant(double tot_life = 40000.0,
                    double punctuated_advantageous_prob = 1.0,
                    double epistatic_mutation_thresh = 1.0,
                    double epistatic_multiplier = 1.0,
+                   SEXP seed = R_NilValue,
                    SEXP input_file = R_NilValue,
                    SEXP output_dir = R_NilValue,
                    SEXP ancestor_file = R_NilValue)
 {
+  // for now, hardcode is_custom_model to false;
+  is_custom_model = false;
 
   //  declaring random number generator and setting seed
   gpcons.rng = gsl_rng_alloc(gsl_rng_mt19937);
-  gpcons.seed = std::chrono::high_resolution_clock::now().time_since_epoch().count();
-
+  if( Rf_isNull(seed) )
+  {
+    gpcons.seed = std::chrono::high_resolution_clock::now().time_since_epoch().count();
+  }
+  else
+  {
+    gpcons.seed = Rf_asInteger(seed);
+  }
   /*
     VARIABLE INPUT AND CONVERSION
   */

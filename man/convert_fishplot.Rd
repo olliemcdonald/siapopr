@@ -2,7 +2,7 @@
 % Please edit documentation in R/convert.R
 \name{convert_fishplot}
 \alias{convert_fishplot}
-\title{Converts data to fish object in package fishplot for plotting}
+\title{convert_fishplot}
 \usage{
 convert_fishplot(time_data, threshold = 1e-04, timepoints = NULL)
 }
@@ -17,6 +17,17 @@ convert_fishplot(time_data, threshold = 1e-04, timepoints = NULL)
 convert_fishplot - returns a fish object for use with fishPlot()
 }
 \description{
-Converts data to fish object in package fishplot for plotting
+Converts time data from a data frame to a fish object in package 'fishplot'
+for plotting.
+}
+\examples{
+\dontrun{
+siapopConstant(seed = 17, max_pop = 1000, mutation_prob = 0.05,
+               observation_frequency = 1, detection_threshold = 0.005,
+               num_samples = 1, sample_size = 100)
+time_data <- import_timedata('./timedata.txt')$`1`
+fish <- convert_fishplot(time_data, timepoints = 1:10)
+fishPlot(fish)
+}
 }
 

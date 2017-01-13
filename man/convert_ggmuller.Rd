@@ -2,7 +2,7 @@
 % Please edit documentation in R/convert.R
 \name{convert_ggmuller}
 \alias{convert_ggmuller}
-\title{Converts data to Muller_df object in package ggmuller for plotting}
+\title{convert_ggmuller}
 \usage{
 convert_ggmuller(time_data, threshold = 0.001, timepoints = NULL,
   freqplot = FALSE, reduce = TRUE, ...)
@@ -16,12 +16,23 @@ convert_ggmuller(time_data, threshold = 0.001, timepoints = NULL,
 
 \item{freqplot}{if TRUE then plot as a frequency relative to each time point}
 
-\item{reduce}{if TRUE then reduce clone names to their final ID rather than their ancestry}
+\item{reduce}{if TRUE then reduce clone names to their final ID rather than
+their ancestry}
 }
 \value{
-convert_fishplot - returns a fish object for use with fishPlot()
+convert_ggmuller - returns a Muller_df tibble for Muller_plot
 }
 \description{
-Converts data to Muller_df object in package ggmuller for plotting
+Converts time data to a Muller_df object in package 'ggmuller' for plotting.
+}
+\examples{
+\dontrun{
+siapopConstant(seed = 17, max_pop = 1000, mutation_prob = 0.05,
+               observation_frequency = 1, detection_threshold = 0.005,
+               num_samples = 1, sample_size = 100)
+ time_data <- import_timedata('./timedata.txt')$`1`
+ mullerdf <- convert_ggmuller(time_data)
+ ggmuller::Muller_plot(mullerdf)
+}
 }
 

@@ -2,18 +2,43 @@
 % Please edit documentation in R/import.R
 \name{import_siapop}
 \alias{import_siapop}
-\title{Import all data from a simulation and outputs a list}
+\title{import_siapop}
 \usage{
 import_siapop(filedir, clonedata_file = NULL, timedata_file = NULL,
   sampledata_file = NULL, simdata_file = NULL)
 }
 \arguments{
 \item{filedir}{folder directory containing siapop output}
+
+\item{clonedata_file}{file of clone data file (required if \code{filedir} not supplied.}
+
+\item{timedata_file}{file of time course data file}
+
+\item{sampledata_file}{file of sample data file}
+
+\item{simdata_file}{file of simulation information}
 }
 \value{
-siapop_data - Complete output of siapop in list format
+siapop_data Complete output of siapop in list format.
 }
 \description{
-Import all data from a simulation and outputs a list
+Import all data from a simulation
+}
+\details{
+The structure of the list contains the data in the first element and
+simulation data in the second. The data element is a list of each run with
+clone data, time data, and samples as elements in each.
+
+Either \code{filedir} is required and will import the files from the folder
+or individual filenames need to be supplied. The clone data file is required
+but if other files are not supplied they are given as NULL values.
+}
+\examples{
+\dontrun{
+siapopConstant(seed = 17, max_pop = 1000, mutation_prob = 0.05,
+               observation_frequency = 1, detection_threshold = 0.005,
+               num_samples = 1, sample_size = 100)
+siapop_data <- import_siapop('./')
+}
 }
 

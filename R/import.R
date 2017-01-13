@@ -1,11 +1,19 @@
 ##------------------------------------------------------------------------
-#' Import clone data as list of data frames by simulation number
+#' import_clonedata
+#'
+#' Imports all clone data as list of data frames by simulation number
 #'
 #' @param filedir folder directory containing clonedata.txt
 #'
-#'
 #' @return clone_data - A list of data frames for each simulation
 #' @export
+#' @examples
+#' \dontrun{
+#' siapopConstant(seed = 17, max_pop = 1000, mutation_prob = 0.05,
+#'                observation_frequency = 1, detection_threshold = 0.005,
+#'                num_samples = 1, sample_size = 100)
+#' clone_data <- import_clonedata('./clonedata.txt')
+#' }
 import_clonedata <- function(filename = "./clonedata") {
   clone_df <- read.table(filename,
                          sep = "\t",
@@ -17,6 +25,8 @@ import_clonedata <- function(filename = "./clonedata") {
 }
 
 ##------------------------------------------------------------------------
+#' import_timedata
+#'
 #' Import time course data as list of data frames by simulation number
 #'
 #' @param filedir folder directory containing clonedata.txt
@@ -24,6 +34,13 @@ import_clonedata <- function(filename = "./clonedata") {
 #'
 #' @return time_data - A list of data frames for each simulation
 #' @export
+#' @examples
+#' \dontrun{
+#' siapopConstant(seed = 17, max_pop = 1000, mutation_prob = 0.05,
+#'                observation_frequency = 1, detection_threshold = 0.005,
+#'                num_samples = 1, sample_size = 100)
+#' time_data <- import_timedata('./timedata.txt')
+#' }
 import_timedata <- function(filename = "./timedata") {
   time_df <- read.table(filename,
                         sep = "\t",
@@ -43,6 +60,13 @@ import_timedata <- function(filename = "./timedata") {
 #'
 #' @return sim_data - A list of variables for all simulations
 #' @export
+#' @examples
+#' \dontrun{
+#' siapopConstant(seed = 17, max_pop = 1000, mutation_prob = 0.05,
+#'                observation_frequency = 1, detection_threshold = 0.005,
+#'                num_samples = 1, sample_size = 100)
+#' time_data <- import_simdata('./sim_stats.txt')
+#' }
 import_simdata <- function(filename = "./sim_stats.txt") {
   sim_df <- read.csv(filename,
                          header = F,
@@ -61,6 +85,13 @@ import_simdata <- function(filename = "./sim_stats.txt") {
 #'
 #' @return sim_data - A list of variables for all simulations
 #' @export
+#' @examples
+#' \dontrun{
+#' siapopConstant(seed = 17, max_pop = 1000, mutation_prob = 0.05,
+#'                observation_frequency = 1, detection_threshold = 0.005,
+#'                num_samples = 1, sample_size = 100)
+#' sample_data <- import_sampledata('./sampledata.txt')
+#' }
 import_sampledata <- function(filename = "./sampledata.txt") {
   sample_df <- read.delim(filename,
                      header = T, sep = "\t",
@@ -70,13 +101,35 @@ import_sampledata <- function(filename = "./sampledata.txt") {
 }
 
 ##------------------------------------------------------------------------
-#' Import all data from a simulation and outputs a list
+#' import_siapop
+#'
+#' Import all data from a simulation
+#'
+#' The structure of the list contains the data in the first element and
+#' simulation data in the second. The data element is a list of each run with
+#' clone data, time data, and samples as elements in each.
+#'
+#' Either \code{filedir} is required and will import the files from the folder
+#' or individual filenames need to be supplied. The clone data file is required
+#' but if other files are not supplied they are given as NULL values.
 #'
 #' @param filedir folder directory containing siapop output
+#' @param clonedata_file file of clone data file (required if \code{filedir} not supplied.
+#' @param timedata_file file of time course data file
+#' @param sampledata_file file of sample data file
+#' @param simdata_file file of simulation information
 #'
 #'
-#' @return siapop_data - Complete output of siapop in list format
+#'
+#' @return siapop_data Complete output of siapop in list format.
 #' @export
+#' @examples
+#' \dontrun{
+#' siapopConstant(seed = 17, max_pop = 1000, mutation_prob = 0.05,
+#'                observation_frequency = 1, detection_threshold = 0.005,
+#'                num_samples = 1, sample_size = 100)
+#' siapop_data <- import_siapop('./')
+#' }
 import_siapop <- function(filedir, clonedata_file = NULL, timedata_file = NULL,
                           sampledata_file = NULL, simdata_file = NULL) {
 

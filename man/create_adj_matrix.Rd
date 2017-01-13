@@ -2,17 +2,36 @@
 % Please edit documentation in R/convert.R
 \name{create_adj_matrix}
 \alias{create_adj_matrix}
-\title{Creates an adjacency matrix from a population run from SIApop}
+\title{create_adj_matrix}
 \usage{
 create_adj_matrix(clone_data)
 }
 \arguments{
-\item{clone_data}{SIApop single simulation}
+\item{clone_data}{SIApop single simulation data frame containing a column
+for the unique id (\code{unique_id}) and number of samples for each id
+(\code{number_obs}).}
 }
 \value{
-create_sample_adj_matrix - returns an adjacency matrix for a sample
+create_adj_matrix - returns an adjacency matrix for a sample
 }
 \description{
-Creates an adjacency matrix from a population run from SIApop
+Creates an adjacency matrix from a population of SIApop. The adjacency matrix
+assumes rows are individuals and columns are alleles and returns a TRUE
+in the i,j element of the matrix if individual sample i contains allele j.
+}
+\details{
+The adjacency matrix create allows conversion a distance matrix for the
+creation of phylogenetic trees with package \code{ape} or converted to a
+\code{phyDat} object in the \code{phanghorn} package.
+}
+\examples{
+\dontrun{
+# simulate process and import
+siapopConstant(seed = 17, max_pop = 1000, mutation_prob = 0.05,
+               observation_frequency = 1, detection_threshold = 0.005,
+               num_samples = 1, sample_size = 100)
+clone_data <- import_clonedata('./clonedata.txt')$`1`
+create_adj_matrix(clone_data)
+}
 }
 
