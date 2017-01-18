@@ -235,22 +235,22 @@ convert_fishplot <- function(time_data, threshold = 0.0001, timepoints = NULL){
     if(is.null(timepoints)) timepoints <- unique(time_data$time)
 
     max_cell_count <- max((time_data %>% group_by(time) %>%
-                           dplyr::summarize(numcells = sum(numcells)))$numcells)
+                           summarize(numcells = sum(numcells)))$numcells)
 
-    time_data <- time_data %>% dplyr::filter(time %in% timepoints) %>%
+    time_data <- time_data %>% filter(time %in% timepoints) %>%
       select(time, unique_id, allelefreq)
 
 
-    to_keep <- (time_data %>% dplyr::mutate(allelefreq =
+    to_keep <- (time_data %>% mutate(allelefreq =
                                               allelefreq / max_cell_count) %>%
-                  dplyr::group_by(unique_id) %>%
-                  dplyr::summarize(maxfreq = max(allelefreq)) %>%
-                  dplyr::filter(maxfreq > threshold))$unique_id
+                  group_by(unique_id) %>%
+                  summarize(maxfreq = max(allelefreq)) %>%
+                  filter(maxfreq > threshold))$unique_id
 
     parents <- .match_parents(to_keep)
 
-    time_data <- time_data %>% dplyr::filter(unique_id %in% to_keep) %>%
-      dplyr::mutate(allelefreq = allelefreq / max_cell_count * 100)
+    time_data <- time_data %>% filter(unique_id %in% to_keep) %>%
+      mutate(allelefreq = allelefreq / max_cell_count * 100)
 
     frac.table <- as.matrix((time_data %>%
                                tidyr::spread(time, allelefreq, fill = 0))[,-1])
@@ -296,7 +296,7 @@ convert_ggmuller <- function(time_data, threshold = 0.001, timepoints = NULL,
                              freqplot = FALSE, reduce = TRUE, ...){
 
   if(is.null(timepoints)) timepoints <- unique(time_data$time)
-  time_data <- time_data %>% dplyr::filter(time %in% timepoints)
+  time_data <- time_data %>% filter(time %in% timepoints)
 
   ##################################################################
   ### if want to call allelefreq as freq w.r.t total number of cells
@@ -311,30 +311,30 @@ convert_ggmuller <- function(time_data, threshold = 0.001, timepoints = NULL,
   ##################################################################
 
   to_keep <- (time_data %>% group_by(time) %>%
-                dplyr::mutate(allelefreq = allelefreq / sum(numcells)) %>%
+                mutate(allelefreq = allelefreq / sum(numcells)) %>%
                 ungroup %>% group_by(unique_id) %>%
-                dplyr::summarize(maxfreq = max(allelefreq)) %>%
-                dplyr::filter(maxfreq >= threshold))$unique_id
+                summarize(maxfreq = max(allelefreq)) %>%
+                filter(maxfreq >= threshold))$unique_id
 
 
   edgelist <- .create_edge.list(to_keep, reduce = reduce)
 
-  pop_df <- time_data %>% dplyr::filter(unique_id %in% to_keep) %>%
-    dplyr::rename(Generation = time, Identity = unique_id,
+  pop_df <- time_data %>% filter(unique_id %in% to_keep) %>%
+    rename(Generation = time, Identity = unique_id,
                   Population = numcells)
 
   if(reduce) pop_df$Identity <- sapply(pop_df$Identity, .pop, ">")
 
   max_cell_count <- max((pop_df %>% group_by(Generation) %>%
-                           dplyr::summarize(numcells =
+                           summarize(numcells =
                                               sum(Population)))$numcells)
 
 
   dummy_ancestor <- data.frame(Generation = -1, Identity = "0",
                                Population = 0, stringsAsFactors = F)
-  pop_df <- dplyr::bind_rows(dummy_ancestor, pop_df)
+  pop_df <- bind_rows(dummy_ancestor, pop_df)
   pop2 <- pop_df
-  pop_df <- pop_df %>% dplyr::select(Generation, Identity, Population)
+  pop_df <- pop_df %>% select(Generation, Identity, Population)
 
   pop_df <- pop_df %>% tidyr::spread(Identity, Population, fill = 0)
 
@@ -345,8 +345,8 @@ convert_ggmuller <- function(time_data, threshold = 0.001, timepoints = NULL,
   }
 
   pop_df <- pop_df %>% tidyr::gather(Identity, "Population", -1) %>%
-    dplyr::arrange(Generation)
-  pop_df <- pop_df %>% dplyr::left_join(pop2)
+    arrange(Generation)
+  pop_df <- pop_df %>% left_join(pop2)
 
   if (requireNamespace("ggmuller", quietly = FALSE)) {
     return(ggmuller::get_Muller_df(edgelist, pop_df))
@@ -366,6 +366,8 @@ convert_ggmuller <- function(time_data, threshold = 0.001, timepoints = NULL,
 #'
 #' @param clonedata data frame of a single timepoint
 #' @param threshold minimum allele frequency to count a clone at
+#' @param size "count" makes the size of nodes proportional to clone sizes.
+#' @param color = c("fitness", "age", "count") the color of nodes
 #'
 #' @return convert_igraph - returns an igraph object
 #' @export
@@ -382,10 +384,10 @@ convert_igraph <- function(clonedata, threshold = 0.01, size = NULL, color = NUL
   if (requireNamespace("igraph", quietly = FALSE)) {
 
     to_keep <- (clonedata %>%
-                  dplyr::mutate(allelefreq = allelefreq / sum(allelefreq)) %>%
-                  dplyr::filter(allelefreq >= threshold))$unique_id
+                  mutate(allelefreq = allelefreq / sum(allelefreq)) %>%
+                  filter(allelefreq >= threshold))$unique_id
 
-    clonedata <- clonedata %>% dplyr::filter(unique_id %in% to_keep)
+    clonedata <- clonedata %>% filter(unique_id %in% to_keep)
 
     edgelist <- .create_edge.list(to_keep)
     edgelist <- edgelist[edgelist$Parent != 0,]
@@ -395,22 +397,22 @@ convert_igraph <- function(clonedata, threshold = 0.01, size = NULL, color = NUL
     nodes <- sapply(clonedata$unique_id, .pop, ">")
     birth_times <- max(clonedata$initialtime) - clonedata$initialtime
 
-    genetree_graph <- graph.data.frame(edgelist)
-    genetree_graph <- add_layout_(genetree_graph, as_tree())
-    graph_attr(genetree_graph, "layout")[,2] <-
-      birth_times[match(as_ids(V(genetree_graph)), nodes)]
+    genetree_graph <- igraph::graph.data.frame(edgelist)
+    genetree_graph <- igraph::add_layout_(genetree_graph, igraph::as_tree())
+    igraph::graph_attr(genetree_graph, "layout")[,2] <-
+      birth_times[match(igraph::as_ids(igraph::V(genetree_graph)), nodes)]
 
     if(!is.null(color)){
       if(color == "fitness"){
         value <- clonedata$birthrate - clonedata$deathrate
-        value <- value[match(as_ids(V(genetree_graph)), nodes)]
+        value <- value[match(igraph::as_ids(igraph::V(genetree_graph)), nodes)]
       } else if(color == "age"){
         value <- clonedata$initialtime
-        value <- value[match(as_ids(V(genetree_graph)), nodes)]
+        value <- value[match(igraph::as_ids(igraph::V(genetree_graph)), nodes)]
 
       } else if(color == "count"){
         value <- clonedata$numcells
-        value <- value[match(as_ids(V(genetree_graph)), nodes)]
+        value <- value[match(igraph::as_ids(igraph::V(genetree_graph)), nodes)]
       } else{
         stop("no applicable variable for color")
       }
@@ -419,19 +421,19 @@ convert_igraph <- function(clonedata, threshold = 0.01, size = NULL, color = NUL
       col_sequence <- colorRampPalette(c("blue", "red"))(100)
       cols <- sapply(value, function(x) which.min(abs(num_sequence - x)))
 
-      vertex_attr(genetree_graph, "color") <- col_sequence[cols]
+      igraph::vertex_attr(genetree_graph, "color") <- col_sequence[cols]
     }
 
     if(!is.null(size)){
       if(size == "count"){
         value <- log10(clonedata$numcells)
-        value <- value[match(as_ids(V(genetree_graph)), nodes)]
+        value <- value[match(igraph::as_ids(igraph::V(genetree_graph)), nodes)]
       } else {
         stop("no applicable variable for size")
       }
       num_sequence <- seq(min(value), max(value), length.out = 5)
       sizes <- sapply(value, function(x) which.min(abs(num_sequence - x)))
-      vertex_attr(genetree_graph, "size") <- num_sequence[sizes]
+      igraph::vertex_attr(genetree_graph, "size") <- num_sequence[sizes]
     }
     return(genetree_graph)
   }

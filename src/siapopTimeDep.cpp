@@ -62,9 +62,9 @@ TDCloneList::NewCloneFunction* NewTDClone;
 //'
 //' 1: linear f(t) = \eqn{max(x_1 + x_2 t, x_3)}
 //'
-//' 2: logistic f(t) = \eqn{x_1 + (x2 - x_1)((1 + x_5 \times \exp \{(-x_3(t - x_6))\})^{1 / x_4})}
+//' 2: logistic f(t) = \eqn{x_1 + (x2 - x_1)((1 + x_5 \times exp \{(-x_3(t - x_6))\})^{1 / x_4})}
 //'
-//' 3: Gompertz Growth f(t) = x_1 + x_3 \exp\{-x_2 t\}
+//' 3: Gompertz Growth f(t) = x_1 + x_3 exp\{-x_2 t\}
 //'
 //' Simulations are output as text files and input can be in the form of text
 //' files or a comma-delimeted input file. Currently input for the ancestors
@@ -541,25 +541,30 @@ int siapopTimeDep(double tot_life = 40000.0,
     // Determine Advance function class to use based on the parameters
     if (gptime.is_custom_model)
     {
+      Rcpp::Rcout << "Custom model\n";
       NewTDClone = new TDCloneList::NewCloneCustom(population);
     }
     else if( punct_params.is_punctuated )
     {
+      Rcpp::Rcout << "Punctuated model\n";
       NewTDClone = new TDCloneList::NewClonePunct(population, fit_params, mut_params, punct_params);
     }
     else if( fit_params.is_randfitness || mut_params.is_mutator )
     {
       if ( epi_params.is_epistasis )
       {
+        Rcpp::Rcout << "Epistatic model\n";
         NewTDClone = new TDCloneList::NewCloneEpi(population, fit_params, mut_params, epi_params);
       }
       else
       {
+        Rcpp::Rcout << "Fitness model\n";
         NewTDClone = new TDCloneList::NewCloneFitMut(population, fit_params, mut_params);
       }
     }
     else
     {
+      Rcpp::Rcout << "No parameters model\n";
       NewTDClone = new TDCloneList::NewCloneNoParams(population);
     }
 
@@ -690,7 +695,6 @@ int siapopTimeDep(double tot_life = 40000.0,
               }
               // Add params to birth function
               (ancestor->B).params = &(ancestor->birth_params);
-
             }
             else // Use defaults if not present
             {

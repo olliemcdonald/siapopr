@@ -10,6 +10,10 @@ convert_igraph(clonedata, threshold = 0.01, size = NULL, color = NULL)
 \item{clonedata}{data frame of a single timepoint}
 
 \item{threshold}{minimum allele frequency to count a clone at}
+
+\item{size}{"count" makes the size of nodes proportional to clone sizes.}
+
+\item{color}{= c("fitness", "age", "count") the color of nodes}
 }
 \value{
 convert_igraph - returns an igraph object

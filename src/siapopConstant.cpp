@@ -482,25 +482,30 @@ int siapopConstant(double tot_life = 40000.0,
     // Determine Advance function class to use based on the parameters
     if (gpcons.is_custom_model)
     {
+      Rcpp::Rcout << "Custom model\n";
       NewConstantClone = new ConstantCloneList::NewCloneCustom(population);
     }
     else if( punct_params.is_punctuated )
     {
+      Rcpp::Rcout << "Punctuated model\n";
       NewConstantClone = new ConstantCloneList::NewClonePunct(population, fit_params, mut_params, punct_params);
     }
     else if( fit_params.is_randfitness || mut_params.is_mutator )
     {
       if ( epi_params.is_epistasis )
       {
+        Rcpp::Rcout << "Epistatic model\n";
         NewConstantClone = new ConstantCloneList::NewCloneEpi(population, fit_params, mut_params, epi_params);
       }
       else
       {
+        Rcpp::Rcout << "Fitness model\n";
         NewConstantClone = new ConstantCloneList::NewCloneFitMut(population, fit_params, mut_params);
       }
     }
     else
     {
+      Rcpp::Rcout << "No parameters model\n";
       NewConstantClone = new ConstantCloneList::NewCloneNoParams(population);
     }
 

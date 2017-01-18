@@ -159,9 +159,9 @@ provided according to the following:
 
 1: linear f(t) = \eqn{max(x_1 + x_2 t, x_3)}
 
-2: logistic f(t) = \eqn{x_1 + (x2 - x_1)((1 + x_5 \times \exp \{(-x_3(t - x_6))\})^{1 / x_4})}
+2: logistic f(t) = \eqn{x_1 + (x2 - x_1)((1 + x_5 \times exp \{(-x_3(t - x_6))\})^{1 / x_4})}
 
-3: Gompertz Growth f(t) = x_1 + x_3 \exp\{-x_2 t\}
+3: Gompertz Growth f(t) = x_1 + x_3 exp\{-x_2 t\}
 
 Simulations are output as text files and input can be in the form of text
 files or a comma-delimeted input file. Currently input for the ancestors

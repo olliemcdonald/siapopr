@@ -6,14 +6,12 @@ lib/*
 
 # Ignore executables
 bin/*
-
 # Ignore Mac specific files
 .DS_Store
-
 # Ignore to do file
 TODO
-
 # Ignore R files
 .Rhistory
 .Rproj.user
 .RData
+inst/doc

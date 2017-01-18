@@ -16,6 +16,7 @@ Imports:
     igraph,
     ggplot2,
     dplyr,
+    magrittr,
     tidyr
 LinkingTo: Rcpp, RcppGSL
 SystemRequirements: GNU GSL
@@ -23,3 +24,6 @@ NeedsCompilation: yes
 RoxygenNote: 5.0.1
 URL: https://github.com/olliemcdonald/siapopr
 BugReports: https://github.com/olliemcdonald/siapopr/issues
+Suggests: knitr,
+    rmarkdown
+VignetteBuilder: knitr

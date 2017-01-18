@@ -13,16 +13,18 @@ Dependencies
     -   On windows, download and extract the file [local\#\#\#.zip](http://www.stats.ox.ac.uk/pub/Rtools/goodies/multilib/) and create an environmental variable LIB\_GSL to add the directory.
     -   On Linux install libgsl0-dev and gsl-bin.
 -   [Rcpp](https://github.com/RcppCore/Rcpp)
--   \[devtools\]
-    -   `install.packages(devtools)`
+-   [devtools](https://github.com/hadley/devtools)
 
-Recommended packages
---------------------
+Recommended R packages
+----------------------
 
 -   [ggmuller](https://github.com/robjohnnoble/ggmuller)
     -   `devtools::install_github("robjohnnoble/ggmuller")`
 -   [fishplot](https://github.com/chrisamiller/fishplot)
     -   `devtools::install_github("chrisamiller/fishplot")`
+-   ape
+-   igraph
+-   phangorn
 
 Uses
 ====

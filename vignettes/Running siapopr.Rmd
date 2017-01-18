@@ -1,0 +1,263 @@
+---
+title: "Simulating a Time-Homogeneous Birth-Death-Mutation Process with siapopConstant"
+author: "Thomas McDonald and Franziska Michor"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Vignette Title}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+
+
+## Infinite-allele birth-death-mutation model
+
+A birth-death-mutation process is a stochastic process that to study population
+dynamics. An individual of type $i$ in the process with birth rate $b_i$ and
+death rate $d_i$ lives for an exponentially distributed length of time with rate
+$\lambda= b_i + d_i$ before either splitting with probability
+$b_i /  (b_i + d_i)$ or dying with probability $d_i / (b_i + d_i)$. Given a
+split occurs, one of the daughter individuals contains a mutant allele with
+probability $\mu_i$. The infinite-allele assumption implies than any new
+mutant that is born contains a new mutant allele that hasn't been observed in
+the population.
+
+Each mutant initiates a new clone, which is indexed by the
+order of its appearance. Thus the first mutant to appear in the population
+contains allele "1" and the second contains allele "2". Clones are labeled as
+the string of mutant alleles they contain, beginning with
+the ancestor (denoted with the suffix ".a"). As an example, "0.a>1", "0.a>2",
+"0.a>3", "0.a>2>4", "0.a>1>5", "0.a>6", "0.a>2>4>7" are clones of a population
+where 7 mutations have occured in the history. "0.a>2>4>7" contains 3 mutant
+alleles, and the clone id traces the ancestry.
+
+A new mutation initiates a new clone, and properties are given to the clone
+based on the options provided by the user. The scenarios provided include
+the ability for a new clone to have an additive fitness change where the
+change in birth rate of a daughter is a randomly generated number from a
+double exponential distribution. That is, given a new type $j$ arises from
+a type $j$ parent, the type $j$ daughter clone has birth rate
+$b_j = b_i + s$ where $s \sim F(x)$. $F(x)$ is a double exponential with an
+atom at $0$ to allow for a nonzero probability of a passenger mutation.
+
+```{r, echo = F, fig.show = 'hold', fig.cap='Double exponential probability distribution function'}
+ddexp <- function(x, a, b, p){
+  if(x == 0) return(p)
+  else if(x < 0){
+    return(dexp(-x, b) / (2) * (1 - p))
+  }
+  else{
+    return(dexp(x, a) / (2) * (1 - p))
+  }
+}
+x <- seq(-3, 3, by = 0.001)
+y <- sapply(x, ddexp, 1, 1, 0.01)
+plot(x, y, type = "l")
+```
+
+Another included scenario allows a new clone to have a mutation probability
+selected from a distribution given by a $G(x)$. The model is additive similar
+to the fitness distribution with bounds on $[0, 1]$. The punctuated model
+included allows a user to determine the probability that multiple mutations
+arise at a single replication event. If so, the number of mutations is Poisson
+distributed with parameter $\lambda_{punct}$, and the effect on fitness is
+multiplied by a factor of $c_{punct}$. The final included scenario is a basic
+epistatic model that gives the clone with $k$ mutations an exaggerated fitness
+effect by a factor of $c_{epi}$.
+
+
+## Running a Simulation and Importing
+
+Since simulation results can get quite large in memory, siapopr outputs data
+from simulations to text files which can then be imported into R via the
+provided library of functions. To simulate a time-homogeneous
+birth-death-mutation process, the user inputs parameters according to the
+desired model. Suppose we are interested in a simple additive fitness model
+where a single ancestor has birth rate $b_0 = 0.5$ and death rate $d_0 = 0.25$
+and a mutation probability of $\mu_0 = 0.005$. Given a mutation occurs, the
+clone has a new birth rate equal to $b_0 + s$ where $s$ is chosen from a
+double exponential distribution with rate parameters $10$. We also can simulate
+sampling individual cells from the process. The code to run this simulation
+is
+
+```{r}
+library(siapopr)
+library(dplyr)
+siapopConstant(seed = 17, max_pop = 1000000, mutation_prob = 0.005,
+               observation_frequency = 1, detection_threshold = 0.0001,
+               birth_rate = 0.5, death_rate = 0.25,
+               alpha_fitness = 10, beta_fitness = 10, pass_prob = 0,
+               num_samples = 1, sample_size = 25, output_dir = './')
+```
+and the data needs to be imported into R. The output directory is given as the
+current working directory, and *import_siapop* looks there for the all files.
+```{r}
+example_sim <- import_siapop('./')
+clone_data <- example_sim$data$`1`$clone_data
+time_data <- example_sim$data$`1`$time_data
+sample_data <- example_sim$data$`1`$sample_data
+```
+The data is imported as a list containing simulation data about each simulation
+and about the run. Within a particular simulation, labeled by its run number
+a list distinguishes the data sets *clone_data*, *time_data*, and
+*sample_data*. The data frame *clone_data* provides information about each
+clone at the end of the simulation including the various rates and number of
+cells in that clone and cells with that particular allele.
+
+```{r}
+knitr::kable(head(clone_data[,1:9], 10))
+```
+
+The `time_data` data frame provides the number of cells in each clone throughout
+time where the frequency is provided by the argument `observation_frequency`.
+Only clone ids and information that may change over time is contained in
+`time_data`.
+
+```{r}
+knitr::kable(head(time_data, 10))
+```
+
+Finally, *sample_data* provides the results of sampling which can occur multiple
+times in each simulation. The sample number, id, and frequency are each given
+in this data frame.
+
+```{r}
+knitr::kable(head(sample_data, 10))
+```
+
+## Converting and Plotting Data
+
+The data from siapopr is imported as dataframes where each observation is
+a given clone at a point in time. Multiple packages deal with analyzing
+phylogenetic data, so we created functions to convert into those data types.
+
+Both [fishplot](https://github.com/chrisamiller/fishplot). and [ggmuller](https://github.com/robjohnnoble/ggmuller) offer the ability to view
+clonal data in elegant plots tracing their evolutionary history which come
+with their own data structures. The commands `convert_ggmuller` and
+`convert_fishplot` convert siapopr's `time_data` data frame into the required
+class for each function respectively. Each package's plot function can then
+take care of plotting the outputted data.
+
+```{r, fig.show='hold'}
+mullerdf <- convert_ggmuller(time_data, threshold = 0.01)
+library(ggmuller)
+ggmuller::Muller_plot(mullerdf)
+```
+
+```{r, fig.show='hold'}
+fishdf <- convert_fishplot(time_data, threshold = 0.01)
+library(fishplot)
+fishplot::fishPlot(fishdf)
+
+fishdf <- convert_fishplot(time_data, threshold = 0.01, timepoints = 20:50)
+fishplot::fishPlot(fishdf)
+```
+
+The gene tree is a graph describing the order alleles enter the
+population, and can be constructed using the `igraph` package. The function 
+`convert_igraph` converts a data frame to an igraph object. Edge lengths
+correspond to the age of parent clones when a new allele appeared and the size
+and color of nodes can correspond to the number of clones or the fitness of
+clones.
+
+
+```{r, fig.show='hold'}
+library(igraph)
+graphdf <- convert_igraph(clone_data, threshold = 0.005,
+                          size = "count", color = "fitness")
+igraph::plot.igraph(graphdf)
+```
+
+A phylogenetic tree of the sampled cells can be constructed using the
+[ape](https://cran.rstudio.com/web/packages/ape/index.html)
+or [phangorn](http://cran.fhcrc.org/web/packages/phangorn/index.html)
+packages, but the sample data needs to first be converted into
+a format for this. The function `create_sample_adj_matrix` converts sample
+data into an binary adjacency matrix with rows corresponding to individuals
+and columns corresponding to alleles. Element $(i,j)$ in the matrix has a value
+of 1 if individual $i$ contains mutant allele $j$. The hamming distance of
+an adjancency matrix is the square of the euclidean distance, and a neighbor-
+joining tree can be constructed from the distance matrix.
+
+```{r, fig.show = 'hold'}
+adj_mat <- create_sample_adj_matrix(sample_data)
+dist_mat <- dist(adj_mat, method = "euclidean")^2
+sample_tree <- ape::nj(dist_mat)
+plot(sample_tree)
+```
+
+The corresponding phylogenetic tree is unrooted, but may be rooted to the oldest
+individual that exists. In this case, the root can be "X1.a" which is element
+12 in the list of tip labels.
+
+```{r, fig.show = 'hold'}
+sample_tree$tip.label
+plot(ape::root(sample_tree, 12))
+```
+
+Finally, `ape` also offers the ability to write the data into
+standard formats, such as "NEXUS". Once data has been converted into an
+distance matrix (which can also be done on population data with
+`get_adj_matrix`), `ape` has functions for converting the distance matrix into
+a tree. `phangorn` has similar functions, including `phyDat` which creates
+a `phyDat` object from an adjacency matrix. Both packages offer different
+analyses.
+
+## Importing from a file
+
+siapopr also allows importing data from a file, and it is currently the only
+way to import ancestor information. Suppose we want to initiate a population
+with 20 distinct clones containing 100 individuals without mutations present
+(allowing us to use `siapopSimple`. We first need to create a tab delimeted
+file with the appropriate variable names (more info in the README).
+
+```{r}
+ancestor.ids <- paste('ancestor.', 1:20, sep = "")
+birth_rates <- round(rnorm(20, 0, 0.1) + 1, 2)
+death_rates <- rep(1, 20)
+numcells <- rep(100, 20)
+ancestors <- data.frame(unique_id = ancestor.ids, birthrate = birth_rates,
+                        deathrate = death_rates, numcells = numcells)
+write.table(ancestors, 'ancestor.txt', sep = "\t", quote = F, row.names = F)
+ ancestors
+```
+
+The file "ancestor.txt" is written to disk in the current working directory.
+Running siapop with the appropriate argument loads the ancestors into the
+simulation.
+
+```{r}
+siapopSimple(tot_life = 20, ancestor_file = './ancestor.txt')
+simplesim <- import_siapop(clonedata_file = './clonedata.txt')
+simplesim
+```
+
+NOTE: Be sure to write the data frame to file with `row.names = FALSE` and
+`quote = FALSE` to avoid mistakes in importing the data into siapop.
+
+## Time inhomogeneous birth-death processes
+Instead of assuming constant birth and death rates throughout a process,
+`siapopTimeDep` allows us to simulate an infinite-allele time-dependent
+birth-death-mutation process in a similar manner. A few time-dependent functions
+are given (found by typing `?siapopTimeDep` in the R console and in the README).
+The user needs to provide variable values for these functions. As a simple
+example, we consider a birth-death without mutation for a population containing
+2 clones. the birth rate function for clone A is $b_A(t) = 1.1 + -0.02t$ and the
+death rate function is $d_A(t) = 1.15 + -0.03t$. Clone B has the same birth
+function, $b_B(t) = b_A(t)$, but it has a constant death function of
+$d_B(t) = 1$.
+
+```{r}
+library(ggplot2)
+library(dplyr)
+siapopTimeDep(tot_life = 50, max_pop = 100000, birth_function = 1,
+              ancestors = 1000, ancestor_clones = 5,
+              death_function = 1, birth_coefs = c(1.1, -0.15, 0.1),
+              death_coefs = c(1.2, -0.16, 0.1), observation_frequency = 0.2)
+timesim <- import_timedata("./timedata.txt")$`1`
+timesim %>% ggplot(aes(x = time, y = numcells, colour = unique_id)) + geom_line()
+
+simmuller <- convert_ggmuller(time_data = timesim)
+ggmuller::Muller_plot(simmuller)
+```
