@@ -237,6 +237,8 @@ double TDCloneList::AdvanceTime(double curr_time)
 
   while(true) // loop until a r.v. is generated that is accepted
   {
+    Rcpp::checkUserInterrupt();
+
     tot_rate = 0;
     rand_next_time = gsl_ran_exponential(gptime.rng, 1 / tot_rate_homog);
     pnode = root;

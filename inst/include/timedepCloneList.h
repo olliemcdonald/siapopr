@@ -30,6 +30,7 @@
 #include "timedepGlobalStructs.h"
 #include "timedepRVFunctions.h"
 #include "timedepRateFunctions.h"
+#include "Rcpp.h"
 
 
 extern GlobalParameters gptime;
