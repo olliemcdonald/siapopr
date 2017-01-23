@@ -9,11 +9,22 @@ Dependencies
 ------------
 
 -   [GNU Scientific Library](https://www.gnu.org/software/gsl/)
-    -   `brew install gsl` with Homebrew on OSX or from [here](http://ftpmirror.gnu.org/gsl/).
-    -   On windows, download and extract the file [local\#\#\#.zip](http://www.stats.ox.ac.uk/pub/Rtools/goodies/multilib/) and create an environmental variable LIB\_GSL to add the directory.
-    -   On Linux install libgsl0-dev and gsl-bin.
--   [Rcpp](https://github.com/RcppCore/Rcpp)
+    -   (OSX) `brew install gsl` with Homebrew or from [here](http://ftpmirror.gnu.org/gsl/).
+    -   (Windows) download and extract the file [local\#\#\#.zip](http://www.stats.ox.ac.uk/pub/Rtools/goodies/multilib/) and create an environmental variable LIB\_GSL to add the directory (see notes about Windows installation below for more details).
+    -   (Linux) install libgsl0-dev and gsl-bin.
+-   [Rtools](https://cran.r-project.org/bin/windows/Rtools/) (*Windows only*)
 -   [devtools](https://github.com/hadley/devtools)
+-   [dplyr](https://cran.r-project.org/web/packages/dplyr/index.html)
+    -   Issues arise with installation of recursive dependencies using install\_github. Installing this R package first solves this issue.
+
+### Important Notes about Windows installation
+
+Rtools contains the necessary resources to compile C++ files when installing packages in R. GSL is also required which can be downloaded from [here](http://www.stats.ox.ac.uk/pub/Rtools/goodies/multilib/local323.zip). After downloading, unzip to your R directory. Depending on if your computer is 32 or 64-bit, move the library files from **local\#\#\#/lib/i386** (32-bit) or **local\#\#\#/lib/x64** (64-bit) to **local\#\#\#/lib**.
+
+To set the environmental variable LIB\_GSL on a Windows 7 computer, go to "Advanced system settings" in *Control Panel &gt; System and Security &gt; System* and click *Environmental Variables*. Create a new system variable with
+
+-   Variable Name: **LIB\_GSL**
+-   Variable Value: **"C:/path/to/local323"** (include quotes)
 
 Recommended R packages
 ----------------------
@@ -44,6 +55,7 @@ To install in R, type:
 
 ``` r
 devtools::install_git("https://github.com/olliemcdonald/siapopr")
+install.packages("dplyr")
 ```
 
 Installing the library should compile all necessary functions so that SIApopr can be run as an R function.

@@ -5,5 +5,6 @@
 #' @name siapopr
 #' @useDynLib siapopr
 #' @importFrom Rcpp evalCpp
+#' @importFrom magrittr %>%
 #' @import dplyr
 NULL

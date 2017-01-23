@@ -447,7 +447,7 @@ int siapopConstant(double tot_life = 40000.0,
 
   // Open output stream for sampling data
   std::ofstream sample_data;
-  if(gpcons.sample_size > 0 & gpcons.num_samples > 0)
+  if( (gpcons.sample_size > 0) & (gpcons.num_samples > 0) )
   {
     sprintf(fn, "%s/sampledata.txt", output_folder);
     sample_data.open(fn);
@@ -462,7 +462,7 @@ int siapopConstant(double tot_life = 40000.0,
   double avg_sim_endtime = 0;
   int count_detect = 0;
   double current_time;
-  int curr_observation;
+  unsigned int curr_observation;
   double rand_next_time;
   int count_extinct = 0;
 
@@ -629,7 +629,7 @@ int siapopConstant(double tot_life = 40000.0,
             (observation_times_.size() == curr_observation + 1) )
         {
           population.Traverse(timedata, sim, observation_times_[curr_observation], gpcons.trace_ancestry, gpcons.count_alleles);
-          if((observation_times_.size() == curr_observation + 1))
+          if((observation_times_.size() == curr_observation + 1) )
           {
             break;
           }
@@ -666,7 +666,7 @@ int siapopConstant(double tot_life = 40000.0,
     // Final Timed Output
     population.Traverse(timedata, sim, current_time, gpcons.trace_ancestry, gpcons.count_alleles);
     // Sampling from population
-    if(gpcons.sample_size > 0 & gpcons.num_samples > 0)
+    if( (gpcons.sample_size > 0) & (gpcons.num_samples > 0) )
     {
       population.SampleAndTraverse(sample_data, sim, gpcons.sample_size, gpcons.num_samples);
     }

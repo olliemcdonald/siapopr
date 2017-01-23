@@ -191,7 +191,7 @@ int siapopSimple(double tot_life = 40000.0,
 
   // Open output stream for sampling data
   std::ofstream sample_data;
-  if(gpsimp.sample_size > 0 & gpsimp.num_samples > 0)
+  if( (gpsimp.sample_size > 0) & (gpsimp.num_samples > 0) )
   {
     sprintf(fn, "%s/sampledata.txt", output_folder);
     sample_data.open(fn);
@@ -330,7 +330,7 @@ int siapopSimple(double tot_life = 40000.0,
     }
 
     // Sampling from population
-    if(gpsimp.sample_size > 0 & gpsimp.num_samples > 0)
+    if( (gpsimp.sample_size > 0) & (gpsimp.num_samples > 0) )
     {
       population.SampleAndTraverse(sample_data, sim, gpsimp.sample_size, gpsimp.num_samples);
     }
