@@ -82,7 +82,7 @@ public:
   class NewCloneFitMut : public NewCloneFunction
   {
   public:
-    NewCloneFitMut(TDCloneList& cl_, FitnessParameters fit_params_, MutationParameters mut_params_) : cl(cl_),fit_params(fit_params_),mut_params(mut_params_)
+    NewCloneFitMut(TDCloneList& cl_, FitnessParameters fit_params_, MutationParameters mut_params_, gsl_rng* rng_) : cl(cl_),fit_params(fit_params_),mut_params(mut_params_),rng(rng_)
     {
     }
     ~NewCloneFitMut(){};
@@ -91,13 +91,14 @@ public:
   private:
     FitnessParameters fit_params;
     MutationParameters mut_params;
+    gsl_rng* rng;
   };
 
   class NewClonePunct : public NewCloneFunction
   {
   public:
     NewClonePunct(TDCloneList& cl_, FitnessParameters fit_params_,
-      MutationParameters mut_params_, PunctuationParameters punct_params_) : cl(cl_),fit_params(fit_params_),mut_params(mut_params_),punct_params(punct_params_)
+      MutationParameters mut_params_, PunctuationParameters punct_params_, gsl_rng* rng_) : cl(cl_),fit_params(fit_params_),mut_params(mut_params_),punct_params(punct_params_),rng(rng_)
     {
     }
     ~NewClonePunct(){};
@@ -107,13 +108,14 @@ public:
     FitnessParameters fit_params;
     MutationParameters mut_params;
     PunctuationParameters punct_params;
+    gsl_rng* rng;
   };
 
   class NewCloneEpi : public NewCloneFunction
   {
   public:
     NewCloneEpi(TDCloneList& cl_, FitnessParameters fit_params_,
-      MutationParameters mut_params_, EpistaticParameters epi_params_) : cl(cl_),fit_params(fit_params_),mut_params(mut_params_),epi_params(epi_params_)
+      MutationParameters mut_params_, EpistaticParameters epi_params_, gsl_rng* rng_) : cl(cl_),fit_params(fit_params_),mut_params(mut_params_),epi_params(epi_params_),rng(rng_)
     {
     }
     ~NewCloneEpi(){};
@@ -123,22 +125,25 @@ public:
     FitnessParameters fit_params;
     MutationParameters mut_params;
     EpistaticParameters epi_params;
+    gsl_rng* rng;
   };
 
   class NewCloneCustom : public NewCloneFunction
   {
   public:
-    NewCloneCustom(TDCloneList& cl_) : cl(cl_)
+    NewCloneCustom(TDCloneList& cl_, gsl_rng* rng_) : cl(cl_),rng(rng_)
     {
     }
     ~NewCloneCustom(){};
     TDCloneList& cl;
     void operator()(struct clone *new_clone, struct clone *parent_clone);
+  private:
+    gsl_rng* rng;
   };
 
   // Next Step Functions
-  double AdvanceTime(double curr_time);
-  void AdvanceState(double curr_time, double next_time);
+  double AdvanceTime(double curr_time, gsl_rng* rng);
+  void AdvanceState(double curr_time, double next_time, gsl_rng* rng);
   void InsertNode(struct clone* newnode, struct clone* parentnode, int number_mutations);
   void InsertAncestor(struct clone* ancestor);
 
@@ -152,7 +157,7 @@ public:
   // Output Functions
   void Traverse(std::ofstream &F, int sim_number, bool count_alleles);
   void Traverse(std::ofstream &F, int sim_number, double obs_time, bool ancestry, bool count_alleles);
-  void SampleAndTraverse(std::ofstream &F, int run, int sample_size, int nsamples);
+  void SampleAndTraverse(std::ofstream &F, int run, int sample_size, int nsamples, gsl_rng* rng);
   void DeleteList();
 };
 

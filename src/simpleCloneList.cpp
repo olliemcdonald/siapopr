@@ -89,7 +89,7 @@ void SimpleCloneList::Traverse(std::ofstream &F, int sim_number)
 /*
   For sampling individuals from the population multiple times.
 */
-void SimpleCloneList::SampleAndTraverse(std::ofstream &F, int sim_number, int sample_size, int nsamples)
+void SimpleCloneList::SampleAndTraverse(std::ofstream &F, int sim_number, int sample_size, int nsamples, gsl_rng* rng)
 {
   // loop through to repeat with all samples
   for(int sample_counter = 1; sample_counter <= nsamples; sample_counter++)
@@ -105,7 +105,7 @@ void SimpleCloneList::SampleAndTraverse(std::ofstream &F, int sim_number, int sa
     {
       // calculate prob and simulate number to sample from this clone
       double prob = (double)pnode->cell_count / (double)cells_left;
-      int samples_placed = gsl_ran_binomial(gpsimp.rng, prob, samples_to_place);
+      int samples_placed = gsl_ran_binomial(rng, prob, samples_to_place);
 
       // only write if sampled any
       if(samples_placed > 0)

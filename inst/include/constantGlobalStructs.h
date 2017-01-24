@@ -40,7 +40,6 @@ struct GlobalParameters
   double mutation_prob;
   bool trace_ancestry;
   bool count_alleles;
-  gsl_rng* rng;
   double seed;
 };
 

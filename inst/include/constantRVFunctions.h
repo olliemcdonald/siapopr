@@ -23,10 +23,8 @@
 #include "constantGlobalStructs.h"
 
 
-extern GlobalParameters gpcons;
-
-double ConstantGenerateFitness(FitnessParameters fit_params);
-double ConstantGenerateMutationProb(MutationParameters mut_params);
-int ConstantGeneratePunctuation(PunctuationParameters punct_params);
+double ConstantGenerateFitness(FitnessParameters fit_params, gsl_rng* rng);
+double ConstantGenerateMutationProb(MutationParameters mut_params, gsl_rng* rng);
+int ConstantGeneratePunctuation(PunctuationParameters punct_params, gsl_rng* rng);
 
 #endif // __CONSTANTRVFUNCTIONS_H_INCLUDED__

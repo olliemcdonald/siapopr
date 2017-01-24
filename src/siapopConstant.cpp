@@ -18,6 +18,7 @@
 
 // structure contains all global parameters used in multiple source files
 GlobalParameters gpcons;
+gsl_rng* constant_rng;
 // Function class ptr defined in main() but used in clonelist.cpp
 ConstantCloneList::NewCloneFunction* NewConstantClone;
 
@@ -166,7 +167,7 @@ int siapopConstant(double tot_life = 40000.0,
   is_custom_model = false;
 
   //  declaring random number generator and setting seed
-  gpcons.rng = gsl_rng_alloc(gsl_rng_mt19937);
+  constant_rng = gsl_rng_alloc(gsl_rng_mt19937);
   if( Rf_isNull(seed) )
   {
     gpcons.seed = std::chrono::high_resolution_clock::now().time_since_epoch().count();
@@ -456,7 +457,7 @@ int siapopConstant(double tot_life = 40000.0,
   }
 
   // set RNG seed
-  gsl_rng_set(gpcons.rng, gpcons.seed);
+  gsl_rng_set(constant_rng, gpcons.seed);
 
   // simulation variables
   double avg_sim_endtime = 0;
@@ -483,24 +484,24 @@ int siapopConstant(double tot_life = 40000.0,
     if (gpcons.is_custom_model)
     {
       Rcpp::Rcout << "Custom model\n";
-      NewConstantClone = new ConstantCloneList::NewCloneCustom(population);
+      NewConstantClone = new ConstantCloneList::NewCloneCustom(population, constant_rng);
     }
     else if( punct_params.is_punctuated )
     {
       Rcpp::Rcout << "Punctuated model\n";
-      NewConstantClone = new ConstantCloneList::NewClonePunct(population, fit_params, mut_params, punct_params);
+      NewConstantClone = new ConstantCloneList::NewClonePunct(population, fit_params, mut_params, punct_params, constant_rng);
     }
     else if( fit_params.is_randfitness || mut_params.is_mutator )
     {
       if ( epi_params.is_epistasis )
       {
         Rcpp::Rcout << "Epistatic model\n";
-        NewConstantClone = new ConstantCloneList::NewCloneEpi(population, fit_params, mut_params, epi_params);
+        NewConstantClone = new ConstantCloneList::NewCloneEpi(population, fit_params, mut_params, epi_params, constant_rng);
       }
       else
       {
         Rcpp::Rcout << "Fitness model\n";
-        NewConstantClone = new ConstantCloneList::NewCloneFitMut(population, fit_params, mut_params);
+        NewConstantClone = new ConstantCloneList::NewCloneFitMut(population, fit_params, mut_params, constant_rng);
       }
     }
     else
@@ -614,10 +615,10 @@ int siapopConstant(double tot_life = 40000.0,
     {
       Rcpp::checkUserInterrupt();
       // Advance Simulation Time (choose next event time)
-      rand_next_time = population.AdvanceTime(current_time);
+      rand_next_time = population.AdvanceTime(current_time, constant_rng);
 
       // Advance Simulation State (choose next event)
-      population.AdvanceState(current_time, rand_next_time);
+      population.AdvanceState(current_time, rand_next_time, constant_rng);
 
       // update current_time
       current_time = current_time + rand_next_time;
@@ -668,7 +669,7 @@ int siapopConstant(double tot_life = 40000.0,
     // Sampling from population
     if( (gpcons.sample_size > 0) & (gpcons.num_samples > 0) )
     {
-      population.SampleAndTraverse(sample_data, sim, gpcons.sample_size, gpcons.num_samples);
+      population.SampleAndTraverse(sample_data, sim, gpcons.sample_size, gpcons.num_samples, constant_rng);
     }
     // Trim tree if threshold is higher. Otherwise, Traverse
     population.TreeTrim(gpcons.detection_threshold, gpcons.max_pop);
@@ -683,7 +684,7 @@ int siapopConstant(double tot_life = 40000.0,
 
   //avg_sim_endtime = avg_sim_endtime * (double)gpcons.num_sims / (double)count_detect;
 
-  gsl_rng_free(gpcons.rng);
+  gsl_rng_free(constant_rng);
   delete NewConstantClone;
 
   sim_stats << "avg_sim_endtime, " << avg_sim_endtime << "\n" <<

@@ -19,22 +19,22 @@
 #include "timedepRVFunctions.h"
 
 // Functions for generating distributions
-double TDGenerateFitness(FitnessParameters fit_params)
+double TDGenerateFitness(FitnessParameters fit_params, gsl_rng* rng)
 {
   double fitness;
-  double z = gsl_ran_flat(gptime.rng, 0, 1);
+  double z = gsl_ran_flat(rng, 0, 1);
 
 
   if( (z > fit_params.pass_prob) &&
     ((fit_params.beta_fitness == 0) || z <= fit_params.pass_prob + (1 - fit_params.pass_prob) / 2) )
   {
-    fitness = gsl_ran_exponential(gptime.rng, 1 / fit_params.alpha_fitness);
+    fitness = gsl_ran_exponential(rng, 1 / fit_params.alpha_fitness);
     return fitness;
 
   }
   else if( (fit_params.alpha_fitness == 0) || (z > fit_params.pass_prob + (1 - fit_params.pass_prob) / 2) )
   {
-    fitness = -1 * gsl_ran_exponential(gptime.rng, 1 / fit_params.beta_fitness);
+    fitness = -1 * gsl_ran_exponential(rng, 1 / fit_params.beta_fitness);
     return fitness;
 
   }
@@ -51,7 +51,7 @@ double TDGenerateFitness(FitnessParameters fit_params)
 double TDGenerateFitness(FitnessParameters fit_params)
 {
   double fitness;
-  double z = gsl_ran_flat(gptime.rng, 0, 1);
+  double z = gsl_ran_flat(rng, 0, 1);
 
   if( z < fit_params.pass_prob )
   {
@@ -66,13 +66,13 @@ double TDGenerateFitness(FitnessParameters fit_params)
 */
 
 // Function for generating the mutation probability from a beta distribution
-double TDGenerateMutationProb(MutationParameters mut_params)
+double TDGenerateMutationProb(MutationParameters mut_params, gsl_rng* rng)
 {
   // might want to customize later
   double mut_prob;
 
   // allow for passenger probability
-  double z = gsl_ran_flat(gptime.rng, 0, 1);
+  double z = gsl_ran_flat(rng, 0, 1);
 
   if(z < mut_params.pass_prob)
   {
@@ -80,22 +80,22 @@ double TDGenerateMutationProb(MutationParameters mut_params)
   }
   else
   {
-    mut_prob = gsl_ran_beta(gptime.rng, mut_params.alpha_mutation, mut_params.beta_mutation);
+    mut_prob = gsl_ran_beta(rng, mut_params.alpha_mutation, mut_params.beta_mutation);
   }
 
   return mut_prob;
 }
 
 // Generate zero-truncated poisson random variable
-int TDGeneratePunctuation(PunctuationParameters punct_params)
+int TDGeneratePunctuation(PunctuationParameters punct_params, gsl_rng* rng)
 {
   // Generates a zero-truncated Poisson
   double lambda = punct_params.poisson_param;
-  double rand_pois = gsl_ran_flat(gptime.rng, 0, 1);
+  double rand_pois = gsl_ran_flat(rng, 0, 1);
   rand_pois = -log(1 - rand_pois * (1 - exp(-lambda)));
   rand_pois = lambda - rand_pois;
 
-  int zero_trun_pois = gsl_ran_poisson(gptime.rng, rand_pois) + 1;
+  int zero_trun_pois = gsl_ran_poisson(rng, rand_pois) + 1;
 
   return zero_trun_pois;
 }

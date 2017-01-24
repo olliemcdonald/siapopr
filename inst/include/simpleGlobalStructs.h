@@ -33,7 +33,6 @@ struct GlobalParameters
   bool allow_extinction;
   double birth_rate;
   double death_rate;
-  gsl_rng* rng;
   double seed;
 };
 

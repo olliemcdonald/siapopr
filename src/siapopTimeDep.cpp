@@ -19,6 +19,7 @@
 
 // structure contains all global parameters used in multiple source files
 GlobalParameters gptime;
+gsl_rng* timedep_rng;
 // Function array for different time-dependent function types
 RateFunctionsPtr rate_function_array[] = {&RateFunctions::constant,
   &RateFunctions::linear, &RateFunctions::logistic,
@@ -197,7 +198,7 @@ int siapopTimeDep(double tot_life = 40000.0,
   gptime.tot_error = 0;
 
   //  declaring random number generator and setting seed
-  gptime.rng = gsl_rng_alloc(gsl_rng_mt19937);
+  timedep_rng = gsl_rng_alloc(gsl_rng_mt19937);
   if( Rf_isNull(seed) )
   {
     gptime.seed = std::chrono::high_resolution_clock::now().time_since_epoch().count();
@@ -515,7 +516,7 @@ int siapopTimeDep(double tot_life = 40000.0,
 
 
   // set RNG seed
-  gsl_rng_set(gptime.rng, gptime.seed);
+  gsl_rng_set(timedep_rng, gptime.seed);
 
   // simulation variables
   double avg_sim_endtime = 0;
@@ -542,24 +543,24 @@ int siapopTimeDep(double tot_life = 40000.0,
     if (gptime.is_custom_model)
     {
       Rcpp::Rcout << "Custom model\n";
-      NewTDClone = new TDCloneList::NewCloneCustom(population);
+      NewTDClone = new TDCloneList::NewCloneCustom(population, timedep_rng);
     }
     else if( punct_params.is_punctuated )
     {
       Rcpp::Rcout << "Punctuated model\n";
-      NewTDClone = new TDCloneList::NewClonePunct(population, fit_params, mut_params, punct_params);
+      NewTDClone = new TDCloneList::NewClonePunct(population, fit_params, mut_params, punct_params, timedep_rng);
     }
     else if( fit_params.is_randfitness || mut_params.is_mutator )
     {
       if ( epi_params.is_epistasis )
       {
         Rcpp::Rcout << "Epistatic model\n";
-        NewTDClone = new TDCloneList::NewCloneEpi(population, fit_params, mut_params, epi_params);
+        NewTDClone = new TDCloneList::NewCloneEpi(population, fit_params, mut_params, epi_params, timedep_rng);
       }
       else
       {
         Rcpp::Rcout << "Fitness model\n";
-        NewTDClone = new TDCloneList::NewCloneFitMut(population, fit_params, mut_params);
+        NewTDClone = new TDCloneList::NewCloneFitMut(population, fit_params, mut_params, timedep_rng);
       }
     }
     else
@@ -762,10 +763,10 @@ int siapopTimeDep(double tot_life = 40000.0,
       Rcpp::checkUserInterrupt();
       //Rcpp::Rcout << current_time << "\n";
       // Get next event time by advancing with adaptive thinning
-      rand_next_time = population.AdvanceTime(current_time);
+      rand_next_time = population.AdvanceTime(current_time, timedep_rng);
 
       // Advance Simulation State (choose next event)
-      population.AdvanceState(current_time, rand_next_time);
+      population.AdvanceState(current_time, rand_next_time, timedep_rng);
 
       // update current_time
       current_time = current_time + rand_next_time;
@@ -816,7 +817,7 @@ int siapopTimeDep(double tot_life = 40000.0,
     // Sampling from population
     if( (gptime.sample_size > 0) & (gptime.num_samples > 0) )
     {
-      population.SampleAndTraverse(sample_data, sim, gptime.sample_size, gptime.num_samples);
+      population.SampleAndTraverse(sample_data, sim, gptime.sample_size, gptime.num_samples, timedep_rng);
     }
     // Trim tree if threshold is higher. Otherwise, Traverse
     population.TreeTrim(gptime.detection_threshold, gptime.max_pop);
@@ -831,7 +832,7 @@ int siapopTimeDep(double tot_life = 40000.0,
 
   //avg_sim_endtime = avg_sim_endtime * (double)num_sims / (double)count_detect;
 
-  gsl_rng_free(gptime.rng);
+  gsl_rng_free(timedep_rng);
   delete NewTDClone;
 
   sim_stats << "avg_sim_endtime, " << avg_sim_endtime << "\n" <<

@@ -230,10 +230,10 @@ void ConstantCloneList::CloneSort(struct clone* sortnode, bool is_birth)
 /*
   AdvanceTime determines the next time in the process.
 */
-double ConstantCloneList::AdvanceTime(double curr_time)
+double ConstantCloneList::AdvanceTime(double curr_time, gsl_rng* rng)
 {
   double rand_next_time;
-  rand_next_time = gsl_ran_exponential(gpcons.rng, 1 / tot_rate);
+  rand_next_time = gsl_ran_exponential(rng, 1 / tot_rate);
   return rand_next_time;
 }
 
@@ -242,10 +242,10 @@ double ConstantCloneList::AdvanceTime(double curr_time)
   clone it occurs in (birth w/o mutation, birth w/ mutation, death) and updates
   the process accordingly
 */
-void ConstantCloneList::AdvanceState(double curr_time, double next_time)
+void ConstantCloneList::AdvanceState(double curr_time, double next_time, gsl_rng* rng)
 {
   double summand = 0;
-  double rand_next_event = gsl_ran_flat(gpcons.rng, 0, tot_rate);
+  double rand_next_event = gsl_ran_flat(rng, 0, tot_rate);
   double rand_mut_occur;
   bool flag = false;
 
@@ -259,7 +259,7 @@ void ConstantCloneList::AdvanceState(double curr_time, double next_time)
     // Condition for new birth
     if ( rand_next_event <= summand + (pnode->cell_count * pnode->birth_rate) )
     {
-      rand_mut_occur = gsl_ran_flat(gpcons.rng, 0, 1);
+      rand_mut_occur = gsl_ran_flat(rng, 0, 1);
       // Condition to determine if mutation occurs in new daughter
       if (rand_mut_occur <= pnode->mut_prob)
       {
@@ -382,7 +382,7 @@ void ConstantCloneList::NewCloneFitMut::operator()(struct clone *new_clone, stru
   // generation of additive rate to the fitness
   if(fit_params.is_randfitness)
   {
-    double additional_rate = ConstantGenerateFitness(fit_params);
+    double additional_rate = ConstantGenerateFitness(fit_params, rng);
     if (additional_rate > 0)
     {
       new_clone->driver_count++;
@@ -398,7 +398,7 @@ void ConstantCloneList::NewCloneFitMut::operator()(struct clone *new_clone, stru
 
   if(mut_params.is_mutator)
   {
-    double additional_mut_prob = ConstantGenerateMutationProb(mut_params);
+    double additional_mut_prob = ConstantGenerateMutationProb(mut_params, rng);
     if(additional_mut_prob > 0)
     {
       if(!did_count_driver) new_clone->driver_count++;
@@ -420,19 +420,19 @@ void ConstantCloneList::NewClonePunct::operator()(struct clone *new_clone, struc
 {
   int number_mutations = 1;
   // generation of punctuated number of mutations
-  double rand_punct = gsl_ran_flat(gpcons.rng, 0, 1);
+  double rand_punct = gsl_ran_flat(rng, 0, 1);
   double rand_advantage = 0;
   if(rand_punct < punct_params.punctuated_prob)
   {
-    number_mutations = ConstantGeneratePunctuation(punct_params);
-    rand_advantage = gsl_ran_flat(gpcons.rng, 0, 1);
+    number_mutations = ConstantGeneratePunctuation(punct_params, rng);
+    rand_advantage = gsl_ran_flat(rng, 0, 1);
   }
 
   bool did_count_driver = false;
   // generation of additive rate to the fitness
   if(fit_params.is_randfitness)
   {
-    double additional_rate = ConstantGenerateFitness(fit_params);
+    double additional_rate = ConstantGenerateFitness(fit_params, rng);
     if (additional_rate > 0)
     {
       new_clone->driver_count++;
@@ -462,7 +462,7 @@ void ConstantCloneList::NewClonePunct::operator()(struct clone *new_clone, struc
 
   if(mut_params.is_mutator)
   {
-    double additional_mut_prob = ConstantGenerateMutationProb(mut_params);
+    double additional_mut_prob = ConstantGenerateMutationProb(mut_params, rng);
     if(additional_mut_prob > 0)
     {
       if(!did_count_driver) new_clone->driver_count++;
@@ -487,7 +487,7 @@ void ConstantCloneList::NewCloneEpi::operator()(struct clone *new_clone, struct 
   // generation of additive rate to the fitness
   if(fit_params.is_randfitness)
   {
-    double additional_rate = ConstantGenerateFitness(fit_params);
+    double additional_rate = ConstantGenerateFitness(fit_params, rng);
     if (additional_rate > 0)
     {
       new_clone->driver_count++;
@@ -503,7 +503,7 @@ void ConstantCloneList::NewCloneEpi::operator()(struct clone *new_clone, struct 
 
   if(mut_params.is_mutator)
   {
-    double additional_mut_prob = ConstantGenerateMutationProb(mut_params);
+    double additional_mut_prob = ConstantGenerateMutationProb(mut_params, rng);
     if(additional_mut_prob > 0)
     {
       if(!did_count_driver) new_clone->driver_count++;
@@ -689,7 +689,7 @@ void ConstantCloneList::Traverse(std::ofstream &F, int sim_number, double obs_ti
 /*
   For sampling individuals from the population multiple times.
 */
-void ConstantCloneList::SampleAndTraverse(std::ofstream &F, int sim_number, int sample_size, int nsamples)
+void ConstantCloneList::SampleAndTraverse(std::ofstream &F, int sim_number, int sample_size, int nsamples, gsl_rng* rng)
 {
   // loop through to repeat with all samples
   for(int sample_counter = 1; sample_counter <= nsamples; sample_counter++)
@@ -705,7 +705,7 @@ void ConstantCloneList::SampleAndTraverse(std::ofstream &F, int sim_number, int 
     {
       // calculate prob and simulate number to sample from this clone
       double prob = (double)pnode->cell_count / (double)cells_left;
-      int samples_placed = gsl_ran_binomial(gpcons.rng, prob, samples_to_place);
+      int samples_placed = gsl_ran_binomial(rng, prob, samples_to_place);
 
       // only write if sampled any
       if(samples_placed > 0)

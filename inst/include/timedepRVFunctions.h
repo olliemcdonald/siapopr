@@ -24,10 +24,8 @@
 #include "timedepGlobalStructs.h"
 
 
-extern GlobalParameters gptime;
-
-double TDGenerateFitness(FitnessParameters fit_params);
-double TDGenerateMutationProb(MutationParameters mut_params);
-int TDGeneratePunctuation(PunctuationParameters punct_params);
+double TDGenerateFitness(FitnessParameters fit_params, gsl_rng* rng);
+double TDGenerateMutationProb(MutationParameters mut_params, gsl_rng* rng);
+int TDGeneratePunctuation(PunctuationParameters punct_params, gsl_rng* rng);
 
 #endif // __TIMEDEPRVFUNCTIONS_TD_H_INCLUDED__

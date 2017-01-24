@@ -230,7 +230,7 @@ void TDCloneList::CloneSort(struct clone* sortnode, bool is_birth)
   than the value of rate function at time t and accepts/reject the r.v. with
   according to a probability based on the value of the rate
 */
-double TDCloneList::AdvanceTime(double curr_time)
+double TDCloneList::AdvanceTime(double curr_time, gsl_rng* rng)
 {
   struct clone *pnode;
   double rand_next_time;
@@ -240,7 +240,7 @@ double TDCloneList::AdvanceTime(double curr_time)
     Rcpp::checkUserInterrupt();
 
     tot_rate = 0;
-    rand_next_time = gsl_ran_exponential(gptime.rng, 1 / tot_rate_homog);
+    rand_next_time = gsl_ran_exponential(rng, 1 / tot_rate_homog);
     pnode = root;
 
     while(pnode) // add the rates of all nodes at the next time to get total rate
@@ -253,7 +253,7 @@ double TDCloneList::AdvanceTime(double curr_time)
 
     // if total rate is less than the total rate assuming constant rates, accept
     // the next time.
-    double u_thin = gsl_ran_flat(gptime.rng, 0, 1);
+    double u_thin = gsl_ran_flat(rng, 0, 1);
     double beta_ratio = tot_rate / tot_rate_homog;
     //std::cout << beta_ratio << "\n";
 
@@ -273,7 +273,7 @@ double TDCloneList::AdvanceTime(double curr_time)
   clone it occurs in (birth w/o mutation, birth w/ mutation, death) and updates
   the process accordingly
 */
-void TDCloneList::AdvanceState(double curr_time, double next_time)
+void TDCloneList::AdvanceState(double curr_time, double next_time, gsl_rng* rng)
 {
   double summand = 0;
   tot_rate_integ = 0;
@@ -301,7 +301,7 @@ void TDCloneList::AdvanceState(double curr_time, double next_time)
     pnode = pnode->nextnode;
   }
 
-  double rand_next_event = gsl_ran_flat(gptime.rng, 0, tot_rate_integ);
+  double rand_next_event = gsl_ran_flat(rng, 0, tot_rate_integ);
   double rand_mut_occur;
   // Put pnode back to the root
   pnode = root;
@@ -312,7 +312,7 @@ void TDCloneList::AdvanceState(double curr_time, double next_time)
     // Condition for new birth
     if ( rand_next_event <= summand + (pnode->cell_count) * (pnode->birth_rate) )
     {
-      rand_mut_occur = gsl_ran_flat(gptime.rng, 0, 1);
+      rand_mut_occur = gsl_ran_flat(rng, 0, 1);
       // Condition to determine if mutation occurs in new daughter
       if (rand_mut_occur <= pnode->mut_prob)
       {
@@ -456,7 +456,7 @@ void TDCloneList::NewCloneFitMut::operator()(struct clone *new_clone, struct clo
   // generation of additive rate to the fitness
   if(fit_params.is_randfitness)
   {
-    double additional_rate = TDGenerateFitness(fit_params);
+    double additional_rate = TDGenerateFitness(fit_params, rng);
 
     if (additional_rate > 0)
     {
@@ -470,7 +470,7 @@ void TDCloneList::NewCloneFitMut::operator()(struct clone *new_clone, struct clo
 
   if(mut_params.is_mutator)
   {
-    double additional_mut_prob = TDGenerateMutationProb(mut_params);
+    double additional_mut_prob = TDGenerateMutationProb(mut_params, rng);
     if(additional_mut_prob > 0)
     {
       if(!did_count_driver) new_clone->driver_count++;
@@ -501,12 +501,12 @@ void TDCloneList::NewClonePunct::operator()(struct clone *new_clone, struct clon
   // generation of punctuated number of mutations
   int number_mutations = 1;
 
-  double rand_punct = gsl_ran_flat(gptime.rng, 0, 1);
+  double rand_punct = gsl_ran_flat(rng, 0, 1);
   double rand_advantage = 0;
   if(rand_punct < punct_params.punctuated_prob)
   {
-    number_mutations = TDGeneratePunctuation(punct_params);
-    rand_advantage = gsl_ran_flat(gptime.rng, 0, 1);
+    number_mutations = TDGeneratePunctuation(punct_params, rng);
+    rand_advantage = gsl_ran_flat(rng, 0, 1);
   }
 
   // updating time-dependent parameters
@@ -517,7 +517,7 @@ void TDCloneList::NewClonePunct::operator()(struct clone *new_clone, struct clon
   // generation of additive rate to the fitness
   if(fit_params.is_randfitness)
   {
-    double additional_rate = TDGenerateFitness(fit_params);
+    double additional_rate = TDGenerateFitness(fit_params, rng);
     if (additional_rate > 0)
     {
       new_clone->driver_count++;
@@ -543,7 +543,7 @@ void TDCloneList::NewClonePunct::operator()(struct clone *new_clone, struct clon
 
   if(mut_params.is_mutator)
   {
-    double additional_mut_prob = TDGenerateMutationProb(mut_params);
+    double additional_mut_prob = TDGenerateMutationProb(mut_params, rng);
     if(additional_mut_prob > 0)
     {
       if(!did_count_driver) new_clone->driver_count++;
@@ -578,7 +578,7 @@ void TDCloneList::NewCloneEpi::operator()(struct clone *new_clone, struct clone 
   // generation of additive rate to the fitness
   if(fit_params.is_randfitness)
   {
-    double additional_rate = TDGenerateFitness(fit_params);
+    double additional_rate = TDGenerateFitness(fit_params, rng);
     if (additional_rate > 0)
     {
       new_clone->driver_count++;
@@ -594,7 +594,7 @@ void TDCloneList::NewCloneEpi::operator()(struct clone *new_clone, struct clone 
 
   if(mut_params.is_mutator)
   {
-    double additional_mut_prob = TDGenerateMutationProb(mut_params);
+    double additional_mut_prob = TDGenerateMutationProb(mut_params, rng);
     if(additional_mut_prob > 0)
     {
       if(!did_count_driver) new_clone->driver_count++;
@@ -783,7 +783,7 @@ void TDCloneList::Traverse(std::ofstream &F, int sim_number, double obs_time, bo
 /*
   For sampling individuals from the population multiple times.
 */
-void TDCloneList::SampleAndTraverse(std::ofstream &F, int run, int sample_size, int nsamples)
+void TDCloneList::SampleAndTraverse(std::ofstream &F, int run, int sample_size, int nsamples, gsl_rng* rng)
 {
   // loop through to repeat with all samples
   for(int sample_counter = 1; sample_counter <= nsamples; sample_counter++)
@@ -799,7 +799,7 @@ void TDCloneList::SampleAndTraverse(std::ofstream &F, int run, int sample_size, 
     {
       // calculate prob and simulate number to sample from this clone
       double prob = (double)pnode->cell_count / (double)cells_left;
-      int samples_placed = gsl_ran_binomial(gptime.rng, prob, samples_to_place);
+      int samples_placed = gsl_ran_binomial(rng, prob, samples_to_place);
 
       // only write if sampled any
       if(samples_placed > 0)

@@ -18,6 +18,8 @@
 
 // structure contains all global parameters used in multiple source files
 GlobalParameters gpsimp;
+gsl_rng* simple_rng;
+
 
 //' siapopSimple
 //'
@@ -84,7 +86,7 @@ int siapopSimple(double tot_life = 40000.0,
 {
 
   //  declaring random number generator and setting seed
-  gpsimp.rng = gsl_rng_alloc(gsl_rng_mt19937);
+  simple_rng = gsl_rng_alloc(gsl_rng_mt19937);
   if( Rf_isNull(seed) )
   {
     gpsimp.seed = std::chrono::high_resolution_clock::now().time_since_epoch().count();
@@ -200,7 +202,7 @@ int siapopSimple(double tot_life = 40000.0,
   }
 
   // set RNG seed
-  gsl_rng_set(gpsimp.rng, gpsimp.seed);
+  gsl_rng_set(simple_rng, gpsimp.seed);
 
 
   // Beginning of simulation that has "sim" number of runs
@@ -234,10 +236,10 @@ int siapopSimple(double tot_life = 40000.0,
         // Update ancestors to time
         for(int i = 0; i < gpsimp.ancestors; ++i)
         {
-          int not_zero = gsl_ran_bernoulli(gpsimp.rng, 1 - alpha);
+          int not_zero = gsl_ran_bernoulli(simple_rng, 1 - alpha);
           if(not_zero == 1)
           {
-            int new_cells = gsl_ran_geometric(gpsimp.rng, 1 - beta);
+            int new_cells = gsl_ran_geometric(simple_rng, 1 - beta);
             ancestor->cell_count = ancestor->cell_count + new_cells;
             population.tot_cell_count = population.tot_cell_count + new_cells;
           }
@@ -303,10 +305,10 @@ int siapopSimple(double tot_life = 40000.0,
             // Update ancestors to time
             for(int i = 0; i < num_ancestors; ++i)
             {
-              int not_zero = gsl_ran_bernoulli(gpsimp.rng, 1 - alpha);
+              int not_zero = gsl_ran_bernoulli(simple_rng, 1 - alpha);
               if(not_zero == 1)
               {
-                int new_cells = gsl_ran_geometric(gpsimp.rng, 1 - beta);
+                int new_cells = gsl_ran_geometric(simple_rng, 1 - beta);
                 ancestor->cell_count = ancestor->cell_count + new_cells;
                 population.tot_cell_count = population.tot_cell_count + new_cells;
               }
@@ -332,7 +334,7 @@ int siapopSimple(double tot_life = 40000.0,
     // Sampling from population
     if( (gpsimp.sample_size > 0) & (gpsimp.num_samples > 0) )
     {
-      population.SampleAndTraverse(sample_data, sim, gpsimp.sample_size, gpsimp.num_samples);
+      population.SampleAndTraverse(sample_data, sim, gpsimp.sample_size, gpsimp.num_samples, simple_rng);
     }
     // Output of end state with clone info
     Rcpp::Rcout << "Traversing and outputting run " << sim << "\n";
@@ -345,7 +347,7 @@ int siapopSimple(double tot_life = 40000.0,
 
   //avg_sim_endtime = avg_sim_endtime * (double)gpsimp.num_sims / (double)count_detect;
 
-  gsl_rng_free(gpsimp.rng);
+  gsl_rng_free(simple_rng);
 
   sim_stats << "count_extinct, " << count_extinct  << "\n";
 

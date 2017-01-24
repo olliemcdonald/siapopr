@@ -51,7 +51,7 @@ public:
   void DeleteNode();
   // Output Functions
   void Traverse(std::ofstream &F, int sim_number);
-  void SampleAndTraverse(std::ofstream &F, int run, int sample_size, int nsamples);
+  void SampleAndTraverse(std::ofstream &F, int run, int sample_size, int nsamples, gsl_rng* rng);
   void DeleteList();
 };
 
