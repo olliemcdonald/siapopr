@@ -24,8 +24,6 @@ gsl_rng* constant_rng;
 // Function class ptr defined in main() but used in clonelist.cpp
 ConstantCloneList::NewCloneFunction* NewConstantClone;
 void (*ConstantGenerateFitness)(double*, struct FitnessParameters*, gsl_rng*);
-void *lib_handle;
-
 
 //' siapopConstant
 //'
@@ -82,7 +80,10 @@ void *lib_handle;
 //' @param death_rate ancestor birth rate
 //' @param mutation_prob ancestor mutation probability, probability that a
 //' daughter is a new mutant allele
-//' @param distribution_function one of "doubleexp", "normal", or "uniform"
+//' @param distribution_function one of "doubleexp", "normal", "uniform", or
+//'   custom
+//' @param custom_distribution_file file name of a .so library built from a
+//'   C++ function "customdist"
 //' @param alpha_fitness fitness distribution (right-side) rate parameter. When
 //'   a new clone arises, the fitness of the new clone is a double exponential
 //'   with the positive side having rate \code{alpha}
@@ -150,6 +151,7 @@ int siapopConstant(double tot_life = 40000.0,
                    double death_rate = 1.0,
                    double mutation_prob = 0.0,
                    SEXP fitness_distribution = R_NilValue,
+                   SEXP custom_distribution_file = R_NilValue,
                    double alpha_fitness = 0.0,
                    double beta_fitness = 0.0,
                    double pass_prob = 1.0,
@@ -172,6 +174,7 @@ int siapopConstant(double tot_life = 40000.0,
 {
   // for now, hardcode is_custom_model to false;
   is_custom_model = false;
+  void *lib_handle;
 
   //  declaring random number generator and setting seed
   constant_rng = gsl_rng_alloc(gsl_rng_mt19937);
@@ -392,6 +395,7 @@ int siapopConstant(double tot_life = 40000.0,
     if( !Rf_isNull(fitness_distribution) )
     {
       fit_params.is_randfitness = true;
+
       std::string fitness_distribution_ = CHAR(STRING_ELT(fitness_distribution, 0));
       fit_params.fitness_distribution = fitness_distribution_;
       if( fit_params.fitness_distribution.compare("doubleexp") == 0 )
@@ -411,8 +415,13 @@ int siapopConstant(double tot_life = 40000.0,
       }
       else if( fit_params.fitness_distribution.compare("custom") == 0 )
       {
-        lib_handle = dlopen("/Users/mcdonald/Desktop/testplugin/plugin.so", RTLD_LAZY);
-        ConstantGenerateFitness = (void (*)(double *, struct FitnessParameters*, gsl_rng*))dlsym(lib_handle, "custom");
+        if(Rf_isNull(custom_distribution_file))
+        {
+          Rcpp::stop("distribution file not specified");
+        }
+        const char* plugin_location = CHAR(Rf_asChar(custom_distribution_file));
+        lib_handle = dlopen(plugin_location, RTLD_LAZY);
+        ConstantGenerateFitness = (void (*)(double *, struct FitnessParameters*, gsl_rng*))dlsym(lib_handle, "customdist");
       }
       else
       {

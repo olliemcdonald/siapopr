@@ -11,6 +11,7 @@ siapopTimeDep(tot_life = 40000, max_pop = 10000L, start_time = 0,
   observation_times = NULL, birth_function = 0L,
   birth_coefs = as.numeric(c(1, 0, 1)), death_function = 0L,
   death_coefs = as.numeric(c(1, 0, 1)), mutation_prob = 0,
+  fitness_distribution = NULL, custom_distribution_file = NULL,
   alpha_fitness = 0, beta_fitness = 0, pass_prob = 1, upper_fitness = 0,
   lower_fitness = 0, alpha_mutation = 0, beta_mutation = 0,
   trace_ancestry = TRUE, count_alleles = TRUE, punctuated_prob = 0,
@@ -71,6 +72,9 @@ current population to \emph{timedata.txt}}
 \item{mutation_prob}{ancestor mutation probability, probability that a
 daughter is a new mutant allele}
 
+\item{custom_distribution_file}{file name of a .so library built from a
+C++ function "customdist"}
+
 \item{alpha_fitness}{fitness distribution (right-side) rate parameter. When
 a new clone arises, the fitness of the new clone is a double exponential
 with the positive side having rate \code{alpha}}
@@ -124,6 +128,9 @@ is multiplied by this amount}
 \item{output_dir}{input character vector of output location}
 
 \item{ancestor_file}{input character vector of ancestor file}
+
+\item{distribution_function}{one of "doubleexp", "normal", "uniform", or
+"custom"}
 }
 \description{
 SIApop for time-dependent processes. Time-Dependent Birth-Death-Mutation

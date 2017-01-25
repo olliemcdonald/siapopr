@@ -107,7 +107,10 @@ void (*TDGenerateFitness)(double*, struct FitnessParameters*, gsl_rng*);
 //'   \code{death_function}. See Details.
 //' @param mutation_prob ancestor mutation probability, probability that a
 //'   daughter is a new mutant allele
-//' @param distribution_function one of "doubleexp", "normal", or "uniform"
+//' @param distribution_function one of "doubleexp", "normal", "uniform", or
+//'   "custom"
+//' @param custom_distribution_file file name of a .so library built from a
+//'   C++ function "customdist"
 //' @param alpha_fitness fitness distribution (right-side) rate parameter. When
 //'   a new clone arises, the fitness of the new clone is a double exponential
 //'   with the positive side having rate \code{alpha}
@@ -178,6 +181,7 @@ int siapopTimeDep(double tot_life = 40000.0,
                   Rcpp::NumericVector  death_coefs = Rcpp::NumericVector::create(1.0, 0.0, 1.0),
                   double mutation_prob = 0.0,
                   SEXP fitness_distribution = R_NilValue,
+                  SEXP custom_distribution_file = R_NilValue,
                   double alpha_fitness = 0.0,
                   double beta_fitness = 0.0,
                   double pass_prob = 1.0,
@@ -452,8 +456,13 @@ int siapopTimeDep(double tot_life = 40000.0,
       }
       else if( fit_params.fitness_distribution.compare("custom") == 0 )
       {
-        lib_handle = dlopen("/Users/mcdonald/Desktop/testplugin/plugin.so", RTLD_LAZY);
-        TDGenerateFitness = (void (*)(double *, struct FitnessParameters*, gsl_rng*))dlsym(lib_handle, "custom");
+        if(Rf_isNull(custom_distribution_file))
+        {
+          Rcpp::stop("distribution file not specified");
+        }
+        const char* plugin_location = CHAR(Rf_asChar(custom_distribution_file));
+        lib_handle = dlopen(plugin_location, RTLD_LAZY);
+        TDGenerateFitness = (void (*)(double *, struct FitnessParameters*, gsl_rng*))dlsym(lib_handle, "customdist");
       }
       else
       {

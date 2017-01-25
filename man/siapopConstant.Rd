@@ -9,13 +9,14 @@ siapopConstant(tot_life = 40000, max_pop = 10000L, start_time = 0,
   allow_extinction = TRUE, is_custom_model = FALSE, num_samples = 0L,
   sample_size = 0L, detection_threshold = 0, observation_frequency = 0,
   observation_times = NULL, birth_rate = 1.5, death_rate = 1,
-  mutation_prob = 0, alpha_fitness = 0, beta_fitness = 0, pass_prob = 1,
-  upper_fitness = 0, lower_fitness = 0, alpha_mutation = 0,
-  beta_mutation = 0, trace_ancestry = TRUE, count_alleles = TRUE,
-  punctuated_prob = 0, poisson_param = 1, punctuated_multiplier = 1,
-  punctuated_advantageous_prob = 1, epistatic_mutation_thresh = 1,
-  epistatic_multiplier = 1, seed = NULL, input_file = NULL,
-  output_dir = NULL, ancestor_file = NULL)
+  mutation_prob = 0, fitness_distribution = NULL,
+  custom_distribution_file = NULL, alpha_fitness = 0, beta_fitness = 0,
+  pass_prob = 1, upper_fitness = 0, lower_fitness = 0,
+  alpha_mutation = 0, beta_mutation = 0, trace_ancestry = TRUE,
+  count_alleles = TRUE, punctuated_prob = 0, poisson_param = 1,
+  punctuated_multiplier = 1, punctuated_advantageous_prob = 1,
+  epistatic_mutation_thresh = 1, epistatic_multiplier = 1, seed = NULL,
+  input_file = NULL, output_dir = NULL, ancestor_file = NULL)
 }
 \arguments{
 \item{tot_life}{total lifetime to run a simulation for}
@@ -58,6 +59,9 @@ current population to \emph{timedata.txt}}
 
 \item{mutation_prob}{ancestor mutation probability, probability that a
 daughter is a new mutant allele}
+
+\item{custom_distribution_file}{file name of a .so library built from a
+C++ function "customdist"}
 
 \item{alpha_fitness}{fitness distribution (right-side) rate parameter. When
 a new clone arises, the fitness of the new clone is a double exponential
@@ -112,6 +116,9 @@ is multiplied by this amount}
 \item{output_dir}{input character vector of output location}
 
 \item{ancestor_file}{input character vector of ancestor file}
+
+\item{distribution_function}{one of "doubleexp", "normal", "uniform", or
+custom}
 }
 \description{
 SIApop for time-homogeneous populations. Simulates a

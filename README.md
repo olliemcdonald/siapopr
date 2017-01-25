@@ -191,14 +191,24 @@ The fitness distribution provided is a double exponential with an atom at 0 indi
 </thead>
 <tbody>
 <tr class="odd">
+<td>distribution_function</td>
+<td>doubleexp, normal, uniform, custom</td>
+<td>the type of distribution to use (see below)</td>
+</tr>
+<tr class="even">
+<td>custom_distribution</td>
+<td>string</td>
+<td>if using a custom distribution, the filepath for the .so file used (see below)</td>
+</tr>
+<tr class="odd">
 <td>alpha_fitness</td>
 <td>numeric &gt; 0</td>
-<td>exponential distribution parameter for positive side of fitness distribution</td>
+<td>parameter 1 for the distribution</td>
 </tr>
 <tr class="even">
 <td>beta_fitness</td>
 <td>numeric &gt; 0</td>
-<td>exponential distribution parameter for negative side of fitness distribution</td>
+<td>parameter 2 for the distribution</td>
 </tr>
 <tr class="odd">
 <td>pass_prob</td>
@@ -217,6 +227,36 @@ The fitness distribution provided is a double exponential with an atom at 0 indi
 </tr>
 </tbody>
 </table>
+
+#### Fitness Distribution Functions
+
+There is an option to specify different distributions using the parameter `distribution_function`. For a double exponential, `alpha_fitness` refers to the rate parameter with respect to an exponential distribution to the right of 0. `beta_fitness` is the rate parameter for the left of 0.
+
+If `distribution_function = "normal"`, fitnesses are generated from a N(`alpha_fitness`, `beta_fitness`) distribution. If `distribution_function = "normal"`, fitnesses are generated from a U(`alpha_fitness`, `beta_fitness`) distribution.
+
+The user has the option to specify a custom distribution. A distribution should be written as a '.cpp' file and include the following:
+
+``` rcpp
+void customdist(double* fitness, struct FitnessParameters *fit_params, gsl_rng* rng)
+{
+  (*fitness) = //insert fitness function;
+}
+```
+
+An example for the uniform distribution with a passenger probability is:
+
+``` rcpp
+void customdist(double* fitness, struct FitnessParameters *fit_params, gsl_rng* rng)
+{
+  double z = gsl_ran_flat(rng, 0, 1);
+  if( (z > fit_params->pass_prob) )
+  {
+    (*fitness) = gsl_ran_flat(rng, fit_params->alpha_fitness, fit_params->beta_fitness);
+  }
+}
+```
+
+The file should be saved as a ".cpp" file and then use the R function `compile_custom_fitness(cppfile)` which creates the necessary header, compiles, and builds a shared library out of the distribution function file so that SIApop can load the shared object.
 
 ### MUTATION DISTRIBUTION PARAMETERS
 

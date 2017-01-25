@@ -56,7 +56,10 @@
 #' @param death_rate ancestor birth rate
 #' @param mutation_prob ancestor mutation probability, probability that a
 #' daughter is a new mutant allele
-#' @param distribution_function one of "doubleexp", "normal", or "uniform"
+#' @param distribution_function one of "doubleexp", "normal", "uniform", or
+#'   custom
+#' @param custom_distribution_file file name of a .so library built from a
+#'   C++ function "customdist"
 #' @param alpha_fitness fitness distribution (right-side) rate parameter. When
 #'   a new clone arises, the fitness of the new clone is a double exponential
 #'   with the positive side having rate \code{alpha}
@@ -106,8 +109,8 @@
 #'                sample_size = 100, observation_times = c(1, 5, 10))
 #' }
 #' @export
-siapopConstant <- function(tot_life = 40000.0, max_pop = 10000L, start_time = 0.0, ancestors = 1L, ancestor_clones = 1L, num_sims = 1L, allow_extinction = TRUE, is_custom_model = FALSE, num_samples = 0L, sample_size = 0L, detection_threshold = 0.0, observation_frequency = 0.0, observation_times = NULL, birth_rate = 1.5, death_rate = 1.0, mutation_prob = 0.0, fitness_distribution = NULL, alpha_fitness = 0.0, beta_fitness = 0.0, pass_prob = 1.0, upper_fitness = 0.0, lower_fitness = 0.0, alpha_mutation = 0.0, beta_mutation = 0.0, trace_ancestry = TRUE, count_alleles = TRUE, punctuated_prob = 0.0, poisson_param = 1.0, punctuated_multiplier = 1.0, punctuated_advantageous_prob = 1.0, epistatic_mutation_thresh = 1.0, epistatic_multiplier = 1.0, seed = NULL, input_file = NULL, output_dir = NULL, ancestor_file = NULL) {
-    .Call('siapopr_siapopConstant', PACKAGE = 'siapopr', tot_life, max_pop, start_time, ancestors, ancestor_clones, num_sims, allow_extinction, is_custom_model, num_samples, sample_size, detection_threshold, observation_frequency, observation_times, birth_rate, death_rate, mutation_prob, fitness_distribution, alpha_fitness, beta_fitness, pass_prob, upper_fitness, lower_fitness, alpha_mutation, beta_mutation, trace_ancestry, count_alleles, punctuated_prob, poisson_param, punctuated_multiplier, punctuated_advantageous_prob, epistatic_mutation_thresh, epistatic_multiplier, seed, input_file, output_dir, ancestor_file)
+siapopConstant <- function(tot_life = 40000.0, max_pop = 10000L, start_time = 0.0, ancestors = 1L, ancestor_clones = 1L, num_sims = 1L, allow_extinction = TRUE, is_custom_model = FALSE, num_samples = 0L, sample_size = 0L, detection_threshold = 0.0, observation_frequency = 0.0, observation_times = NULL, birth_rate = 1.5, death_rate = 1.0, mutation_prob = 0.0, fitness_distribution = NULL, custom_distribution_file = NULL, alpha_fitness = 0.0, beta_fitness = 0.0, pass_prob = 1.0, upper_fitness = 0.0, lower_fitness = 0.0, alpha_mutation = 0.0, beta_mutation = 0.0, trace_ancestry = TRUE, count_alleles = TRUE, punctuated_prob = 0.0, poisson_param = 1.0, punctuated_multiplier = 1.0, punctuated_advantageous_prob = 1.0, epistatic_mutation_thresh = 1.0, epistatic_multiplier = 1.0, seed = NULL, input_file = NULL, output_dir = NULL, ancestor_file = NULL) {
+    .Call('siapopr_siapopConstant', PACKAGE = 'siapopr', tot_life, max_pop, start_time, ancestors, ancestor_clones, num_sims, allow_extinction, is_custom_model, num_samples, sample_size, detection_threshold, observation_frequency, observation_times, birth_rate, death_rate, mutation_prob, fitness_distribution, custom_distribution_file, alpha_fitness, beta_fitness, pass_prob, upper_fitness, lower_fitness, alpha_mutation, beta_mutation, trace_ancestry, count_alleles, punctuated_prob, poisson_param, punctuated_multiplier, punctuated_advantageous_prob, epistatic_mutation_thresh, epistatic_multiplier, seed, input_file, output_dir, ancestor_file)
 }
 
 #' siapopSimple
@@ -236,7 +239,10 @@ siapopSimple <- function(tot_life = 40000.0, ancestors = 1L, ancestor_clones = 1
 #'   \code{death_function}. See Details.
 #' @param mutation_prob ancestor mutation probability, probability that a
 #'   daughter is a new mutant allele
-#' @param distribution_function one of "doubleexp", "normal", or "uniform"
+#' @param distribution_function one of "doubleexp", "normal", "uniform", or
+#'   "custom"
+#' @param custom_distribution_file file name of a .so library built from a
+#'   C++ function "customdist"
 #' @param alpha_fitness fitness distribution (right-side) rate parameter. When
 #'   a new clone arises, the fitness of the new clone is a double exponential
 #'   with the positive side having rate \code{alpha}
@@ -287,7 +293,7 @@ siapopSimple <- function(tot_life = 40000.0, ancestors = 1L, ancestor_clones = 1
 #'                sample_size = 100, observation_times = c(1, 5, 10))
 #' }
 #' @export
-siapopTimeDep <- function(tot_life = 40000.0, max_pop = 10000L, start_time = 0.0, ancestors = 1L, ancestor_clones = 1L, num_sims = 1L, allow_extinction = TRUE, is_custom_model = FALSE, num_samples = 0L, sample_size = 0L, detection_threshold = 0.0, observation_frequency = 0.0, observation_times = NULL, birth_function = 0L, birth_coefs = as.numeric( c(1.0, 0.0, 1.0)), death_function = 0L, death_coefs = as.numeric( c(1.0, 0.0, 1.0)), mutation_prob = 0.0, fitness_distribution = NULL, alpha_fitness = 0.0, beta_fitness = 0.0, pass_prob = 1.0, upper_fitness = 0.0, lower_fitness = 0.0, alpha_mutation = 0.0, beta_mutation = 0.0, trace_ancestry = TRUE, count_alleles = TRUE, punctuated_prob = 0.0, poisson_param = 1.0, punctuated_multiplier = 1.0, punctuated_advantageous_prob = 1.0, epistatic_mutation_thresh = 1.0, epistatic_multiplier = 1.0, seed = NULL, input_file = NULL, output_dir = NULL, ancestor_file = NULL) {
-    .Call('siapopr_siapopTimeDep', PACKAGE = 'siapopr', tot_life, max_pop, start_time, ancestors, ancestor_clones, num_sims, allow_extinction, is_custom_model, num_samples, sample_size, detection_threshold, observation_frequency, observation_times, birth_function, birth_coefs, death_function, death_coefs, mutation_prob, fitness_distribution, alpha_fitness, beta_fitness, pass_prob, upper_fitness, lower_fitness, alpha_mutation, beta_mutation, trace_ancestry, count_alleles, punctuated_prob, poisson_param, punctuated_multiplier, punctuated_advantageous_prob, epistatic_mutation_thresh, epistatic_multiplier, seed, input_file, output_dir, ancestor_file)
+siapopTimeDep <- function(tot_life = 40000.0, max_pop = 10000L, start_time = 0.0, ancestors = 1L, ancestor_clones = 1L, num_sims = 1L, allow_extinction = TRUE, is_custom_model = FALSE, num_samples = 0L, sample_size = 0L, detection_threshold = 0.0, observation_frequency = 0.0, observation_times = NULL, birth_function = 0L, birth_coefs = as.numeric( c(1.0, 0.0, 1.0)), death_function = 0L, death_coefs = as.numeric( c(1.0, 0.0, 1.0)), mutation_prob = 0.0, fitness_distribution = NULL, custom_distribution_file = NULL, alpha_fitness = 0.0, beta_fitness = 0.0, pass_prob = 1.0, upper_fitness = 0.0, lower_fitness = 0.0, alpha_mutation = 0.0, beta_mutation = 0.0, trace_ancestry = TRUE, count_alleles = TRUE, punctuated_prob = 0.0, poisson_param = 1.0, punctuated_multiplier = 1.0, punctuated_advantageous_prob = 1.0, epistatic_mutation_thresh = 1.0, epistatic_multiplier = 1.0, seed = NULL, input_file = NULL, output_dir = NULL, ancestor_file = NULL) {
+    .Call('siapopr_siapopTimeDep', PACKAGE = 'siapopr', tot_life, max_pop, start_time, ancestors, ancestor_clones, num_sims, allow_extinction, is_custom_model, num_samples, sample_size, detection_threshold, observation_frequency, observation_times, birth_function, birth_coefs, death_function, death_coefs, mutation_prob, fitness_distribution, custom_distribution_file, alpha_fitness, beta_fitness, pass_prob, upper_fitness, lower_fitness, alpha_mutation, beta_mutation, trace_ancestry, count_alleles, punctuated_prob, poisson_param, punctuated_multiplier, punctuated_advantageous_prob, epistatic_mutation_thresh, epistatic_multiplier, seed, input_file, output_dir, ancestor_file)
 }
 

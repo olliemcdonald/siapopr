@@ -29,8 +29,8 @@ reload <- function( path ){
 #'
 #' @return .pop_off - string with everything after final pattern removed.
 #' @export
-.pop_off <- function(string, pattern = ">"){
-  string <- unlist(strsplit(string, pattern))
+.pop_off <- function(string, pattern = ">", ...){
+  string <- unlist(strsplit(string, pattern, ...))
   string <- string[1:length(string)-1]
   paste(string, collapse = pattern)
 }
@@ -45,8 +45,8 @@ reload <- function( path ){
 #'
 #' @return .pop - string of everything after final pattern.
 #' @export
-.pop <- function(string, pattern = ">"){
-  string <- unlist(strsplit(string, pattern))
+.pop <- function(string, pattern = ">", ...){
+  string <- unlist(strsplit(string, pattern, ...))
   string[length(string)]
 }
 
