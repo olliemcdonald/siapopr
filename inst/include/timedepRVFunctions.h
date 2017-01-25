@@ -23,8 +23,10 @@
 #include <cmath>
 #include "timedepGlobalStructs.h"
 
+double tdoubleexp(struct FitnessParameters fit_params, gsl_rng* rng);
+double tnormal(struct FitnessParameters fit_params, gsl_rng* rng);
+double tuniform(struct FitnessParameters fit_params, gsl_rng* rng);
 
-double TDGenerateFitness(FitnessParameters fit_params, gsl_rng* rng);
 double TDGenerateMutationProb(MutationParameters mut_params, gsl_rng* rng);
 int TDGeneratePunctuation(PunctuationParameters punct_params, gsl_rng* rng);
 

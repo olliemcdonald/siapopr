@@ -67,6 +67,7 @@ struct clone
 
 struct FitnessParameters
 {
+  std::string fitness_distribution;
   bool is_randfitness;
   double alpha_fitness;
   double beta_fitness;

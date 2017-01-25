@@ -31,6 +31,7 @@
 
 
 extern GlobalParameters gpcons;
+extern double (*ConstantGenerateFitness)(struct FitnessParameters, gsl_rng*);
 
 class ConstantCloneList
 {

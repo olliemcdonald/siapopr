@@ -36,6 +36,8 @@
 extern GlobalParameters gptime;
 extern RateFunctionsPtr rate_function_array[];
 extern gsl_integration_workspace *workspace;
+extern double (*TDGenerateFitness)(struct FitnessParameters, gsl_rng*);
+
 
 
 class TDCloneList

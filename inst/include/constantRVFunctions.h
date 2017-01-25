@@ -23,7 +23,11 @@
 #include "constantGlobalStructs.h"
 
 
-double ConstantGenerateFitness(FitnessParameters fit_params, gsl_rng* rng);
+
+double cdoubleexp(struct FitnessParameters fit_params, gsl_rng* rng);
+double cnormal(struct FitnessParameters fit_params, gsl_rng* rng);
+double cuniform(struct FitnessParameters fit_params, gsl_rng* rng);
+
 double ConstantGenerateMutationProb(MutationParameters mut_params, gsl_rng* rng);
 int ConstantGeneratePunctuation(PunctuationParameters punct_params, gsl_rng* rng);
 

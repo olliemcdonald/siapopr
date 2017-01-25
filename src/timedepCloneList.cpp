@@ -456,7 +456,7 @@ void TDCloneList::NewCloneFitMut::operator()(struct clone *new_clone, struct clo
   // generation of additive rate to the fitness
   if(fit_params.is_randfitness)
   {
-    double additional_rate = TDGenerateFitness(fit_params, rng);
+    double additional_rate = (*TDGenerateFitness)(fit_params, rng);
 
     if (additional_rate > 0)
     {
@@ -517,7 +517,7 @@ void TDCloneList::NewClonePunct::operator()(struct clone *new_clone, struct clon
   // generation of additive rate to the fitness
   if(fit_params.is_randfitness)
   {
-    double additional_rate = TDGenerateFitness(fit_params, rng);
+    double additional_rate = (*TDGenerateFitness)(fit_params, rng);
     if (additional_rate > 0)
     {
       new_clone->driver_count++;
@@ -578,7 +578,7 @@ void TDCloneList::NewCloneEpi::operator()(struct clone *new_clone, struct clone 
   // generation of additive rate to the fitness
   if(fit_params.is_randfitness)
   {
-    double additional_rate = TDGenerateFitness(fit_params, rng);
+    double additional_rate = (*TDGenerateFitness)(fit_params, rng);
     if (additional_rate > 0)
     {
       new_clone->driver_count++;

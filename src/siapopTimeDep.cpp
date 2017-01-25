@@ -28,6 +28,8 @@ gsl_integration_workspace *workspace = gsl_integration_workspace_alloc(1000);
 // Pointer to Function class which will point to an instance of one based on
 // parameters
 TDCloneList::NewCloneFunction* NewTDClone;
+double (*TDGenerateFitness)(struct FitnessParameters, gsl_rng*);
+
 
 //' siapopTimeDep
 //'
@@ -104,6 +106,7 @@ TDCloneList::NewCloneFunction* NewTDClone;
 //'   \code{death_function}. See Details.
 //' @param mutation_prob ancestor mutation probability, probability that a
 //'   daughter is a new mutant allele
+//' @param distribution_function one of "doubleexp", "normal", or "uniform"
 //' @param alpha_fitness fitness distribution (right-side) rate parameter. When
 //'   a new clone arises, the fitness of the new clone is a double exponential
 //'   with the positive side having rate \code{alpha}
@@ -173,6 +176,7 @@ int siapopTimeDep(double tot_life = 40000.0,
                   int death_function = 0,
                   Rcpp::NumericVector  death_coefs = Rcpp::NumericVector::create(1.0, 0.0, 1.0),
                   double mutation_prob = 0.0,
+                  SEXP fitness_distribution = R_NilValue,
                   double alpha_fitness = 0.0,
                   double beta_fitness = 0.0,
                   double pass_prob = 1.0,
@@ -299,17 +303,36 @@ int siapopTimeDep(double tot_life = 40000.0,
     params.convert("count_alleles", gptime.count_alleles);
     params.convert("mutation_prob", gptime.mutation_prob);
 
+    std::string fitness_distribution;
+    params.convert("fitness_distribution", fit_params.fitness_distribution);
     params.convert("alpha_fitness", fit_params.alpha_fitness);
     params.convert("beta_fitness", fit_params.beta_fitness);
     params.convert("pass_prob", fit_params.pass_prob);
     params.convert("upper_fitness", fit_params.upper_fitness);
     params.convert("lower_fitness", fit_params.lower_fitness);
     fit_params.is_randfitness = false;
-    if( ((fit_params.alpha_fitness > 0 && fit_params.beta_fitness > 0) ||
-        (fit_params.upper_fitness != fit_params.lower_fitness)) &&
-        (fit_params.pass_prob < 1) )
+    if( !fit_params.fitness_distribution.empty() )
     {
       fit_params.is_randfitness = true;
+      if( fit_params.fitness_distribution.compare("doubleexp") == 0 )
+      {
+        Rcpp::Rcout << "Double Exponential Fitness Distribution\n";
+        TDGenerateFitness = &tdoubleexp;
+      }
+      else if( fit_params.fitness_distribution.compare("normal") == 0 )
+      {
+        Rcpp::Rcout << "Normal Fitness Distribution\n";
+        TDGenerateFitness = &tnormal;
+      }
+      else if( fit_params.fitness_distribution.compare("uniform") == 0 )
+      {
+        Rcpp::Rcout << "Uniform Fitness Distribution\n";
+        TDGenerateFitness = &tuniform;
+      }
+      else
+      {
+        Rcpp::stop("Not a valid fitness distribution");
+      }
     }
 
     params.convert("alpha_mutation", mut_params.alpha_mutation);
@@ -405,11 +428,30 @@ int siapopTimeDep(double tot_life = 40000.0,
     fit_params.upper_fitness = upper_fitness;
     fit_params.lower_fitness = lower_fitness;
     fit_params.is_randfitness = false;
-    if( ((fit_params.alpha_fitness > 0 && fit_params.beta_fitness > 0) ||
-        (fit_params.upper_fitness != fit_params.lower_fitness)) &&
-        (fit_params.pass_prob < 1) )
+    if( !Rf_isNull(fitness_distribution) )
     {
       fit_params.is_randfitness = true;
+      std::string fitness_distribution_ = CHAR(STRING_ELT(fitness_distribution, 0));
+      fit_params.fitness_distribution = fitness_distribution_;
+      if( fit_params.fitness_distribution.compare("doubleexp") == 0 )
+      {
+        Rcpp::Rcout << "Double Exponential Fitness Distribution\n";
+        TDGenerateFitness = &tdoubleexp;
+      }
+      else if( fit_params.fitness_distribution.compare("normal") == 0 )
+      {
+        Rcpp::Rcout << "Normal Fitness Distribution\n";
+        TDGenerateFitness = &tnormal;
+      }
+      else if( fit_params.fitness_distribution.compare("uniform") == 0 )
+      {
+        Rcpp::Rcout << "Uniform Fitness Distribution\n";
+        TDGenerateFitness = &tuniform;
+      }
+      else
+      {
+        Rcpp::stop("Not a valid fitness distribution");
+      }
     }
 
     mut_params.alpha_mutation = alpha_mutation;
