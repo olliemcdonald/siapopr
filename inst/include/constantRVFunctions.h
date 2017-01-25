@@ -24,9 +24,9 @@
 
 
 
-double cdoubleexp(struct FitnessParameters fit_params, gsl_rng* rng);
-double cnormal(struct FitnessParameters fit_params, gsl_rng* rng);
-double cuniform(struct FitnessParameters fit_params, gsl_rng* rng);
+void cdoubleexp(double *fitness, struct FitnessParameters *fit_params, gsl_rng* rng);
+void cnormal(double *fitness, struct FitnessParameters *fit_params, gsl_rng* rng);
+void cuniform(double *fitness, struct FitnessParameters *fit_params, gsl_rng* rng);
 
 double ConstantGenerateMutationProb(MutationParameters mut_params, gsl_rng* rng);
 int ConstantGeneratePunctuation(PunctuationParameters punct_params, gsl_rng* rng);

@@ -4,5 +4,6 @@ GSL_LIBS   = @GSL_LIBS@
 
 # combine with standard arguments for R
 PKG_CXXFLAGS = $(GSL_CFLAGS) -I../inst/include
-PKG_LIBS = $(GSL_LIBS)
+PKG_LIBS = $(GSL_LIBS) -rdynamic -ldl
 CXX_STD = CXX11
+

@@ -19,6 +19,7 @@
  */
 
 #include "constantCloneList.h"
+#include <Rcpp.h>
 
 // Constructor
 void ConstantCloneList::init()
@@ -382,7 +383,9 @@ void ConstantCloneList::NewCloneFitMut::operator()(struct clone *new_clone, stru
   // generation of additive rate to the fitness
   if(fit_params.is_randfitness)
   {
-    double additional_rate = (*ConstantGenerateFitness)(fit_params, rng);
+    double additional_rate = 0;
+    (*ConstantGenerateFitness)(&additional_rate, &fit_params, rng);
+
     if (additional_rate > 0)
     {
       new_clone->driver_count++;
@@ -432,7 +435,8 @@ void ConstantCloneList::NewClonePunct::operator()(struct clone *new_clone, struc
   // generation of additive rate to the fitness
   if(fit_params.is_randfitness)
   {
-    double additional_rate = (*ConstantGenerateFitness)(fit_params, rng);
+    double additional_rate = 0;
+    (*ConstantGenerateFitness)(&additional_rate, &fit_params, rng);
     if (additional_rate > 0)
     {
       new_clone->driver_count++;
@@ -487,7 +491,8 @@ void ConstantCloneList::NewCloneEpi::operator()(struct clone *new_clone, struct 
   // generation of additive rate to the fitness
   if(fit_params.is_randfitness)
   {
-    double additional_rate = (*ConstantGenerateFitness)(fit_params, rng);
+    double additional_rate = 0;
+    (*ConstantGenerateFitness)(&additional_rate, &fit_params, rng);
     if (additional_rate > 0)
     {
       new_clone->driver_count++;

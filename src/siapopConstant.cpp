@@ -11,6 +11,8 @@
 #include <string>
 #include <cmath>
 #include <gsl/gsl_randist.h>
+#include <dlfcn.h>
+
 
 #include "constantGlobalStructs.h"
 #include "constantCloneList.h"
@@ -21,7 +23,9 @@ GlobalParameters gpcons;
 gsl_rng* constant_rng;
 // Function class ptr defined in main() but used in clonelist.cpp
 ConstantCloneList::NewCloneFunction* NewConstantClone;
-double (*ConstantGenerateFitness)(struct FitnessParameters, gsl_rng*);
+void (*ConstantGenerateFitness)(double*, struct FitnessParameters*, gsl_rng*);
+void *lib_handle;
+
 
 //' siapopConstant
 //'
@@ -405,6 +409,12 @@ int siapopConstant(double tot_life = 40000.0,
         Rcpp::Rcout << "Uniform Fitness Distribution\n";
         ConstantGenerateFitness = &cuniform;
       }
+      else if( fit_params.fitness_distribution.compare("custom") == 0 )
+      {
+//        Rcpp::stop("test");
+        lib_handle = dlopen("/Users/mcdonald/Desktop/testplugin/plugin.so", RTLD_LAZY);
+        ConstantGenerateFitness = (void (*)(double *, struct FitnessParameters*, gsl_rng*))dlsym(lib_handle, "custom");
+      }
       else
       {
         Rcpp::stop("Not a valid fitness distribution");
@@ -735,6 +745,8 @@ int siapopConstant(double tot_life = 40000.0,
   timedata.close();
   sample_data.close();
   sim_stats.close();
+  dlclose(lib_handle);
+
 
 
   return 0;
