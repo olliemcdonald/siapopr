@@ -19,51 +19,46 @@
 #include "timedepRVFunctions.h"
 
 // Functions for generating distributions
-double tdoubleexp(struct FitnessParameters fit_params, gsl_rng* rng)
+void tdoubleexp(double *fitness, struct FitnessParameters *fit_params, gsl_rng* rng)
 {
-  double fitness;
   double z = gsl_ran_flat(rng, 0, 1);
 
-  if( z <= fit_params.pass_prob )
+  if( z <= fit_params->pass_prob )
   {
     // passenger mutation
-    fitness = 0;
+    (*fitness = 0);
   }
-  else if( ( (z > fit_params.pass_prob) && (z <= fit_params.pass_prob + (1 - fit_params.pass_prob) / 2)) ||
-    (fit_params.beta_fitness == 0) )
+  else if( ( (z > fit_params->pass_prob) && (z <= fit_params->pass_prob + (1 - fit_params->pass_prob) / 2)) ||
+    (fit_params->beta_fitness == 0) )
   {
-    fitness = gsl_ran_exponential(rng, 1 / fit_params.alpha_fitness);
+    (*fitness) = gsl_ran_exponential(rng, 1 / fit_params->alpha_fitness);
   }
   else
   {
-    fitness = -1 * gsl_ran_exponential(rng, 1 / fit_params.beta_fitness);
+    (*fitness) = -1 * gsl_ran_exponential(rng, 1 / fit_params->beta_fitness);
   }
-  return fitness;
 }
 
 
-double tnormal(struct FitnessParameters fit_params, gsl_rng* rng)
+
+void tnormal(double *fitness, struct FitnessParameters *fit_params, gsl_rng* rng)
 {
-  double fitness = 0;
   double z = gsl_ran_flat(rng, 0, 1);
 
-  if( (z > fit_params.pass_prob) )
+  if( (z > fit_params->pass_prob) )
   {
-    fitness = gsl_ran_gaussian(rng, fit_params.beta_fitness) + fit_params.alpha_fitness;
+    (*fitness) = gsl_ran_gaussian(rng, fit_params->beta_fitness) + fit_params->alpha_fitness;
   }
-  return fitness;
 }
 
-double tuniform(struct FitnessParameters fit_params, gsl_rng* rng)
+void tuniform(double *fitness, struct FitnessParameters *fit_params, gsl_rng* rng)
 {
-  double fitness = 0;
   double z = gsl_ran_flat(rng, 0, 1);
 
-  if( (z > fit_params.pass_prob) )
+  if( (z > fit_params->pass_prob) )
   {
-    fitness = gsl_ran_flat(rng, fit_params.alpha_fitness, fit_params.beta_fitness);
+    (*fitness) = gsl_ran_flat(rng, fit_params->alpha_fitness, fit_params->beta_fitness);
   }
-  return fitness;
 }
 
 

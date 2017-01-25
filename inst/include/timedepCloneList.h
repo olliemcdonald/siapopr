@@ -27,16 +27,16 @@
 #include <cmath>
 #include <gsl/gsl_randist.h>
 #include <gsl/gsl_integration.h>
+#include <Rcpp.h>
 #include "timedepGlobalStructs.h"
 #include "timedepRVFunctions.h"
 #include "timedepRateFunctions.h"
-#include "Rcpp.h"
 
 
 extern GlobalParameters gptime;
 extern RateFunctionsPtr rate_function_array[];
 extern gsl_integration_workspace *workspace;
-extern double (*TDGenerateFitness)(struct FitnessParameters, gsl_rng*);
+extern void (*TDGenerateFitness)(double *, struct FitnessParameters*, gsl_rng*);
 
 
 

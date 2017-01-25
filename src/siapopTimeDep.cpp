@@ -11,6 +11,7 @@
 #include <cmath>
 #include <string>
 #include <gsl/gsl_randist.h>
+#include <dlfcn.h>
 
 #include "timedepGlobalStructs.h"
 #include "timedepCloneList.h"
@@ -28,7 +29,7 @@ gsl_integration_workspace *workspace = gsl_integration_workspace_alloc(1000);
 // Pointer to Function class which will point to an instance of one based on
 // parameters
 TDCloneList::NewCloneFunction* NewTDClone;
-double (*TDGenerateFitness)(struct FitnessParameters, gsl_rng*);
+void (*TDGenerateFitness)(double*, struct FitnessParameters*, gsl_rng*);
 
 
 //' siapopTimeDep
@@ -197,6 +198,7 @@ int siapopTimeDep(double tot_life = 40000.0,
                   SEXP output_dir = R_NilValue,
                   SEXP ancestor_file = R_NilValue)
 {
+  void *lib_handle;
 
   // track total error from integration - FOR TESTING
   gptime.tot_error = 0;
@@ -447,6 +449,11 @@ int siapopTimeDep(double tot_life = 40000.0,
       {
         Rcpp::Rcout << "Uniform Fitness Distribution\n";
         TDGenerateFitness = &tuniform;
+      }
+      else if( fit_params.fitness_distribution.compare("custom") == 0 )
+      {
+        lib_handle = dlopen("/Users/mcdonald/Desktop/testplugin/plugin.so", RTLD_LAZY);
+        TDGenerateFitness = (void (*)(double *, struct FitnessParameters*, gsl_rng*))dlsym(lib_handle, "custom");
       }
       else
       {
