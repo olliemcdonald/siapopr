@@ -2,7 +2,7 @@
 % Please edit documentation in R/customize.R
 \name{compile_custom_newclone}
 \alias{compile_custom_newclone}
-\title{custom_custom_newclone}
+\title{compile_custom_newclone}
 \usage{
 compile_custom_newclone(cppfile)
 }
