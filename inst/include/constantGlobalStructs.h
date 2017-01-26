@@ -96,8 +96,6 @@ struct PunctuationParameters
 struct EpistaticParameters
 {
     bool is_epistasis;
-    //bool epistatic_model;
-    //double epistatic_driver_prob;
     int epistatic_mutation_thresh;
     double epistatic_multiplier;
 };

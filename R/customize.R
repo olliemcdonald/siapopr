@@ -1,4 +1,47 @@
 ##------------------------------------------------------------------------
+#' create_fitness_template
+#'
+#' Creates a fitness distribution ".cpp" template file at the given location
+#' which can be modified before running `compile_custom_fitness`.
+#'
+#' @param cppfile file name of .cpp file to create
+#'
+#' @export
+#' @examples
+#' \dontrun{
+#' create_fitness_template(cppfile = "custom_dist_plugin.cpp")
+#' }
+create_fitness_template <- function(cppfile = "custom_dist_plugin.cpp"){
+  cppfile <- unlist(strsplit(cppfile, ".", fixed = T))
+  if(cppfile[length(cppfile)] != "cpp") cppfile <- c(cppfile, "cpp")
+  cppfile <- paste(cppfile, collapse = ".")
+  template_location <- paste(.libPaths(), "/siapopr/extras/customdist_template.cpp", sep = "")
+  file.copy(template_location, cppfile)
+}
+
+##------------------------------------------------------------------------
+#' create_newclone_template
+#'
+#' Creates a new clone plugin ".cpp" template file at the given location
+#' which can be modified before running `compile_custom_newclone`.
+#'
+#' @param cppfile file name of .cpp file to create
+#'
+#' @export
+#' @examples
+#' \dontrun{
+#' create_newclone_template(cppfile = "custom_newclone_plugin.cpp")
+#' }
+create_newclone_template <- function(cppfile = "custom_newclone_plugin.cpp"){
+  cppfile <- unlist(strsplit(cppfile, ".", fixed = T))
+  if(cppfile[length(cppfile)] != "cpp") cppfile <- c(cppfile, "cpp")
+  cppfile <- paste(cppfile, collapse = ".")
+  template_location <- paste(.libPaths(), "/siapopr/extras/custom_newclone_template.cpp", sep = "")
+  file.copy(template_location, cppfile)
+}
+
+
+##------------------------------------------------------------------------
 #' custom_fitness_distribution
 #'
 #' Allows the user to create a custom fitness distribution in C++ for use in
@@ -55,7 +98,7 @@ compile_custom_fitness <- function(cppfile){
 
 
 ##------------------------------------------------------------------------
-#' custom_custom_newclone
+#' compile_custom_newclone
 #'
 #' Allows the user to create a custom plugin in C++ for use in
 #' SIApop. The plugin would allow new inheritance scenarios for a new clone

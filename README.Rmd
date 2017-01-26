@@ -151,6 +151,7 @@ well.
 | mutation_prob       | numeric [0, 1] | default mutation probability for new clone|
 | trace_ancestry      | TRUE/FALSE    | Track info on parent of each clone |
 | count_alleles       | TRUE/FALSE    | adds/subtracts and individual to allele_count of individual and all ancestors |
+| custom_model_file    | string    | A custom model shared object file |
 
 ### FITNESS DISTRIBUTION PARAMETERS
   

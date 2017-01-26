@@ -9,8 +9,6 @@ vignette: >
   %\VignetteEncoding{UTF-8}
 ---
 
-
-
 ## Infinite-allele birth-death-mutation model
 
 A birth-death-mutation process is a stochastic process that to study population
@@ -69,7 +67,7 @@ effect by a factor of $c_{epi}$.
 
 ## Running a Simulation and Importing
 
-Since simulation results can get quite large in memory, siapopr outputs data
+Since simulation results can get quite large in memory, SIApopr outputs data
 from simulations to text files which can then be imported into R via the
 provided library of functions. To simulate a time-homogeneous
 birth-death-mutation process, the user inputs parameters according to the
@@ -128,14 +126,14 @@ knitr::kable(head(sample_data, 10))
 
 ## Converting and Plotting Data
 
-The data from siapopr is imported as dataframes where each observation is
+The data from SIApopr is imported as dataframes where each observation is
 a given clone at a point in time. Multiple packages deal with analyzing
 phylogenetic data, so we created functions to convert into those data types.
 
 Both [fishplot](https://github.com/chrisamiller/fishplot). and [ggmuller](https://github.com/robjohnnoble/ggmuller) offer the ability to view
 clonal data in elegant plots tracing their evolutionary history which come
 with their own data structures. The commands `convert_ggmuller` and
-`convert_fishplot` convert siapopr's `time_data` data frame into the required
+`convert_fishplot` convert SIApopr's `time_data` data frame into the required
 class for each function respectively. Each package's plot function can then
 take care of plotting the outputted data.
 
@@ -206,7 +204,7 @@ analyses.
 
 ## Importing from a file
 
-siapopr also allows importing data from a file, and it is currently the only
+SIApopr also allows importing data from a file, and it is currently the only
 way to import ancestor information. Suppose we want to initiate a population
 with 20 distinct clones containing 100 individuals without mutations present
 (allowing us to use `siapopSimple`. We first need to create a tab delimeted

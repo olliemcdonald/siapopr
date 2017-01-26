@@ -530,12 +530,13 @@ void ConstantCloneList::NewCloneEpi::operator()(struct clone *new_clone, struct 
 void ConstantCloneList::NewCloneCustom::operator()(struct clone *new_clone, struct clone *parent_clone)
 {
   // Insert custom code here for how to update a new clone - need to put all params
-  void (*CreateNewCustomClone)(struct clone *, struct clone *, struct FitnessParameters*, struct MutationParameters*, struct PunctuationParameters*, struct EpistaticParameters*, gsl_rng*, void (*ConstantGenerateFitness)(double *, struct FitnessParameters*, gsl_rng*));
-  CreateNewCustomClone = (void (*)(struct clone *, struct clone *, struct FitnessParameters*, struct MutationParameters*, struct PunctuationParameters*, struct EpistaticParameters*, gsl_rng*, void (*ConstantGenerateFitness)(double *, struct FitnessParameters*, gsl_rng*)))dlsym(lib_handle_newclone, "customclone");
-  (*CreateNewCustomClone)(new_clone, parent_clone, &fit_params, &mut_params, &punct_params, &epi_params, rng, ConstantGenerateFitness);
+  int number_mutations = 1;
+  void (*CreateNewCustomClone)(struct clone *, struct clone *, struct FitnessParameters*, struct MutationParameters*, struct PunctuationParameters*, struct EpistaticParameters*, int*, gsl_rng*, void (*ConstantGenerateFitness)(double *, struct FitnessParameters*, gsl_rng*));
+  CreateNewCustomClone = (void (*)(struct clone *, struct clone *, struct FitnessParameters*, struct MutationParameters*, struct PunctuationParameters*, struct EpistaticParameters*, int*, gsl_rng*, void (*ConstantGenerateFitness)(double *, struct FitnessParameters*, gsl_rng*)))dlsym(lib_handle_newclone, "customclone");
+  (*CreateNewCustomClone)(new_clone, parent_clone, &fit_params, &mut_params, &punct_params, &epi_params, &number_mutations, rng, ConstantGenerateFitness);
 
   // End with this piece - Insert new clone
-  cl.InsertNode(new_clone, parent_clone, 1);
+  cl.InsertNode(new_clone, parent_clone, number_mutations);
 }
 
 /*
