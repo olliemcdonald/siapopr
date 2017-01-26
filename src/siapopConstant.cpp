@@ -65,8 +65,8 @@ void (*ConstantGenerateFitness)(double*, struct FitnessParameters*, gsl_rng*);
 //' @param allow_extinction if TRUE then each simulation restarts when
 //'   extinction occurs. The run counter is incremented and the data is still
 //'   recorded in \emph{timedata.txt}
-//' @param is_custom_model (not implemented yet) allows user to provide a shared
-//'   object file to advance the clone
+//' @param custom_model_file string location of .so file containing a custom model
+//'   function.
 //' @param num_samples number of single cell samples to take from each
 //'   simulation
 //' @param sample_size size of each sample of single cells
@@ -141,7 +141,6 @@ int siapopConstant(double tot_life = 40000.0,
                    int ancestor_clones = 1,
                    int num_sims = 1,
                    bool allow_extinction = true,
-                   bool is_custom_model = false,
                    int num_samples = 0,
                    int sample_size = 0,
                    double detection_threshold = 0.0,
@@ -168,13 +167,13 @@ int siapopConstant(double tot_life = 40000.0,
                    double epistatic_mutation_thresh = 1.0,
                    double epistatic_multiplier = 1.0,
                    SEXP seed = R_NilValue,
+                   SEXP custom_model_file = R_NilValue,
                    SEXP input_file = R_NilValue,
                    SEXP output_dir = R_NilValue,
                    SEXP ancestor_file = R_NilValue)
 {
-  // for now, hardcode is_custom_model to false;
-  is_custom_model = false;
   void *lib_handle;
+  void *lib_handle_newclone;
 
   //  declaring random number generator and setting seed
   constant_rng = gsl_rng_alloc(gsl_rng_mt19937);
@@ -274,7 +273,6 @@ int siapopConstant(double tot_life = 40000.0,
     params.convert("birth_rate", gpcons.birth_rate);
     params.convert("death_rate", gpcons.death_rate);
     params.convert("mutation_prob", gpcons.mutation_prob);
-    params.convert("is_custom_model", gpcons.is_custom_model);
 
     std::string fitness_distribution;
     params.convert("fitness_distribution", fit_params.fitness_distribution);
@@ -384,7 +382,6 @@ int siapopConstant(double tot_life = 40000.0,
     gpcons.birth_rate = birth_rate;
     gpcons.death_rate = death_rate;
     gpcons.mutation_prob = mutation_prob;
-    gpcons.is_custom_model = is_custom_model;
 
     fit_params.alpha_fitness = alpha_fitness;
     fit_params.beta_fitness = beta_fitness;
@@ -421,6 +418,10 @@ int siapopConstant(double tot_life = 40000.0,
         }
         const char* plugin_location = CHAR(Rf_asChar(custom_distribution_file));
         lib_handle = dlopen(plugin_location, RTLD_LAZY);
+        if(!lib_handle)
+        {
+          Rcpp::stop("invalid file name for distribution file");
+        }
         ConstantGenerateFitness = (void (*)(double *, struct FitnessParameters*, gsl_rng*))dlsym(lib_handle, "customdist");
       }
       else
@@ -539,10 +540,18 @@ int siapopConstant(double tot_life = 40000.0,
     population.init();
 
     // Determine Advance function class to use based on the parameters
-    if (gpcons.is_custom_model)
+    if ( !Rf_isNull(custom_model_file) )
     {
       Rcpp::Rcout << "Custom model\n";
-      NewConstantClone = new ConstantCloneList::NewCloneCustom(population, constant_rng);
+      gpcons.is_custom_model = true;
+
+      const char* custom_model_location = CHAR(Rf_asChar(custom_model_file));
+      lib_handle_newclone = dlopen(custom_model_location, RTLD_LAZY);
+      if(!lib_handle_newclone)
+      {
+        Rcpp::stop("invalid custom clone file name");
+      }
+      NewConstantClone = new ConstantCloneList::NewCloneCustom(population, fit_params, mut_params, punct_params, epi_params, constant_rng, lib_handle_newclone);
     }
     else if( punct_params.is_punctuated )
     {
@@ -754,6 +763,7 @@ int siapopConstant(double tot_life = 40000.0,
   sample_data.close();
   sim_stats.close();
   dlclose(lib_handle);
+  if(gpcons.is_custom_model) dlclose(lib_handle_newclone);
 
 
 

@@ -6,8 +6,8 @@
 \usage{
 siapopConstant(tot_life = 40000, max_pop = 10000L, start_time = 0,
   ancestors = 1L, ancestor_clones = 1L, num_sims = 1L,
-  allow_extinction = TRUE, is_custom_model = FALSE, num_samples = 0L,
-  sample_size = 0L, detection_threshold = 0, observation_frequency = 0,
+  allow_extinction = TRUE, num_samples = 0L, sample_size = 0L,
+  detection_threshold = 0, observation_frequency = 0,
   observation_times = NULL, birth_rate = 1.5, death_rate = 1,
   mutation_prob = 0, fitness_distribution = NULL,
   custom_distribution_file = NULL, alpha_fitness = 0, beta_fitness = 0,
@@ -16,7 +16,8 @@ siapopConstant(tot_life = 40000, max_pop = 10000L, start_time = 0,
   count_alleles = TRUE, punctuated_prob = 0, poisson_param = 1,
   punctuated_multiplier = 1, punctuated_advantageous_prob = 1,
   epistatic_mutation_thresh = 1, epistatic_multiplier = 1, seed = NULL,
-  input_file = NULL, output_dir = NULL, ancestor_file = NULL)
+  custom_model_file = NULL, input_file = NULL, output_dir = NULL,
+  ancestor_file = NULL)
 }
 \arguments{
 \item{tot_life}{total lifetime to run a simulation for}
@@ -35,9 +36,6 @@ siapopConstant(tot_life = 40000, max_pop = 10000L, start_time = 0,
 \item{allow_extinction}{if TRUE then each simulation restarts when
 extinction occurs. The run counter is incremented and the data is still
 recorded in \emph{timedata.txt}}
-
-\item{is_custom_model}{(not implemented yet) allows user to provide a shared
-object file to advance the clone}
 
 \item{num_samples}{number of single cell samples to take from each
 simulation}
@@ -110,6 +108,9 @@ event occurs affecting the fitness}
 
 \item{epistatic_multiplier}{= given an epistatic event occurs, the fitness
 is multiplied by this amount}
+
+\item{custom_model_file}{string location of .so file containing a custom model
+function.}
 
 \item{input_file}{input character vector of input file}
 

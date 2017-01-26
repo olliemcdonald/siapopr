@@ -28,6 +28,7 @@
 #include <gsl/gsl_randist.h>
 #include "constantGlobalStructs.h"
 #include "constantRVFunctions.h"
+#include <dlfcn.h>
 
 
 extern GlobalParameters gpcons;
@@ -125,14 +126,22 @@ public:
   class NewCloneCustom : public NewCloneFunction
   {
   public:
-    NewCloneCustom(ConstantCloneList& cl_, gsl_rng* rng_) : cl(cl_),rng(rng_)
+    NewCloneCustom(ConstantCloneList& cl_, FitnessParameters fit_params_,
+      MutationParameters mut_params_, PunctuationParameters punct_params_,
+      EpistaticParameters epi_params_,
+      gsl_rng* rng_, void* lib_handle_newclone_) : cl(cl_),fit_params(fit_params_),mut_params(mut_params_),punct_params(punct_params_),epi_params(epi_params_),rng(rng_),lib_handle_newclone(lib_handle_newclone_)
     {
     }
     ~NewCloneCustom(){};
     ConstantCloneList& cl;
     void operator()(struct clone *new_clone, struct clone *parent_clone);
   private:
+    FitnessParameters fit_params;
+    MutationParameters mut_params;
+    PunctuationParameters punct_params;
+    EpistaticParameters epi_params;
     gsl_rng* rng;
+    void* lib_handle_newclone;
   };
 
   // Next Step Functions
