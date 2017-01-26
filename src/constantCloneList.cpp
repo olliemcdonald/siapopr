@@ -39,8 +39,6 @@ void ConstantCloneList::init()
 // to add to the ID.
 void ConstantCloneList::InsertNode(struct clone* newnode, struct clone* parentnode, int number_mutations)
 {
-  num_clones++;
-
   if( root == NULL ) // if linked list not yet rooted (no clones created)
   {
     newnode->nextnode = NULL;
@@ -531,8 +529,6 @@ void ConstantCloneList::NewCloneCustom::operator()(struct clone *new_clone, stru
 {
   // Insert custom code here for how to update a new clone - need to put all params
   int number_mutations = 1;
-  void (*CreateNewCustomClone)(struct clone *, struct clone *, struct FitnessParameters*, struct MutationParameters*, struct PunctuationParameters*, struct EpistaticParameters*, int*, gsl_rng*, void (*ConstantGenerateFitness)(double *, struct FitnessParameters*, gsl_rng*));
-  CreateNewCustomClone = (void (*)(struct clone *, struct clone *, struct FitnessParameters*, struct MutationParameters*, struct PunctuationParameters*, struct EpistaticParameters*, int*, gsl_rng*, void (*ConstantGenerateFitness)(double *, struct FitnessParameters*, gsl_rng*)))dlsym(lib_handle_newclone, "customclone");
   (*CreateNewCustomClone)(new_clone, parent_clone, &fit_params, &mut_params, &punct_params, &epi_params, &number_mutations, rng, ConstantGenerateFitness);
 
   // End with this piece - Insert new clone

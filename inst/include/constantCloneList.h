@@ -33,7 +33,7 @@
 
 extern GlobalParameters gpcons;
 extern void (*ConstantGenerateFitness)(double *, struct FitnessParameters*, gsl_rng*);
-
+extern void (*CreateNewCustomClone)( struct clone *, struct clone *, struct FitnessParameters*, struct MutationParameters*, struct PunctuationParameters*, struct EpistaticParameters*,  int*, gsl_rng*, void (*ConstantGenerateFitness)(double *, struct FitnessParameters*, gsl_rng*) );
 
 class ConstantCloneList
 {

@@ -14,7 +14,7 @@
 #'                num_samples = 1, sample_size = 100)
 #' clone_data <- import_clonedata('./clonedata.txt')
 #' }
-import_clonedata <- function(filename = "./clonedata") {
+import_clonedata <- function(filename = "./clonedata.txt") {
   clone_df <- read.table(filename,
                          sep = "\t",
                          header = T,
@@ -41,7 +41,7 @@ import_clonedata <- function(filename = "./clonedata") {
 #'                num_samples = 1, sample_size = 100)
 #' time_data <- import_timedata('./timedata.txt')
 #' }
-import_timedata <- function(filename = "./timedata") {
+import_timedata <- function(filename = "./timedata.txt") {
   time_df <- read.table(filename,
                         sep = "\t",
                         header = T,

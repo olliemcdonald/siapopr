@@ -24,6 +24,7 @@ gsl_rng* constant_rng;
 // Function class ptr defined in main() but used in clonelist.cpp
 ConstantCloneList::NewCloneFunction* NewConstantClone;
 void (*ConstantGenerateFitness)(double*, struct FitnessParameters*, gsl_rng*);
+void (*CreateNewCustomClone)( struct clone *, struct clone *, struct FitnessParameters*, struct MutationParameters*, struct PunctuationParameters*, struct EpistaticParameters*,  int*, gsl_rng*, void (*ConstantGenerateFitness)(double *, struct FitnessParameters*, gsl_rng*) );
 
 //' siapopConstant
 //'
@@ -551,6 +552,7 @@ int siapopConstant(double tot_life = 40000.0,
       {
         Rcpp::stop("invalid custom clone file name");
       }
+      CreateNewCustomClone = (void (*)(struct clone *, struct clone *, struct FitnessParameters*, struct MutationParameters*, struct PunctuationParameters*, struct EpistaticParameters*,  int*, gsl_rng*, void (*ConstantGenerateFitness)(double *, struct FitnessParameters*, gsl_rng*)))dlsym(lib_handle_newclone, "customclone");
       NewConstantClone = new ConstantCloneList::NewCloneCustom(population, fit_params, mut_params, punct_params, epi_params, constant_rng, lib_handle_newclone);
     }
     else if( punct_params.is_punctuated )
