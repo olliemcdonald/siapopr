@@ -527,10 +527,10 @@ void ConstantCloneList::NewCloneEpi::operator()(struct clone *new_clone, struct 
 */
 void ConstantCloneList::NewCloneCustom::operator()(struct clone *new_clone, struct clone *parent_clone)
 {
-  // Insert custom code here for how to update a new clone - need to put all params
   int number_mutations = 1;
-  (*CreateNewCustomClone)(new_clone, parent_clone, &fit_params, &mut_params, &punct_params, &epi_params, &number_mutations, rng, ConstantGenerateFitness);
-
+  // Insert custom code here for how to update a new clone - need to put all params
+  (*CreateNewCustomClone)(new_clone, parent_clone, &fit_params, &mut_params,
+    &punct_params, &epi_params, /*&number_mutations,*/ rng, ConstantGenerateFitness);
   // End with this piece - Insert new clone
   cl.InsertNode(new_clone, parent_clone, number_mutations);
 }

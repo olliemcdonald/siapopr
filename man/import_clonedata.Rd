@@ -4,7 +4,7 @@
 \alias{import_clonedata}
 \title{import_clonedata}
 \usage{
-import_clonedata(filename = "./clonedata")
+import_clonedata(filename = "./clonedata.txt")
 }
 \arguments{
 \item{filedir}{folder directory containing clonedata.txt}

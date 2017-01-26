@@ -4,7 +4,7 @@
 \alias{import_timedata}
 \title{import_timedata}
 \usage{
-import_timedata(filename = "./timedata")
+import_timedata(filename = "./timedata.txt")
 }
 \arguments{
 \item{filedir}{folder directory containing clonedata.txt}
