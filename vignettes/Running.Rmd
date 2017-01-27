@@ -162,7 +162,7 @@ clones.
 
 ```{r, fig.show='hold'}
 library(igraph)
-graphdf <- convert_igraph(clone_data, threshold = 0.005,
+graphdf <- convert_igraph(clone_data, threshold = 0.001,
                           size = "count", color = "fitness")
 igraph::plot.igraph(graphdf)
 ```

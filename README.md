@@ -39,6 +39,19 @@ The following R packages are required for certain functions.
 -   igraph
 -   phangorn
 
+Installation
+============
+
+To install in R, type:
+
+``` r
+install.packages("devtools")
+devtools::install_git("https://github.com/olliemcdonald/siapopr")
+install.packages("dplyr")
+```
+
+Installing the library should compile all necessary functions so that SIApopr can be run as an R function.
+
 Uses
 ====
 
@@ -47,18 +60,6 @@ SIApopr (Simulating Infinite-Allele populations in R) is an R package that uses 
 The software simulates clonal evolution with the emergence of driver and passenger mutations under the infinite-allele assumption. The software is a application of the direct Gillespie Stochastic Simulation Algorithm expanded to a large number of cell types and scenarios, with the intention of allowing users to easily modify existing models or create their own. Visualization functions in R are included to show results of individual simulations.
 
 A branching process is a stochastic process used to model the growth and composition of reproducing populations. Assumptions made in branching processes are individuals live for a random amount of time before splitting into a random number of individuals (both dictated by distribution functions). Individuals of the same type are independent and identically distributed. These processes are useful for modeling cell growth and evolution, as in a tumor. Mutations may occur that lead to different types of individuals with different probability laws dictating those individuals' birth and death rates.
-
-Installation
-============
-
-To install in R, type:
-
-``` r
-devtools::install_git("https://github.com/olliemcdonald/siapopr")
-install.packages("dplyr")
-```
-
-Installing the library should compile all necessary functions so that SIApopr can be run as an R function.
 
 Using SIApop in R
 =================
@@ -168,6 +169,11 @@ Model Parameters
 <td>count_alleles</td>
 <td>TRUE/FALSE</td>
 <td>adds/subtracts and individual to allele_count of individual and all ancestors</td>
+</tr>
+<tr class="even">
+<td>custom_model_file</td>
+<td>string</td>
+<td>A custom model shared object file</td>
 </tr>
 </tbody>
 </table>
