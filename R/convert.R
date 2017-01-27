@@ -193,8 +193,7 @@ convert_ggmuller <- function(time_data, threshold = 0.001, timepoints = NULL,
   if(reduce) pop_df$Identity <- sapply(pop_df$Identity, .pop, ">")
 
   max_cell_count <- max((pop_df %>% group_by(Generation) %>%
-                           summarize(numcells =
-                                              sum(Population)))$numcells)
+                           summarize(numcells = sum(Population)))$numcells)
 
 
   dummy_ancestor <- data.frame(Generation = -1, Identity = "0",
@@ -247,7 +246,7 @@ convert_ggmuller <- function(time_data, threshold = 0.001, timepoints = NULL,
 #' clonegraph <- convert_igraph(clone_data)
 #' plot(clonegraph)
 #' }
-convert_igraph <- function(clonedata, threshold = 0.01, size = NULL, color = NULL){
+convert_igraph <- function(clonedata, threshold = 0.00, size = NULL, color = NULL){
   if (requireNamespace("igraph", quietly = FALSE)) {
 
     to_keep <- (clonedata %>%

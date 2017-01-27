@@ -4,7 +4,7 @@
 \alias{convert_igraph}
 \title{convert_igraph}
 \usage{
-convert_igraph(clonedata, threshold = 0.01, size = NULL, color = NULL)
+convert_igraph(clonedata, threshold = 0, size = NULL, color = NULL)
 }
 \arguments{
 \item{clonedata}{data frame of a single timepoint}

@@ -6,4 +6,3 @@ GSL_LIBS   = @GSL_LIBS@
 PKG_CXXFLAGS = $(GSL_CFLAGS) -I../inst/include
 PKG_LIBS = $(GSL_LIBS) -rdynamic -ldl
 CXX_STD = CXX11
-

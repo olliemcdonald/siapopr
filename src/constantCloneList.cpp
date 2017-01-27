@@ -17,7 +17,6 @@
  *
  * =====================================================================================
  */
-
 #include "constantCloneList.h"
 #include <Rcpp.h>
 
@@ -527,12 +526,12 @@ void ConstantCloneList::NewCloneEpi::operator()(struct clone *new_clone, struct 
 */
 void ConstantCloneList::NewCloneCustom::operator()(struct clone *new_clone, struct clone *parent_clone)
 {
-  int number_mutations = 1;
   // Insert custom code here for how to update a new clone - need to put all params
   (*CreateNewCustomClone)(new_clone, parent_clone, &fit_params, &mut_params,
-    &punct_params, &epi_params, /*&number_mutations,*/ rng, ConstantGenerateFitness);
+    &punct_params, &epi_params, &num_new_muts, rng, ConstantGenerateFitness);
+
   // End with this piece - Insert new clone
-  cl.InsertNode(new_clone, parent_clone, number_mutations);
+  cl.InsertNode(new_clone, parent_clone, num_new_muts);
 }
 
 /*

@@ -130,7 +130,7 @@ compile_custom_newclone <- function(cppfile){
   void customclone(struct clone *new_clone, struct clone *parent_clone,
   struct FitnessParameters* fit_params, struct MutationParameters* mut_params,
   struct PunctuationParameters* punct_params,
-  struct EpistaticParameters* epi_params, gsl_rng* rng,
+  struct EpistaticParameters* epi_params, int* number_mutations, gsl_rng* rng,
   void (*ConstantGenerateFitness)(double *, struct FitnessParameters*, gsl_rng*));
   #ifdef __cplusplus
   }
@@ -146,9 +146,8 @@ compile_custom_newclone <- function(cppfile){
   if(!(include_header %in% cppdat)) writeLines(c(include_header, cppdat), con, sep = "\n")
   close(con)
 
-  concopy <- file(paste(cppfile, ".backup", sep = ""))
-  writeLines(cppdat, concopy)
-  close(concopy)
+  concopy <- paste(cppfile, ".backup", sep = "")
+  file.copy(cppfile, concopy)
 
   compile <- paste("R CMD COMPILE ", cpproot, ".", cppsuffix, sep = "")
   # Need to make windows version

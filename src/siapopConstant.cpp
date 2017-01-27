@@ -24,7 +24,7 @@ gsl_rng* constant_rng;
 // Function class ptr defined in main() but used in clonelist.cpp
 ConstantCloneList::NewCloneFunction* NewConstantClone;
 void (*ConstantGenerateFitness)(double*, struct FitnessParameters*, gsl_rng*);
-void (*CreateNewCustomClone)( struct clone *, struct clone *, struct FitnessParameters*, struct MutationParameters*, struct PunctuationParameters*, struct EpistaticParameters*,  /*int*,*/ gsl_rng*, void (*ConstantGenerateFitness)(double *, struct FitnessParameters*, gsl_rng*) );
+void (*CreateNewCustomClone)( struct clone *, struct clone *, struct FitnessParameters*, struct MutationParameters*, struct PunctuationParameters*, struct EpistaticParameters*, int*, gsl_rng*, void (*ConstantGenerateFitness)(double *, struct FitnessParameters*, gsl_rng*) );
 
 //' siapopConstant
 //'
@@ -418,7 +418,7 @@ int siapopConstant(double tot_life = 40000.0,
           Rcpp::stop("distribution file not specified");
         }
         const char* plugin_location = CHAR(Rf_asChar(custom_distribution_file));
-        lib_handle = dlopen(plugin_location, RTLD_LAZY);
+        lib_handle = dlopen(plugin_location, RTLD_NOW);
         if(!lib_handle)
         {
           Rcpp::stop("invalid file name for distribution file");
@@ -547,12 +547,12 @@ int siapopConstant(double tot_life = 40000.0,
       gpcons.is_custom_model = true;
 
       const char* custom_model_location = CHAR(Rf_asChar(custom_model_file));
-      lib_handle_newclone = dlopen(custom_model_location, RTLD_LAZY);
+      lib_handle_newclone = dlopen(custom_model_location, RTLD_NOW);
       if(!lib_handle_newclone)
       {
         Rcpp::stop("invalid custom clone file name");
       }
-      CreateNewCustomClone = (void (*)(struct clone *, struct clone *, struct FitnessParameters*, struct MutationParameters*, struct PunctuationParameters*, struct EpistaticParameters*,  /*int*,*/ gsl_rng*, void (*ConstantGenerateFitness)(double *, struct FitnessParameters*, gsl_rng*)))dlsym(lib_handle_newclone, "customclone");
+      CreateNewCustomClone = (void (*)(struct clone *, struct clone *, struct FitnessParameters*, struct MutationParameters*, struct PunctuationParameters*, struct EpistaticParameters*, int*, gsl_rng*, void (*ConstantGenerateFitness)(double *, struct FitnessParameters*, gsl_rng*)))dlsym(lib_handle_newclone, "customclone");
       NewConstantClone = new ConstantCloneList::NewCloneCustom(population, fit_params, mut_params, punct_params, epi_params, constant_rng, lib_handle_newclone);
     }
     else if( punct_params.is_punctuated )
@@ -765,7 +765,10 @@ int siapopConstant(double tot_life = 40000.0,
   sample_data.close();
   sim_stats.close();
   dlclose(lib_handle);
-  if(gpcons.is_custom_model) dlclose(lib_handle_newclone);
+  if(gpcons.is_custom_model)
+  {
+    dlclose(lib_handle_newclone);
+  }
 
 
 
