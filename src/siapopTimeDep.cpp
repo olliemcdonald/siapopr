@@ -475,22 +475,22 @@ int siapopTimeDep(double tot_life = 40000.0,
           Rcpp::stop("distribution file not specified");
         }
         const char* plugin_location = CHAR(Rf_asChar(custom_distribution_file));
-#ifdef _WIN32
-        lib_handle = LoadLibrary(plugin_location);
-        if(!lib_handle)
-        {
-          Rcpp::stop("invalid file name for distribution file");
-        }
-        TDGenerateFitness = (void (*)(double *, struct FitnessParameters*, gsl_rng*))GetProcAddress(lib_handle, "customdist");
+        #ifdef _WIN32
+            lib_handle = LoadLibrary(plugin_location);
+            if(!lib_handle)
+            {
+              Rcpp::stop("invalid file name for distribution file");
+            }
+            TDGenerateFitness = (void (*)(double *, struct FitnessParameters*, gsl_rng*))GetProcAddress(lib_handle, "customdist");
 
-#else
-        lib_handle = dlopen(plugin_location, RTLD_NOW);
-        if(!lib_handle)
-        {
-          Rcpp::stop("invalid file name for distribution file");
-        }
-        TDGenerateFitness = (void (*)(double *, struct FitnessParameters*, gsl_rng*))dlsym(lib_handle, "customdist");
-#endif
+        #else
+            lib_handle = dlopen(plugin_location, RTLD_NOW);
+            if(!lib_handle)
+            {
+              Rcpp::stop("invalid file name for distribution file");
+            }
+            TDGenerateFitness = (void (*)(double *, struct FitnessParameters*, gsl_rng*))dlsym(lib_handle, "customdist");
+        #endif
       }
       else
       {
@@ -932,9 +932,15 @@ int siapopTimeDep(double tot_life = 40000.0,
   sim_stats.close();
 
 #ifdef _WIN32
-  FreeLibrary(lib_handle);
+  if( fit_params.fitness_distribution.compare("custom") == 0 )
+  {
+    FreeLibrary(lib_handle);
+  }
 #else
-  dlclose(lib_handle);
+  if( fit_params.fitness_distribution.compare("custom") == 0 )
+  {
+    dlclose(lib_handle);
+  }
 #endif
 
   return 0;

@@ -434,22 +434,22 @@ int siapopConstant(double tot_life = 40000.0,
         // Name for plugin library location
         const char* plugin_location = CHAR(Rf_asChar(custom_distribution_file));
         // Load plugin library
-#ifdef _WIN32
-        lib_handle = LoadLibrary(plugin_location);
-        if(!lib_handle)
-        {
-          Rcpp::stop("invalid file name for distribution file");
-        }
-        ConstantGenerateFitness = (void (*)(double *, struct FitnessParameters*, gsl_rng*))GetProcAddress(lib_handle, "customdist");
+        #ifdef _WIN32
+          lib_handle = LoadLibrary(plugin_location);
+          if(!lib_handle)
+          {
+            Rcpp::stop("invalid file name for distribution file");
+          }
+          ConstantGenerateFitness = (void (*)(double *, struct FitnessParameters*, gsl_rng*))GetProcAddress(lib_handle, "customdist");
 
-#else
-        lib_handle = dlopen(plugin_location, RTLD_NOW);
-        if(!lib_handle)
-        {
-          Rcpp::stop("invalid file name for distribution file");
-        }
-        ConstantGenerateFitness = (void (*)(double *, struct FitnessParameters*, gsl_rng*))dlsym(lib_handle, "customdist");
-#endif
+        #else
+          lib_handle = dlopen(plugin_location, RTLD_NOW);
+          if(!lib_handle)
+          {
+            Rcpp::stop("invalid file name for distribution file");
+          }
+          ConstantGenerateFitness = (void (*)(double *, struct FitnessParameters*, gsl_rng*))dlsym(lib_handle, "customdist");
+        #endif
 
         if(!ConstantGenerateFitness)
         {
@@ -811,13 +811,19 @@ int siapopConstant(double tot_life = 40000.0,
   sim_stats.close();
 
 #ifdef _WIN32
-  FreeLibrary(lib_handle);
+  if(fit_params.fitness_distribution.compare("custom") == 0)
+  {
+    FreeLibrary(lib_handle);
+  }
   if(gpcons.is_custom_model)
   {
     FreeLibrary(lib_handle_newclone);
   }
 #else
-  dlclose(lib_handle);
+  if(fit_params.fitness_distribution.compare("custom") == 0)
+  {
+    dlclose(lib_handle);
+  }
   if(gpcons.is_custom_model)
   {
     dlclose(lib_handle_newclone);
