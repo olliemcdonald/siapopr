@@ -1,6 +1,12 @@
-#include <RcppGSL.h>
-#include <Rcpp.h>
-#include <Rinternals.h>
+// For plugin system
+#ifndef USE_PRECOMPILED_HEADERS
+#ifdef _WIN32
+#include <direct.h>
+#include <windows.h>
+#else
+#include <dlfcn.h>
+#endif
+#endif
 
 #include <iostream>
 #include <fstream>
@@ -11,8 +17,10 @@
 #include <string>
 #include <cmath>
 #include <gsl/gsl_randist.h>
-#include <dlfcn.h>
 
+#include <RcppGSL.h>
+#include <Rcpp.h>
+#include <Rinternals.h>
 
 #include "constantGlobalStructs.h"
 #include "constantCloneList.h"
@@ -173,8 +181,14 @@ int siapopConstant(double tot_life = 40000.0,
                    SEXP output_dir = R_NilValue,
                    SEXP ancestor_file = R_NilValue)
 {
+  // Defining both function pointers for plugin based on system
+#ifdef _WIN32
+  HINSTANCE lib_handle;
+  HINSTANCE lib_handle_newclone;
+#else
   void *lib_handle;
   void *lib_handle_newclone;
+#endif
 
   //  declaring random number generator and setting seed
   constant_rng = gsl_rng_alloc(gsl_rng_mt19937);
@@ -187,7 +201,7 @@ int siapopConstant(double tot_life = 40000.0,
     gpcons.seed = Rf_asInteger(seed);
   }
   /*
-    VARIABLE INPUT AND CONVERSION
+  VARIABLE INPUT AND CONVERSION
   */
   // parsing arguments in command line by searching for argument options
   // default output is current directory
@@ -230,12 +244,12 @@ int siapopConstant(double tot_life = 40000.0,
     std::ifstream infile(input_params);
     if(infile.is_open())
     {
-        while(getline(infile, s))
-        {
-            // allow comments
-            if(s[0] == '#') continue;
-            params.SplitAndFill(s);
-        }
+      while(getline(infile, s))
+      {
+        // allow comments
+        if(s[0] == '#') continue;
+        params.SplitAndFill(s);
+      }
     }
 
     for(std::map<std::string, std::string>::iterator it=params.begin(); it!=params.end(); ++it)
@@ -332,7 +346,7 @@ int siapopConstant(double tot_life = 40000.0,
       epi_params.is_epistasis = false;
     }
     /*
-      END OF VARIABLE INPUT AND CONVERSION FROM input_file
+    END OF VARIABLE INPUT AND CONVERSION FROM input_file
     */
   }
   else
@@ -417,13 +431,31 @@ int siapopConstant(double tot_life = 40000.0,
         {
           Rcpp::stop("distribution file not specified");
         }
+        // Name for plugin library location
         const char* plugin_location = CHAR(Rf_asChar(custom_distribution_file));
+        // Load plugin library
+#ifdef _WIN32
+        lib_handle = LoadLibrary(plugin_location);
+        if(!lib_handle)
+        {
+          Rcpp::stop("invalid file name for distribution file");
+        }
+        ConstantGenerateFitness = (void (*)(double *, struct FitnessParameters*, gsl_rng*))GetProcAddress(lib_handle, "customdist");
+
+#else
         lib_handle = dlopen(plugin_location, RTLD_NOW);
         if(!lib_handle)
         {
           Rcpp::stop("invalid file name for distribution file");
         }
         ConstantGenerateFitness = (void (*)(double *, struct FitnessParameters*, gsl_rng*))dlsym(lib_handle, "customdist");
+#endif
+
+        if(!ConstantGenerateFitness)
+        {
+          Rcpp::stop("Cannot load customclone from distribution file");
+        }
+
       }
       else
       {
@@ -455,7 +487,7 @@ int siapopConstant(double tot_life = 40000.0,
       epi_params.is_epistasis = false;
     }
     /*
-      END OF VARIABLE INPUT AND CONVERSION
+    END OF VARIABLE INPUT AND CONVERSION
     */
   }
 
@@ -468,12 +500,12 @@ int siapopConstant(double tot_life = 40000.0,
   if(gpcons.count_alleles)
   {
     clonedata << "run\tunique_id\tnumcells\tallelefreq\tbirthrate\tdeathrate\tmutprob\t"
-      "initialtime\tsubclone_count\tnum_mut\tnum_drivers\tis_driver" << "\n";
+    "initialtime\tsubclone_count\tnum_mut\tnum_drivers\tis_driver" << "\n";
   }
   else
   {
     clonedata << "run\tunique_id\tnumcells\tbirthrate\tdeathrate\tmutprob\t"
-      "initialtime\tsubclone_count\tnum_mut\tnum_drivers\tis_driver" << "\n";
+    "initialtime\tsubclone_count\tnum_mut\tnum_drivers\tis_driver" << "\n";
   }
 
   std::ofstream timedata;
@@ -486,12 +518,12 @@ int siapopConstant(double tot_life = 40000.0,
     if(gpcons.count_alleles)
     {
       timedata << "run\ttime\tunique_id\tnumcells\tallelefreq\tgrowth_rate\tinitialtime\t"
-        "parent_growth_rate\tparent_initialtime" << "\n";
+      "parent_growth_rate\tparent_initialtime" << "\n";
     }
     else
     {
       timedata << "run\ttime\tunique_id\tnumcells\tgrowth_rate\tinitialtime\t"
-        "parent_growth_rate\tparent_initialtime" << "\n";
+      "parent_growth_rate\tparent_initialtime" << "\n";
     }
   }
   else
@@ -546,13 +578,26 @@ int siapopConstant(double tot_life = 40000.0,
       Rcpp::Rcout << "Custom model\n";
       gpcons.is_custom_model = true;
 
+
+      // Name for plugin library location
       const char* custom_model_location = CHAR(Rf_asChar(custom_model_file));
+      // Load plugin library
+#ifdef _WIN32
+      lib_handle_newclone = LoadLibrary(custom_model_location);
+      if(!lib_handle_newclone)
+      {
+        Rcpp::stop("invalid custom clone file name");
+      }
+      CreateNewCustomClone = (void (*)(struct clone *, struct clone *, struct FitnessParameters*, struct MutationParameters*, struct PunctuationParameters*, struct EpistaticParameters*, int*, gsl_rng*, void (*ConstantGenerateFitness)(double *, struct FitnessParameters*, gsl_rng*)))GetProcAddress(lib_handle_newclone, "customclone");
+#else
       lib_handle_newclone = dlopen(custom_model_location, RTLD_NOW);
       if(!lib_handle_newclone)
       {
         Rcpp::stop("invalid custom clone file name");
       }
       CreateNewCustomClone = (void (*)(struct clone *, struct clone *, struct FitnessParameters*, struct MutationParameters*, struct PunctuationParameters*, struct EpistaticParameters*, int*, gsl_rng*, void (*ConstantGenerateFitness)(double *, struct FitnessParameters*, gsl_rng*)))dlsym(lib_handle_newclone, "customclone");
+#endif
+
       NewConstantClone = new ConstantCloneList::NewCloneCustom(population, fit_params, mut_params, punct_params, epi_params, constant_rng, lib_handle_newclone);
     }
     else if( punct_params.is_punctuated )
@@ -646,28 +691,28 @@ int siapopConstant(double tot_life = 40000.0,
             ancestor_map[*it];
             ancestor_map[*it] = s2;
           }
-            // Move map values to structures
-            struct clone* ancestor;
-            ancestor = new struct clone;
+          // Move map values to structures
+          struct clone* ancestor;
+          ancestor = new struct clone;
 
-            ancestor->clone_id = !ancestor_map["unique_id"].empty() ? ancestor_map["unique_id"] : "";
-            ancestor->cell_count = !ancestor_map["numcells"].empty() ? stoi(ancestor_map["numcells"]) : 0;
-            ancestor->allele_count = ancestor->cell_count;
-            ancestor->birth_rate = !ancestor_map["birthrate"].empty() ? stof(ancestor_map["birthrate"]) : gpcons.birth_rate;
-            ancestor->death_rate = !ancestor_map["deathrate"].empty() ? stof(ancestor_map["deathrate"]) : gpcons.death_rate;
-            ancestor->mut_prob = !ancestor_map["mutprob"].empty() ? stof(ancestor_map["mutprob"]) : gpcons.mutation_prob;
-            ancestor->clone_time = !ancestor_map["initialtime"].empty() ? stof(ancestor_map["initialtime"]) : current_time;
-            ancestor->subclone_count = !ancestor_map["subclone_count"].empty() ? stoi(ancestor_map["subclone_count"]) : 0;
-            ancestor->mut_count = !ancestor_map["num_mut"].empty() ? stoi(ancestor_map["num_mut"]) : 0;
-            ancestor->driver_count = !ancestor_map["num_drivers"].empty() ? stoi(ancestor_map["num_drivers"]) : 0;
-            ancestor->is_driver = !ancestor_map["is_driver"].empty() ? stoi(ancestor_map["is_driver"]) : false;
+          ancestor->clone_id = !ancestor_map["unique_id"].empty() ? ancestor_map["unique_id"] : "";
+          ancestor->cell_count = !ancestor_map["numcells"].empty() ? stoi(ancestor_map["numcells"]) : 0;
+          ancestor->allele_count = ancestor->cell_count;
+          ancestor->birth_rate = !ancestor_map["birthrate"].empty() ? stof(ancestor_map["birthrate"]) : gpcons.birth_rate;
+          ancestor->death_rate = !ancestor_map["deathrate"].empty() ? stof(ancestor_map["deathrate"]) : gpcons.death_rate;
+          ancestor->mut_prob = !ancestor_map["mutprob"].empty() ? stof(ancestor_map["mutprob"]) : gpcons.mutation_prob;
+          ancestor->clone_time = !ancestor_map["initialtime"].empty() ? stof(ancestor_map["initialtime"]) : current_time;
+          ancestor->subclone_count = !ancestor_map["subclone_count"].empty() ? stoi(ancestor_map["subclone_count"]) : 0;
+          ancestor->mut_count = !ancestor_map["num_mut"].empty() ? stoi(ancestor_map["num_mut"]) : 0;
+          ancestor->driver_count = !ancestor_map["num_drivers"].empty() ? stoi(ancestor_map["num_drivers"]) : 0;
+          ancestor->is_driver = !ancestor_map["is_driver"].empty() ? stoi(ancestor_map["is_driver"]) : false;
 
-            population.InsertAncestor(ancestor);
+          population.InsertAncestor(ancestor);
 
-            population.tot_rate = population.tot_rate + (ancestor->birth_rate + ancestor->death_rate) * ancestor->cell_count;
-            population.tot_cell_count = population.tot_cell_count + ancestor->cell_count;
+          population.tot_rate = population.tot_rate + (ancestor->birth_rate + ancestor->death_rate) * ancestor->cell_count;
+          population.tot_cell_count = population.tot_cell_count + ancestor->cell_count;
 
-            ancestor_map.clear();
+          ancestor_map.clear();
         }
       }
       Rcpp::Rcout << "Ancestor File Read...";
@@ -710,7 +755,7 @@ int siapopConstant(double tot_life = 40000.0,
       /*
       if((population.tot_cell_count % 50000) == 0)
       {
-        Rcpp::Rcout << "Time: " << current_time << "\t size: " << population.tot_cell_count << "\n";
+      Rcpp::Rcout << "Time: " << current_time << "\t size: " << population.tot_cell_count << "\n";
       }
       //*/
     }
@@ -757,20 +802,29 @@ int siapopConstant(double tot_life = 40000.0,
   delete NewConstantClone;
 
   sim_stats << "avg_sim_endtime, " << avg_sim_endtime << "\n" <<
-               "count_detect, " << count_detect << "\n" <<
-               "count_extinct, " << count_extinct  << "\n";
+    "count_detect, " << count_detect << "\n" <<
+      "count_extinct, " << count_extinct  << "\n";
 
   clonedata.close();
   timedata.close();
   sample_data.close();
   sim_stats.close();
+
+#ifdef _WIN32
+  FreeLibrary(lib_handle);
+  if(gpcons.is_custom_model)
+  {
+    FreeLibrary(lib_handle_newclone);
+  }
+#else
   dlclose(lib_handle);
   if(gpcons.is_custom_model)
   {
     dlclose(lib_handle_newclone);
   }
+#endif
 
 
 
   return 0;
-}
+  }

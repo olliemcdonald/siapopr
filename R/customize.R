@@ -63,7 +63,7 @@ compile_custom_fitness <- function(cppfile){
   header1 <- '#ifndef CTEST_H
               #define CTEST_H
               #include '
-  siapoplib <- paste('"', .libPaths(), "/siapopr/include/constantGlobalStructs.h", '"', sep = "")
+  siapoplib <- paste('"', .libPaths()[1], "/siapopr/include/constantGlobalStructs.h", '"', sep = "")
   header2 <- '
     #include <gsl/gsl_randist.h>
     #ifdef __cplusplus

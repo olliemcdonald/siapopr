@@ -1,6 +1,12 @@
-#include <RcppGSL.h>
-#include <Rcpp.h>
-#include <Rinternals.h>
+// For plugin system
+#ifndef USE_PRECOMPILED_HEADERS
+#ifdef _WIN32
+#include <direct.h>
+#include <windows.h>
+#else
+#include <dlfcn.h>
+#endif
+#endif
 
 #include <iostream>
 #include <fstream>
@@ -11,7 +17,10 @@
 #include <cmath>
 #include <string>
 #include <gsl/gsl_randist.h>
-#include <dlfcn.h>
+
+#include <RcppGSL.h>
+#include <Rcpp.h>
+#include <Rinternals.h>
 
 #include "timedepGlobalStructs.h"
 #include "timedepCloneList.h"
@@ -202,7 +211,12 @@ int siapopTimeDep(double tot_life = 40000.0,
                   SEXP output_dir = R_NilValue,
                   SEXP ancestor_file = R_NilValue)
 {
-  void *lib_handle;
+    // Defining function pointers for plugin based on system
+  #ifdef _WIN32
+    HINSTANCE lib_handle;
+  #else
+    void *lib_handle;
+  #endif
 
   // track total error from integration - FOR TESTING
   gptime.tot_error = 0;
@@ -461,8 +475,22 @@ int siapopTimeDep(double tot_life = 40000.0,
           Rcpp::stop("distribution file not specified");
         }
         const char* plugin_location = CHAR(Rf_asChar(custom_distribution_file));
-        lib_handle = dlopen(plugin_location, RTLD_LAZY);
+#ifdef _WIN32
+        lib_handle = LoadLibrary(plugin_location);
+        if(!lib_handle)
+        {
+          Rcpp::stop("invalid file name for distribution file");
+        }
+        TDGenerateFitness = (void (*)(double *, struct FitnessParameters*, gsl_rng*))GetProcAddress(lib_handle, "customdist");
+
+#else
+        lib_handle = dlopen(plugin_location, RTLD_NOW);
+        if(!lib_handle)
+        {
+          Rcpp::stop("invalid file name for distribution file");
+        }
         TDGenerateFitness = (void (*)(double *, struct FitnessParameters*, gsl_rng*))dlsym(lib_handle, "customdist");
+#endif
       }
       else
       {
@@ -902,6 +930,12 @@ int siapopTimeDep(double tot_life = 40000.0,
   timedata.close();
   sample_data.close();
   sim_stats.close();
+
+#ifdef _WIN32
+  FreeLibrary(lib_handle);
+#else
+  dlclose(lib_handle);
+#endif
 
   return 0;
 }
