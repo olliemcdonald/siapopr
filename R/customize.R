@@ -15,7 +15,7 @@ create_fitness_template <- function(cppfile = "custom_dist_plugin.cpp"){
   cppfile <- unlist(strsplit(cppfile, ".", fixed = T))
   if(cppfile[length(cppfile)] != "cpp") cppfile <- c(cppfile, "cpp")
   cppfile <- paste(cppfile, collapse = ".")
-  template_location <- paste(.libPaths(), "/siapopr/extras/customdist_template.cpp", sep = "")
+  template_location <- paste(.libPaths()[1], "/siapopr/extras/customdist_template.cpp", sep = "")
   file.copy(template_location, cppfile)
 }
 
@@ -36,7 +36,7 @@ create_newclone_template <- function(cppfile = "custom_newclone_plugin.cpp"){
   cppfile <- unlist(strsplit(cppfile, ".", fixed = T))
   if(cppfile[length(cppfile)] != "cpp") cppfile <- c(cppfile, "cpp")
   cppfile <- paste(cppfile, collapse = ".")
-  template_location <- paste(.libPaths(), "/siapopr/extras/custom_newclone_template.cpp", sep = "")
+  template_location <- paste(.libPaths()[1], "/siapopr/extras/custom_newclone_template.cpp", sep = "")
   file.copy(template_location, cppfile)
 }
 
@@ -118,8 +118,8 @@ compile_custom_newclone <- function(cppfile){
 
   header1 <- '#ifndef CCLONE_H
 #define CCLONE_H'
-  structurelib <- paste('#include "', .libPaths(), "/siapopr/include/constantGlobalStructs.h", '"', sep = "")
-  functionlib <- paste('#include "', .libPaths(), "/siapopr/include/constantRVFunctions.h", '"', sep = "")
+  structurelib <- paste('#include "', .libPaths()[1], "/siapopr/include/constantGlobalStructs.h", '"', sep = "")
+  functionlib <- paste('#include "', .libPaths()[1], "/siapopr/include/constantRVFunctions.h", '"', sep = "")
   header2 <- '
 #include <gsl/gsl_randist.h>
 #include <math.h>
