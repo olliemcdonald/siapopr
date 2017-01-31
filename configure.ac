@@ -21,4 +21,4 @@ fi
 AC_SUBST(GSL_CFLAGS)
 AC_SUBST(GSL_LIBS)
 
-AC_OUTPUT(src/Makevars)
+AC_OUTPUT([src/Makevars inst/extras/Makevars])

@@ -110,14 +110,24 @@ compile_custom_fitness <- function(cppfile){
   cpproot <- .pop_off(cppfile, ".", fixed = T)
   cppsuffix <- .pop(cppfile, ".", fixed = T)
 
-  concopy <- file(paste(cppfile, ".backup", sep = ""))
-  writeLines(cppfile, concopy)
-  close(concopy)
+  concopy <- paste(cppfile, ".backup", sep = "")
+  file.copy(cppfile, concopy)
+  if(.Platform$OS.type == "windows")
+  {
+    file.copy(paste(.libPaths()[1], "/siapopr/extras/Makevars.win", sep = ""), "Makevars.win")
 
-  compile <- paste("R CMD COMPILE ", cpproot, ".", cppsuffix, sep = "")
+  }
+  else if(.Platform$OS.type == "unix")
+  {
+    file.copy(paste(.libPaths()[1], "/siapopr/extras/Makevars", sep = ""), "Makevars")
+  }
+  else
+  {
+    stop("Customization only support on Windows, OS X, and Linux systems")
+  }
+
   # Need to make windows version
-  shlib <- paste("R CMD SHLIB -o ", cpproot, ".so ",  cpproot, ".o -dynamiclib -lgsl", sep = "")
-  system(compile)
+  shlib <- paste("R CMD SHLIB", cppfile)
   system(shlib)
 }
 
@@ -143,12 +153,22 @@ compile_custom_newclone <- function(cppfile){
 
   concopy <- paste(cppfile, ".backup", sep = "")
   file.copy(cppfile, concopy)
-  close(concopy)
+  if(.Platform$OS.type == "windows")
+  {
+    file.copy(paste(.libPaths()[1], "/siapopr/extras/Makevars.win", sep = ""), "Makevars.win")
 
-  compile <- paste("R CMD COMPILE ", cpproot, ".", cppsuffix, sep = "")
+  }
+  else if(.Platform$OS.type == "unix")
+  {
+    file.copy(paste(.libPaths()[1], "/siapopr/extras/Makevars", sep = ""), "Makevars")
+  }
+  else
+  {
+    stop("Customization only support on Windows, OS X, and Linux systems")
+  }
+
   # Need to make windows version
-  shlib <- paste("R CMD SHLIB -o ", cpproot, ".so ",  cpproot, ".o -dynamiclib -lgsl", sep = "")
-  system(compile)
+  shlib <- paste("R CMD SHLIB", cppfile)
   system(shlib)
 }
 

@@ -28,7 +28,6 @@
 #include <gsl/gsl_randist.h>
 #include "constantGlobalStructs.h"
 #include "constantRVFunctions.h"
-#include <dlfcn.h>
 
 
 extern GlobalParameters gpcons;
