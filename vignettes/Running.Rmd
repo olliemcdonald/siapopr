@@ -147,7 +147,8 @@ ggmuller::Muller_plot(mullerdf)
 fishdf <- convert_fishplot(time_data, threshold = 0.01)
 library(fishplot)
 fishplot::fishPlot(fishdf)
-
+```
+```{r, fig.show='hold'}
 fishdf <- convert_fishplot(time_data, threshold = 0.01, timepoints = 20:50)
 fishplot::fishPlot(fishdf)
 ```

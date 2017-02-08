@@ -1,4 +1,6 @@
 ---
+title: "SIApopr: A computational method to simulate evolutionary branching trees for analysis of tumor clonal evolution"
+author: "Thomas McDonald and Franziska Michor"
 output: github_document
 ---
 

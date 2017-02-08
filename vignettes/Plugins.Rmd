@@ -70,7 +70,7 @@ The main elements that are alterable are `driver_count`, `is_driver`, `mut_prob`
 customize and use global parameters is given later.
 
 The linked list has the following structure
-```{r, out.width = "600px", echo = F}
+```{r, out.width = "400px", echo = F}
 knitr::include_graphics("pictures/linkedlist1.png")
 ```
 
@@ -78,7 +78,7 @@ A new clone is added to the end and the list is updated by linking the
 clones to their respective previous and next clones as well as the parent clone.
 This is done automatically by SIApopr.
 
-```{r, out.width = "600px", echo = F}
+```{r, out.width = "400px", echo = F}
 knitr::include_graphics("pictures/linkedlist2.png")
 ```
 
