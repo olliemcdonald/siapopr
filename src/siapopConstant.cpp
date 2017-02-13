@@ -34,7 +34,7 @@ ConstantCloneList::NewCloneFunction* NewConstantClone;
 void (*ConstantGenerateFitness)(double*, struct FitnessParameters*, gsl_rng*);
 void (*CreateNewCustomClone)( struct clone *, struct clone *, struct FitnessParameters*, struct MutationParameters*, struct PunctuationParameters*, struct EpistaticParameters*, int*, gsl_rng*, void (*ConstantGenerateFitness)(double *, struct FitnessParameters*, gsl_rng*) );
 
-//' siapopConstant
+//' siapop
 //'
 //' SIApop for time-homogeneous populations. Simulates a
 //' Birth-Death-Mutation process simulation for infinite-allele
@@ -42,7 +42,7 @@ void (*CreateNewCustomClone)( struct clone *, struct clone *, struct FitnessPara
 //' outputs data to the location of \code{output_dir}.
 //'
 //' The infinite-allele birth death process assumes anytime a mutation that
-//' occurs, it is unique and not seen in the population. \code{siapopConstant}
+//' occurs, it is unique and not seen in the population. \code{siapop}
 //' can generates an infinite-allele birth-death time homogeneous process along
 //' with additional scenarios that affect new clones.
 //'
@@ -132,10 +132,10 @@ void (*CreateNewCustomClone)( struct clone *, struct clone *, struct FitnessPara
 //' @examples
 //' \dontrun{
 //' # Use default values
-//' siapopConstant()
-//' siapopConstant(outputdir = "./")
-//' siapopConstant(ancestor_file = "./ancestors.txt")
-//' siapopConstant(tot_life = 10, max_pop = 1000, birth_rate = 1.1,
+//' siapop()
+//' siapop(outputdir = "./")
+//' siapop(ancestor_file = "./ancestors.txt")
+//' siapop(tot_life = 10, max_pop = 1000, birth_rate = 1.1,
 //'                death_rate = 0.99, mutation_prob = 0.01,
 //'                allow_extinction = FALSE, num_sims = 1, num_samples = 1,
 //'                alpha_fitness = 100, beta_fitness = 100,
@@ -143,7 +143,7 @@ void (*CreateNewCustomClone)( struct clone *, struct clone *, struct FitnessPara
 //' }
 //' @export
 // [[Rcpp::export]]
-int siapopConstant(double tot_life = 40000.0,
+int siapop(double tot_life = 40000.0,
                    int max_pop = 10000,
                    double start_time = 0.0,
                    int ancestors = 1,

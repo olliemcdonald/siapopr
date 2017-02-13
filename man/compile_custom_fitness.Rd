@@ -19,4 +19,3 @@ links into a shared object. The created shared object is used as a plugin.
 compile_custom_fitness(cppfile = "./plugin.cpp")
 }
 }
-

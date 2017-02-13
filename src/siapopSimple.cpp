@@ -21,7 +21,7 @@ GlobalParameters gpsimp;
 gsl_rng* simple_rng;
 
 
-//' siapopSimple
+//' siapopNoMut
 //'
 //' SIApop for non-mutating processes. Runs an exact process by simulating
 //' binomial and negative binomial random values at each time step. The process
@@ -60,16 +60,16 @@ gsl_rng* simple_rng;
 //' @examples
 //' \dontrun{
 //' # Use default values
-//' siapopSimple()
-//' siapopSimple(input_file = "./input.txt, "output_dir = "./",
+//' siapopNoMut()
+//' siapopNoMut(input_file = "./input.txt, "output_dir = "./",
 //'              ancestor_file = "ancestors.txt")
-//' siapopSimple(tot_life = 5, ancestors = 10, ancestor_clones = 5,
+//' siapopNoMut(tot_life = 5, ancestors = 10, ancestor_clones = 5,
 //'              num_sims = 1, allow_extinction = FALSE,
 //'              detection_threshold = 0, birth_rate = 1.1, death_rate = 1)
 //' }
 //' @export
 // [[Rcpp::export]]
-int siapopSimple(double tot_life = 40000.0,
+int siapopNoMut(double tot_life = 40000.0,
                  int ancestors = 1,
                  int ancestor_clones = 1,
                  int num_sims = 1,

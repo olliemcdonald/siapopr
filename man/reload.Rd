@@ -14,4 +14,3 @@ Recompiles and reinstalls the package for use after adjusting the model
 code. WARNING: For advanced users. Adjusting the C++ code can lead to
 errors in compilation.
 }
-

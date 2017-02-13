@@ -18,4 +18,3 @@ which can be modified before running `compile_custom_fitness`.
 create_fitness_template(cppfile = "custom_dist_plugin.cpp")
 }
 }
-

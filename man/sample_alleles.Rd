@@ -19,4 +19,3 @@ data frame of a sample of alleles
 \description{
 collect a sample of alleles from the entire population
 }
-

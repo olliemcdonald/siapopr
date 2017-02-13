@@ -18,4 +18,3 @@ which can be modified before running `compile_custom_newclone`.
 create_newclone_template(cppfile = "custom_newclone_plugin.cpp")
 }
 }
-

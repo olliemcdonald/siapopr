@@ -27,11 +27,10 @@ creation of phylogenetic trees with package \code{ape} or converted to a
 \examples{
 \dontrun{
 # simulate process and import
-siapopConstant(seed = 17, max_pop = 1000, mutation_prob = 0.05,
+siapop(seed = 17, max_pop = 1000, mutation_prob = 0.05,
                observation_frequency = 1, detection_threshold = 0.005,
                num_samples = 1, sample_size = 100)
 clone_data <- import_clonedata('./clonedata.txt')$`1`
 create_adj_matrix(clone_data)
 }
 }
-

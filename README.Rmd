@@ -98,16 +98,16 @@ those individuals' birth and death rates.
 
 SIApopr contains three functions to simulate birth-death processes based on the
 desired model. To run a birth-death process without mutation where birth and
-death rates are constant, `siapopSimple` simulates the number of individuals
+death rates are constant, `siapopNoMut` simulates the number of individuals
 with respect to each ancestor clone at the exact time given by the parameter.
-`siapopSimple` generates the exact number of descendants for each clone by
+`siapopNoMut` generates the exact number of descendants for each clone by
 generating the number of ancestors that have nonextinct lines as a binomial
 random variable, then generating the number of descendants of those lines
 as a negative binomial random variable. Since mutation is not allowed,
-`siapopConstant` does not simulate evolution, and only allows growth of
+`siapop` does not simulate evolution, and only allows growth of
 preexisting clones.
 
-If a model with mutation is desired and rates are constant, `siapopConstant`
+If a model with mutation is desired and rates are constant, `siapop`
 simulates a birth-death-mutation process under the infinite-allele assumption,
 that any mutation leads to a new allele that has not yet been observed in the
 population. This is distinct from a traditional multitype branching process
@@ -119,13 +119,13 @@ below. A neutral model can also be created, where mutations are passengers only
 and have no effect on fitness of new clones.
 
 The final function allows for time-dependent birth and death rates, named
-`siapopTimeDep`. For now, we included preselected time-dependent kernels
+`siapopTD`. For now, we included preselected time-dependent kernels
 for the rate functions and the user can input the selected parameters.
 Parameters are input as a numeric vector. More details are given below.
 
 To run, type in the R console:
 ```{r, eval = F}
-siapopConstant(...)
+siapop(...)
 ```
 and the simulation proceeds. Results from the simulation are output as a file
 instead of being loaded into the environment, and the user imports the data
@@ -245,7 +245,7 @@ variable `epistatic_mutation_threshold` is $k$.
 |epistatic_multiplier         | numeric        | amount to multiply fitness contribution in new clone by due to epistasis occurring|
 
 
-### TIME-DEPENDENT PARAMETERS (siapopTimeDep only)
+### TIME-DEPENDENT PARAMETERS (siapopTD only)
 
 The following parameters define the birth and death rate functions and
 associated parameters. More information is given in the next section.

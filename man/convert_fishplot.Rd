@@ -22,7 +22,7 @@ for plotting.
 }
 \examples{
 \dontrun{
-siapopConstant(seed = 17, max_pop = 1000, mutation_prob = 0.05,
+siapop(seed = 17, max_pop = 1000, mutation_prob = 0.05,
                observation_frequency = 1, detection_threshold = 0.005,
                num_samples = 1, sample_size = 100)
 time_data <- import_timedata('./timedata.txt')$`1`
@@ -30,4 +30,3 @@ fish <- convert_fishplot(time_data, timepoints = 1:10)
 fishPlot(fish)
 }
 }
-

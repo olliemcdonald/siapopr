@@ -17,4 +17,3 @@ data frame containing a list of clones with respective cells sampled
 \description{
 sample cells from clone data frame (for small number of clones)
 }
-

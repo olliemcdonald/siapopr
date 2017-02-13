@@ -18,7 +18,7 @@
 #' @examples
 #' \dontrun{
 #' # simulate process and import
-#' siapopConstant(seed = 17, max_pop = 1000, mutation_prob = 0.05,
+#' siapop(seed = 17, max_pop = 1000, mutation_prob = 0.05,
 #'                observation_frequency = 1, detection_threshold = 0.005,
 #'                num_samples = 1, sample_size = 100)
 #' samp_data <- import_sampledata('./sampledata.txt')$`1`
@@ -58,7 +58,7 @@ create_sample_adj_matrix <- function(samp){
 #' @examples
 #' \dontrun{
 #' # simulate process and import
-#' siapopConstant(seed = 17, max_pop = 1000, mutation_prob = 0.05,
+#' siapop(seed = 17, max_pop = 1000, mutation_prob = 0.05,
 #'                observation_frequency = 1, detection_threshold = 0.005,
 #'                num_samples = 1, sample_size = 100)
 #' clone_data <- import_clonedata('./clonedata.txt')$`1`
@@ -88,7 +88,7 @@ create_adj_matrix <- function(clone_data){
 #' @export
 #' @examples
 #' \dontrun{
-#' siapopConstant(seed = 17, max_pop = 1000, mutation_prob = 0.05,
+#' siapop(seed = 17, max_pop = 1000, mutation_prob = 0.05,
 #'                observation_frequency = 1, detection_threshold = 0.005,
 #'                num_samples = 1, sample_size = 100)
 #' time_data <- import_timedata('./timedata.txt')$`1`
@@ -152,7 +152,7 @@ convert_fishplot <- function(time_data, threshold = 0.0001, timepoints = NULL){
 #' @export
 #' @examples
 #' \dontrun{
-#' siapopConstant(seed = 17, max_pop = 1000, mutation_prob = 0.05,
+#' siapop(seed = 17, max_pop = 1000, mutation_prob = 0.05,
 #'                observation_frequency = 1, detection_threshold = 0.005,
 #'                num_samples = 1, sample_size = 100)
 #'  time_data <- import_timedata('./timedata.txt')$`1`
@@ -239,7 +239,7 @@ convert_ggmuller <- function(time_data, threshold = 0.001, timepoints = NULL,
 #' @export
 #' @examples
 #' \dontrun{
-#' siapopConstant(seed = 17, max_pop = 1000, mutation_prob = 0.05,
+#' siapop(seed = 17, max_pop = 1000, mutation_prob = 0.05,
 #'                observation_frequency = 1, detection_threshold = 0.005,
 #'                num_samples = 1, sample_size = 100)
 #' clone_data <- import_clonedata('./clonedata.txt')$`1`

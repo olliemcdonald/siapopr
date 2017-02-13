@@ -41,7 +41,7 @@ TDCloneList::NewCloneFunction* NewTDClone;
 void (*TDGenerateFitness)(double*, struct FitnessParameters*, gsl_rng*);
 
 
-//' siapopTimeDep
+//' siapopTD
 //'
 //' SIApop for time-dependent processes. Time-Dependent Birth-Death-Mutation
 //' process simulation for infinite-allele model with random fitness
@@ -159,10 +159,10 @@ void (*TDGenerateFitness)(double*, struct FitnessParameters*, gsl_rng*);
 //' @examples
 //' \dontrun{
 //' # Use default values
-//' siapopTimeDep()
-//' siapopTimeDep(outputdir = "./", birth_function = 1, death_function = 0
+//' siapopTD()
+//' siapopTD(outputdir = "./", birth_function = 1, death_function = 0
 //'                birth_params = c(-1, 0, 0.01), death_params = 0.5)
-//' siapopTimeDep(tot_life = 10, max_pop = 1000,  birth_function = 1,
+//' siapopTD(tot_life = 10, max_pop = 1000,  birth_function = 1,
 //'                death_function = 0, birth_params = c(-1, 0, 0.01),
 //'                death_params = 0.5, death_rate = 0.99, mutation_prob = 0.01,
 //'                allow_extinction = FALSE, num_sims = 1, num_samples = 1,
@@ -171,7 +171,7 @@ void (*TDGenerateFitness)(double*, struct FitnessParameters*, gsl_rng*);
 //' }
 //' @export
 // [[Rcpp::export]]
-int siapopTimeDep(double tot_life = 40000.0,
+int siapopTD(double tot_life = 40000.0,
                   int max_pop = 10000,
                   double start_time = 0.0,
                   int ancestors = 1,

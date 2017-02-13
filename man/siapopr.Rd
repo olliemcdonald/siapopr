@@ -8,4 +8,3 @@
 \description{
 siapopr: implementation of SIApop in R
 }
-
