@@ -1,8 +1,9 @@
 ---
-title: "Simulating a Time-Homogeneous Birth-Death-Mutation Process with siapopConstant"
+title: "Simulating a Time-Homogeneous Birth-Death-Mutation Process with siapop"
 author: "Thomas McDonald and Franziska Michor"
 date: "`r Sys.Date()`"
-output: rmarkdown::html_vignette
+output: pdf_document
+#output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{Vignette Title}
   %\VignetteEngine{knitr::rmarkdown}
@@ -82,7 +83,7 @@ is
 ```{r}
 library(siapopr)
 library(dplyr)
-siapopConstant(seed = 17, max_pop = 1000000, mutation_prob = 0.005,
+siapop(seed = 17, max_pop = 1000000, mutation_prob = 0.005,
                observation_frequency = 1, detection_threshold = 0.0001,
                birth_rate = 0.5, death_rate = 0.25,
                alpha_fitness = 10, beta_fitness = 10, pass_prob = 0,
@@ -208,7 +209,7 @@ analyses.
 SIApopr also allows importing data from a file, and it is currently the only
 way to import ancestor information. Suppose we want to initiate a population
 with 20 distinct clones containing 100 individuals without mutations present
-(allowing us to use `siapopSimple`. We first need to create a tab delimeted
+(allowing us to use `siapopNoMut`. We first need to create a tab delimeted
 file with the appropriate variable names (more info in the README).
 
 ```{r}
@@ -227,7 +228,7 @@ Running siapop with the appropriate argument loads the ancestors into the
 simulation.
 
 ```{r}
-siapopSimple(tot_life = 20, ancestor_file = './ancestor.txt')
+siapopNoMut(tot_life = 20, ancestor_file = './ancestor.txt')
 simplesim <- import_siapop(clonedata_file = './clonedata.txt')
 simplesim
 ```
@@ -237,9 +238,9 @@ NOTE: Be sure to write the data frame to file with `row.names = FALSE` and
 
 ## Time inhomogeneous birth-death processes
 Instead of assuming constant birth and death rates throughout a process,
-`siapopTimeDep` allows us to simulate an infinite-allele time-dependent
+`siapopTD` allows us to simulate an infinite-allele time-dependent
 birth-death-mutation process in a similar manner. A few time-dependent functions
-are given (found by typing `?siapopTimeDep` in the R console and in the README).
+are given (found by typing `?siapopTD` in the R console and in the README).
 The user needs to provide variable values for these functions. As a simple
 example, we consider a birth-death without mutation for a population containing
 2 clones. the birth rate function for clone A is $b_A(t) = 1.1 + -0.02t$ and the
@@ -250,7 +251,7 @@ $d_B(t) = 1$.
 ```{r}
 library(ggplot2)
 library(dplyr)
-siapopTimeDep(tot_life = 50, max_pop = 100000, birth_function = 1,
+siapopTD(tot_life = 50, max_pop = 100000, birth_function = 1,
               ancestors = 1000, ancestor_clones = 5,
               death_function = 1, birth_coefs = c(1.1, -0.15, 0.1),
               death_coefs = c(1.2, -0.16, 0.1), observation_frequency = 0.2)

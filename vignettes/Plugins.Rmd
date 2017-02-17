@@ -2,7 +2,8 @@
 title: "Customizing SIApopr with plugins"
 author: "Thomas McDonald and Franziska Michor"
 date: "`r Sys.Date()`"
-output: rmarkdown::html_vignette
+output: pdf_document
+#output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{Vignette Title}
   %\VignetteEngine{knitr::rmarkdown}
@@ -134,7 +135,7 @@ probability is modified, it needs to be set between 0 and 1 in the plugin.
 ### Punctuation parameters
 
 | Parameter Name | Description |
-| ----------------- |--------------------------------------|
+| ---------------------------------- |--------------------------------------|
 |    bool is_punctuated | TRUE/FALSE if a punctuated mode is used |
 |    double punctuated_prob | probability of a punctuated event occuring |
 |    double poisson_param | Parameter associated with a zero-truncated poisson distribution to determine the number of mutations |
@@ -150,7 +151,7 @@ a zero-truncated Poisson random variable.
 ### Epistatic Parameters
 
 | Parameter Name | Description |
-| -------------- |-----------------------------------------|
+| ----------------------------- |-----------------------------------------|
 |   bool is_epistasis | TRUE/FALSE if an epistatic model is used |
 |   int epistatic_mutation_thresh | number of mutations in a clone required for an epistatic event |
 |   double epistatic_multiplier | amount to multiply fitness by in an epistatic event |
@@ -210,12 +211,12 @@ distribution, run the function
 compile_custom_fitness("file/name.cpp")
 ```
 which creates the necessary headers, compiles, and builds the shared library
-file "file/name.so". Then, running `siapopConstant` or `siapopTimeDep` with the
+file "file/name.so". Then, running `siapop` or `siapopTD` with the
 parameters `distribution_function = "custom"` and
 `custom_distribution_file = "file/name.so"` to run.
 
 
-# Model Plugin Customization (siapopConstant only)
+# Model Plugin Customization (siapop only)
 Creating a new model requires some knowledge of C++ and the underlying data
 structures used in SIApopr mentioned in a previous section. The template for
 creating a new plugin is given below. The arguments for `customclone` are
@@ -313,5 +314,5 @@ After customizing the distribution, run the function
 compile_custom_newclone("file/name.cpp")
 ```
 which creates the necessary headers, compiles, and builds the shared library
-file "file/name.so". Then, running `siapopConstant` with the parameter
+file "file/name.so". Then, running `siapop` with the parameter
 `custom_model_file = "file/name.so"` to run.

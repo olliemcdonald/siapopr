@@ -1,7 +1,8 @@
 ---
 title: "SIApopr: A computational method to simulate evolutionary branching trees for analysis of tumor clonal evolution"
 author: "Thomas McDonald and Franziska Michor"
-output: github_document
+output: pdf_document
+# output: github_document
 ---
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
@@ -14,9 +15,9 @@ knitr::opts_chunk$set(
 )
 ```
 
-# siapopr
+# Siapopr
 
-siapopr is an R package that wraps the C++ functions SIApop. These functions
+Siapopr is an R package that wraps the C++ functions SIApop. These functions
 simulate birth-death-mutation processes with mutations having random fitnesses
 to simulate clonal evolution.
 
@@ -75,26 +76,28 @@ can be run as an R function.
 
 # Uses
 SIApopr (Simulating Infinite-Allele populations in R) is an R package that
-uses C++ to simulate homogeneous and inhomogeneous birth-death-mutation
+uses C++ to simulate time homogeneous and inhomogeneous birth-death-mutation
 processes under a very flexible set of assumptions.
 
 The software simulates clonal evolution with the emergence of driver and
-passenger mutations under the infinite-allele assumption. The software is a
+passenger mutations under the infinite-allele assumption. The software uses an
 application of the direct Gillespie Stochastic Simulation Algorithm expanded to
-a large number of cell types and scenarios, with the intention of allowing
-users to easily modify existing models or create their own. Visualization
-functions in R are included to show results of individual simulations.
+a large number of cell types and scenarios with the intention of allowing
+users to easily modify existing models or create their own. Conversion functions
+to other visualization packages in R are included to show results of
+individual simulations.
 
 A branching process is a stochastic process used to model the growth and
 composition of reproducing populations. Assumptions made in branching processes are
 individuals live for a random amount of time before splitting into a random number
-of individuals (both dictated by distribution functions). Individuals of the same
-type are independent and identically distributed. These processes are useful for
-modeling cell growth and evolution, as in a tumor. Mutations may occur that lead
-to different types of individuals with different probability laws dictating
-those individuals' birth and death rates.
+of individuals (both random variables are dictated by their given distribution
+functions). Individuals of the same type are independent and identically
+distributed. These processes are useful for modeling cell growth and evolution,
+as in a tumor. Mutations may occur that lead to different types of individuals
+with different probability laws dictating those individuals' birth and death
+rates.
 
-# Using SIApop in R
+# Using SIApopr in R
 
 SIApopr contains three functions to simulate birth-death processes based on the
 desired model. To run a birth-death process without mutation where birth and
@@ -104,7 +107,7 @@ with respect to each ancestor clone at the exact time given by the parameter.
 generating the number of ancestors that have nonextinct lines as a binomial
 random variable, then generating the number of descendants of those lines
 as a negative binomial random variable. Since mutation is not allowed,
-`siapop` does not simulate evolution, and only allows growth of
+`siapopNoMut` does not simulate evolution, and only allows growth of
 preexisting clones.
 
 If a model with mutation is desired and rates are constant, `siapop`
@@ -136,7 +139,7 @@ well.
 # Model Parameters
 
 | Variable Name       | Variable Type | Description |
-| ------------------- | ------------- | ----------- |
+| ------------------- | ------------- | ------------------------------------- |
 | tot_life            | numeric        | total lifetime of branching process |
 | max_pop             | numeric        | maximum population to end process at|
 | start_time          | numeric        | starting time (typically 0)|
@@ -164,7 +167,7 @@ the probability distribution to this range. These parameters are not required.
 The default model assumes passenger mutations only.
 
 | Variable Name | Variable Type | Description |
-| ------------- | ------------- | ----------- |
+| ------------- | ------------- | ----------------------------------------------- |
 | distribution_function | doubleexp, normal, uniform, custom | the type of distribution to use (see below)
 | custom_distribution | string | if using a custom distribution, the filepath for the .so file used (see below)
 | alpha_fitness | numeric > 0             | parameter 1 for the distribution |
@@ -182,14 +185,14 @@ distribution. If `distribution_function = "normal"`, fitnesses are generated fro
 
 The user has the option to specify a custom distribution. A distribution should
 be written as a '.cpp' file and include the following:
-```{rcpp, eval = FALSE}
+```{r engine='Rcpp', eval = FALSE}
 void customdist(double* fitness, struct FitnessParameters *fit_params, gsl_rng* rng)
 {
   (*fitness) = //insert fitness function;
 }
 ```
 An example for the uniform distribution with a passenger probability is:
-```{rcpp, eval = FALSE}
+```{r engine='Rcpp', eval = FALSE}
 void customdist(double* fitness, struct FitnessParameters *fit_params, gsl_rng* rng)
 {
   double z = gsl_ran_flat(rng, 0, 1);
@@ -200,8 +203,8 @@ void customdist(double* fitness, struct FitnessParameters *fit_params, gsl_rng* 
 }
 ```
 The file should be saved as a ".cpp" file and then use the R function
-`compile_custom_fitness(cppfile)` which creates the necessary header, compiles, and
-builds a shared library out of the distribution function file so that SIApop can
+`compile_custom_fitness(cppfile)` which creates the necessary headers, compiles, and
+builds a shared library out of the distribution function file so that SIApopr can
 load the shared object.
 
 ### MUTATION DISTRIBUTION PARAMETERS
@@ -210,7 +213,7 @@ If these parameters are defined, any new clone has a mutation probability coming
 from a beta distribution with parameters `alpha_mutation` and `beta_mutation`.
 
 | Variable Name  | Variable Type | Description |
-| -------------- | ------------- | ----------- |
+| -------------- | ------------- | ----------------------------------------------- |
 | alpha_mutation | numeric > 0    | alpha parameter for Beta distribution for additional mutation probability in new mutant clone|
 | beta_mutation  | numeric > 0    | beta parameter for Beta distribution for additional mutation probability in new mutant clone|
 
@@ -226,7 +229,7 @@ rate unless an advantageous clone arises with probability defined by the paramet
 new birth rate is multiplied by a factor of `punctuated_fitness_multiplier`.
 
 | Variable Name                 | Variable Type | Description |
-| ----------------------------- | ------------- | ----------- |
+| ----------------------------- | ------------- | ---------------------------- |
 | punctuated_prob               | numeric [0,1]  | probability of mutation burst |
 | poisson_param                 | numeric > 0    | rate parameter for zero-truncated Poisson distribution number of mutations in burst |
 | punctuated_fitness_multiplier | numeric        | amount to multiply additional fitness by |
@@ -235,12 +238,12 @@ new birth rate is multiplied by a factor of `punctuated_fitness_multiplier`.
 
 ### EPISTATIC PARAMETERS
 
-The epistatic model is a basic one that assumes the birth rate is multiplied
+The epistatic model only assumes the birth rate is multiplied
 by a factor of `epistatic_multiplier` after the $k^{th}$ mutation arises. The
 variable `epistatic_mutation_threshold` is $k$.
 
 | Variable Name               | Variable Type | Description |
-| --------------------------- | ------------- | ----------- |
+| --------------------------- | ------------- | ------------------------------ |
 |epistatic_mutation_threshold | int > 0       | number of mutation required before burst in fitness due to epistasis|
 |epistatic_multiplier         | numeric        | amount to multiply fitness contribution in new clone by due to epistasis occurring|
 
@@ -251,7 +254,7 @@ The following parameters define the birth and death rate functions and
 associated parameters. More information is given in the next section.
 
 | Variable Name  | Variable Type                       | Description |
-| -------------- | ----------------------------------- | ----------- |
+| -------------- | ----------------------------- | --------------------------- |
 |birth_function  | 0, 1, 2, 3, 4                       | see below |
 |death_function  | 0, 1, 2, 3, 4                       | see below |
 |td_birth_params | numeric vector | see below |
@@ -272,7 +275,7 @@ output and store information when continuing a previous simulation.
 ### PARAMETERS
 
 | Variable Name | Variable Type | Description |
-| ------------  | ------------- | ----------- |
+| ------------  | ------------- | -------------------------------------- |
 | unique_id     | string        | id for each ancestor |
 | numcells      | int           | the number of cells for the ancestor |
 | mutprob       | numeric [0,1]  | the probability of initiating a new clone given a birth occurs |
@@ -280,7 +283,7 @@ output and store information when continuing a previous simulation.
 ### TIME-DEPENDENT PARAMETERS
 
 | Variable Name  | Variable Type                       | Description |
-| -------------- | ----------------------------------- | ----------- |
+| -------------- | ----------------------------------- | ------------------------------- |
 |birth_function  | 0, 1, 2, 3, 4                       | see below |
 |death_function  | 0, 1, 2, 3, 4                       | see below |
 |bf_params       | vector of doubles (space-delimited) | see below |
@@ -298,8 +301,9 @@ The curves are parameterized as follows:
 
 | Function Parameter  | Function Name     | Mathematical Description |
 | ------------------- | ----------------- | ------------------------ |
-| 0                   | constant          | ![constant](README/README-image-1.png) |             |
+| 0                   | constant          | ![constant](README/README-image-1.png) |
 | 1                   | linear            | ![linear](README/README-image-2.png)  |
 | 2                   | logistic          | ![logistic](README/README-image-3.png)  |
 | 3                   | Gompertz growth   | ![Gompertz](README/README-image-4.png)  |
 | 4                   | Custom            | Include own parameters  |
+
