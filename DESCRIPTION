@@ -3,8 +3,9 @@ Type: Package
 Title: siapopr is an R implementation of SIApop to simulate infinite-allele
     branching process populations
 Version: 0.0.1
-Author: Ollie McDonald and Franziska Michor
-Maintainer: Ollie McDonald <mcdonald@jimmy.harvard.edu>
+Authors@R: c(
+    person("Thomas", "McDonald", , "mcdonald@jimmy.harvard.edu", c("aut", "cre")),
+    person("Franziska", "Michor", , "michor@jimmy.harvard.edu", "aut"))
 Description: siapopr is a branching process simulation software written in
     C++ to simulate birth-death-mutation processes where each new mutation
     is unique, following the infinite-allele assumption.
