@@ -340,7 +340,7 @@ int siapopNoMut(double tot_life = 40000.0,
       }
       else
       {
-        population.SampleAndTraverse(sample_data, sim, gpsimp.sample_size, gpsimp.num_samples, constant_rng);
+        population.SampleAndTraverse(sample_data, sim, gpsimp.sample_size, gpsimp.num_samples, simple_rng);
       }
     }
     // Output of end state with clone info

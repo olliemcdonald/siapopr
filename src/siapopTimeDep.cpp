@@ -909,7 +909,7 @@ int siapopTD(double tot_life = 40000.0,
       }
       else
       {
-        population.SampleAndTraverse(sample_data, sim, gptime.sample_size, gptime.num_samples, constant_rng);
+        population.SampleAndTraverse(sample_data, sim, gptime.sample_size, gptime.num_samples, timedep_rng);
       }
     }
     // Trim tree if threshold is higher. Otherwise, Traverse
