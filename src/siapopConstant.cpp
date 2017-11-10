@@ -783,7 +783,14 @@ int siapop(double tot_life = 40000.0,
     // Sampling from population
     if( (gpcons.sample_size > 0) & (gpcons.num_samples > 0) )
     {
-      population.SampleAndTraverse(sample_data, sim, gpcons.sample_size, gpcons.num_samples, constant_rng);
+      if( population.tot_cell_count == 0 )
+      {
+        Rcpp::Rcout << "Population went extinct. Samples can't be taken.\n";
+      }
+      else
+      {
+        population.SampleAndTraverse(sample_data, sim, gpcons.sample_size, gpcons.num_samples, constant_rng);
+      }
     }
     // Trim tree if threshold is higher. Otherwise, Traverse
     population.TreeTrim(gpcons.detection_threshold, gpcons.max_pop);
