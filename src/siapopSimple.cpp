@@ -334,7 +334,14 @@ int siapopNoMut(double tot_life = 40000.0,
     // Sampling from population
     if( (gpsimp.sample_size > 0) & (gpsimp.num_samples > 0) )
     {
-      population.SampleAndTraverse(sample_data, sim, gpsimp.sample_size, gpsimp.num_samples, simple_rng);
+      if( population.tot_cell_count == 0 )
+      {
+        Rcpp::Rcout << "Population went extinct. Samples can't be taken.\n";
+      }
+      else
+      {
+        population.SampleAndTraverse(sample_data, sim, gpsimp.sample_size, gpsimp.num_samples, constant_rng);
+      }
     }
     // Output of end state with clone info
     Rcpp::Rcout << "Traversing and outputting run " << sim << "\n";
