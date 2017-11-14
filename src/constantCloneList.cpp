@@ -746,7 +746,10 @@ void ConstantCloneList::TreeTrim(double threshold, int max_pop)
     if( currnode->cell_count < cell_cutoff )
     {
       // add current clones numbers to that of parent
-      currnode->parent->cell_count = currnode->parent->cell_count + currnode->cell_count;
+      if(currnode->parent != NULL)
+      {
+        currnode->parent->cell_count = currnode->parent->cell_count + currnode->cell_count;
+      }
       // remove the node and update pointers
       DeleteNode();
     }
