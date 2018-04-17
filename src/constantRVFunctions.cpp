@@ -37,6 +37,9 @@ void cdoubleexp(double *fitness, struct FitnessParameters *fit_params, gsl_rng* 
   {
     (*fitness) = -1 * gsl_ran_exponential(rng, 1 / fit_params->beta_fitness);
   }
+
+  (*fitness) = fmin(fit_params->upper_fitness, (*fitness));
+  (*fitness) = fmax(fit_params->lower_fitness, (*fitness));
 }
 
 
@@ -48,6 +51,9 @@ void cnormal(double *fitness, struct FitnessParameters *fit_params, gsl_rng* rng
   {
     (*fitness) = gsl_ran_gaussian(rng, fit_params->beta_fitness) + fit_params->alpha_fitness;
   }
+
+  (*fitness) = fmin(fit_params->upper_fitness, (*fitness));
+  (*fitness) = fmax(fit_params->lower_fitness, (*fitness));
 }
 
 void cuniform(double *fitness, struct FitnessParameters *fit_params, gsl_rng* rng)
@@ -58,6 +64,9 @@ void cuniform(double *fitness, struct FitnessParameters *fit_params, gsl_rng* rn
   {
     (*fitness) = gsl_ran_flat(rng, fit_params->alpha_fitness, fit_params->beta_fitness);
   }
+
+  (*fitness) = fmin(fit_params->upper_fitness, (*fitness));
+  (*fitness) = fmax(fit_params->lower_fitness, (*fitness));
 }
 
 

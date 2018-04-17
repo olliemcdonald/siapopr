@@ -163,8 +163,8 @@ int siapop(double tot_life = 40000.0,
                    double alpha_fitness = 0.0,
                    double beta_fitness = 0.0,
                    double pass_prob = 1.0,
-                   double upper_fitness = 0.0,
-                   double lower_fitness = 0.0,
+                   SEXP upper_fitness = R_NilValue,
+                   SEXP lower_fitness = R_NilValue,
                    double alpha_mutation = 0.0,
                    double beta_mutation = 0.0,
                    bool trace_ancestry = true,
@@ -401,8 +401,23 @@ int siapop(double tot_life = 40000.0,
     fit_params.alpha_fitness = alpha_fitness;
     fit_params.beta_fitness = beta_fitness;
     fit_params.pass_prob = pass_prob;
-    fit_params.upper_fitness = upper_fitness;
-    fit_params.lower_fitness = lower_fitness;
+    if( !Rf_isNull(upper_fitness) )
+    {
+      fit_params.upper_fitness = *REAL(upper_fitness);
+    }
+    else
+    {
+      fit_params.upper_fitness = DBL_MAX;
+    }
+    if( !Rf_isNull(lower_fitness) )
+    {
+      fit_params.lower_fitness = *REAL(lower_fitness);
+    }
+    else
+    {
+      fit_params.lower_fitness = -DBL_MAX;
+    }
+
     fit_params.is_randfitness = false;
     if( !Rf_isNull(fitness_distribution) )
     {
