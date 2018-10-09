@@ -1,6 +1,6 @@
 # set by configure
-GSL_CFLAGS = -I/usr/local/Cellar/gsl/1.16/include
-GSL_LIBS   = -L/usr/local/Cellar/gsl/1.16/lib -lgsl -lgslcblas
+GSL_CFLAGS = -I/usr/local/Cellar/gsl/2.4/include
+GSL_LIBS   = -L/usr/local/Cellar/gsl/2.4/lib -lgsl -lgslcblas
 
 # combine with standard arguments for R
 PKG_CXXFLAGS = $(GSL_CFLAGS) -I../inst/include
