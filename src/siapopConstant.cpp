@@ -146,7 +146,7 @@ void (*CreateNewCustomClone)( struct clone *, struct clone *, struct FitnessPara
 // [[Rcpp::export]]
 int siapop(double tot_life = 40000.0,
                    int max_pop = 10000,
-                   int max_pop_mutation = 10e10;
+                   int max_pop_mutation = 1000000000,
                    double start_time = 0.0,
                    int ancestors = 1,
                    int ancestor_clones = 1,

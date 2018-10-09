@@ -33,6 +33,7 @@
 #'
 #' @param tot_life total lifetime to run a simulation for
 #' @param max_pop maximum population to stop simulation
+#' @param max_pop_mutation maximum population to stop additional mutations
 #' @param start_time time index to begin each simulation
 #' @param ancestors number of ancestors in a clone to initialize simulation
 #' @param ancestor_clones number of ancestor clones each containing
@@ -102,15 +103,15 @@
 #' siapop()
 #' siapop(outputdir = "./")
 #' siapop(ancestor_file = "./ancestors.txt")
-#' siapop(tot_life = 10, max_pop = 1000, birth_rate = 1.1,
-#'                death_rate = 0.99, mutation_prob = 0.01,
+#' siapop(tot_life = 10, max_pop = 1000, max_pop_mutation = 1000,
+#'                birth_rate = 1.1, death_rate = 0.99, mutation_prob = 0.01,
 #'                allow_extinction = FALSE, num_sims = 1, num_samples = 1,
 #'                alpha_fitness = 100, beta_fitness = 100,
 #'                sample_size = 100, observation_times = c(1, 5, 10))
 #' }
 #' @export
-siapop <- function(tot_life = 40000.0, max_pop = 10000L, start_time = 0.0, ancestors = 1L, ancestor_clones = 1L, num_sims = 1L, allow_extinction = TRUE, num_samples = 0L, sample_size = 0L, detection_threshold = 0.0, observation_frequency = 0.0, observation_times = NULL, birth_rate = 1.5, death_rate = 1.0, mutation_prob = 0.0, fitness_distribution = NULL, custom_distribution_file = NULL, alpha_fitness = 0.0, beta_fitness = 0.0, pass_prob = 1.0, upper_fitness = NULL, lower_fitness = NULL, alpha_mutation = 0.0, beta_mutation = 0.0, trace_ancestry = TRUE, count_alleles = TRUE, punctuated_prob = 0.0, poisson_param = 1.0, punctuated_multiplier = 1.0, punctuated_advantageous_prob = 1.0, epistatic_mutation_thresh = 1.0, epistatic_multiplier = 1.0, seed = NULL, custom_model_file = NULL, input_file = NULL, output_dir = NULL, ancestor_file = NULL) {
-    .Call('_siapopr_siapop', PACKAGE = 'siapopr', tot_life, max_pop, start_time, ancestors, ancestor_clones, num_sims, allow_extinction, num_samples, sample_size, detection_threshold, observation_frequency, observation_times, birth_rate, death_rate, mutation_prob, fitness_distribution, custom_distribution_file, alpha_fitness, beta_fitness, pass_prob, upper_fitness, lower_fitness, alpha_mutation, beta_mutation, trace_ancestry, count_alleles, punctuated_prob, poisson_param, punctuated_multiplier, punctuated_advantageous_prob, epistatic_mutation_thresh, epistatic_multiplier, seed, custom_model_file, input_file, output_dir, ancestor_file)
+siapop <- function(tot_life = 40000.0, max_pop = 10000L, max_pop_mutation = 1000000000L, start_time = 0.0, ancestors = 1L, ancestor_clones = 1L, num_sims = 1L, allow_extinction = TRUE, num_samples = 0L, sample_size = 0L, detection_threshold = 0.0, observation_frequency = 0.0, observation_times = NULL, birth_rate = 1.5, death_rate = 1.0, mutation_prob = 0.0, fitness_distribution = NULL, custom_distribution_file = NULL, alpha_fitness = 0.0, beta_fitness = 0.0, pass_prob = 1.0, upper_fitness = NULL, lower_fitness = NULL, alpha_mutation = 0.0, beta_mutation = 0.0, trace_ancestry = TRUE, count_alleles = TRUE, punctuated_prob = 0.0, poisson_param = 1.0, punctuated_multiplier = 1.0, punctuated_advantageous_prob = 1.0, epistatic_mutation_thresh = 1.0, epistatic_multiplier = 1.0, seed = NULL, custom_model_file = NULL, input_file = NULL, output_dir = NULL, ancestor_file = NULL) {
+    .Call('_siapopr_siapop', PACKAGE = 'siapopr', tot_life, max_pop, max_pop_mutation, start_time, ancestors, ancestor_clones, num_sims, allow_extinction, num_samples, sample_size, detection_threshold, observation_frequency, observation_times, birth_rate, death_rate, mutation_prob, fitness_distribution, custom_distribution_file, alpha_fitness, beta_fitness, pass_prob, upper_fitness, lower_fitness, alpha_mutation, beta_mutation, trace_ancestry, count_alleles, punctuated_prob, poisson_param, punctuated_multiplier, punctuated_advantageous_prob, epistatic_mutation_thresh, epistatic_multiplier, seed, custom_model_file, input_file, output_dir, ancestor_file)
 }
 
 #' siapopNoMut
