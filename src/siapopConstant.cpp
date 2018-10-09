@@ -66,6 +66,7 @@ void (*CreateNewCustomClone)( struct clone *, struct clone *, struct FitnessPara
 //'
 //' @param tot_life total lifetime to run a simulation for
 //' @param max_pop maximum population to stop simulation
+//' @param max_pop_mutation maximum population to stop additional mutations
 //' @param start_time time index to begin each simulation
 //' @param ancestors number of ancestors in a clone to initialize simulation
 //' @param ancestor_clones number of ancestor clones each containing
@@ -135,8 +136,8 @@ void (*CreateNewCustomClone)( struct clone *, struct clone *, struct FitnessPara
 //' siapop()
 //' siapop(outputdir = "./")
 //' siapop(ancestor_file = "./ancestors.txt")
-//' siapop(tot_life = 10, max_pop = 1000, birth_rate = 1.1,
-//'                death_rate = 0.99, mutation_prob = 0.01,
+//' siapop(tot_life = 10, max_pop = 1000, max_pop_mutation = 1000,
+//'                birth_rate = 1.1, death_rate = 0.99, mutation_prob = 0.01,
 //'                allow_extinction = FALSE, num_sims = 1, num_samples = 1,
 //'                alpha_fitness = 100, beta_fitness = 100,
 //'                sample_size = 100, observation_times = c(1, 5, 10))
@@ -145,6 +146,7 @@ void (*CreateNewCustomClone)( struct clone *, struct clone *, struct FitnessPara
 // [[Rcpp::export]]
 int siapop(double tot_life = 40000.0,
                    int max_pop = 10000,
+                   int max_pop_mutation = 10e10;
                    double start_time = 0.0,
                    int ancestors = 1,
                    int ancestor_clones = 1,
@@ -260,6 +262,7 @@ int siapop(double tot_life = 40000.0,
     // convert all parameters imported from file into respective values in gpcons
     params.convert("tot_life", gpcons.tot_life);
     params.convert("max_pop", gpcons.max_pop);
+    params.convert("max_pop_mutation", gpcons.max_pop_mutation);
     params.convert("start_time", gpcons.start_time);
     params.convert("ancestors", gpcons.ancestors);
     params.convert("ancestor_clones", gpcons.ancestor_clones);
@@ -354,6 +357,7 @@ int siapop(double tot_life = 40000.0,
     // convert all parameters imported from file into respective values in gpcons
     gpcons.tot_life = tot_life;
     gpcons.max_pop = max_pop;
+    gpcons.max_pop_mutation = max_pop_mutation;
     gpcons.start_time = start_time;
     gpcons.ancestors = ancestors;
     gpcons.ancestor_clones = ancestor_clones;

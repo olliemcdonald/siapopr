@@ -55,6 +55,7 @@ void ConstantParameterList::init()
     //default values
     insert(std::make_pair("tot_life", "40000"));
     insert(std::make_pair("max_pop", "10000"));
+    insert(std::make_pair("max_pop_mutation", "1000000000"));
     insert(std::make_pair("start_time", "0"));
     insert(std::make_pair("ancestors", "1"));
     insert(std::make_pair("ancestor_clones", "1"));
