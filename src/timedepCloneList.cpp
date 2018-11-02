@@ -240,7 +240,7 @@ double TDCloneList::AdvanceTime(double curr_time, gsl_rng* rng)
     Rcpp::checkUserInterrupt();
 
     tot_rate = 0;
-    rand_next_time = gsl_ran_exponential(rng, 1 / tot_rate_homog);
+    rand_next_time += gsl_ran_exponential(rng, 1 / tot_rate_homog);
     pnode = root;
 
     while(pnode) // add the rates of all nodes at the next time to get total rate
