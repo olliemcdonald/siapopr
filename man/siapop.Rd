@@ -4,25 +4,31 @@
 \alias{siapop}
 \title{siapop}
 \usage{
-siapop(tot_life = 40000, max_pop = 10000L, start_time = 0,
-  ancestors = 1L, ancestor_clones = 1L, num_sims = 1L,
-  allow_extinction = TRUE, num_samples = 0L, sample_size = 0L,
-  detection_threshold = 0, observation_frequency = 0,
-  observation_times = NULL, birth_rate = 1.5, death_rate = 1,
-  mutation_prob = 0, fitness_distribution = NULL,
-  custom_distribution_file = NULL, alpha_fitness = 0, beta_fitness = 0,
-  pass_prob = 1, upper_fitness = 0, lower_fitness = 0,
-  alpha_mutation = 0, beta_mutation = 0, trace_ancestry = TRUE,
-  count_alleles = TRUE, punctuated_prob = 0, poisson_param = 1,
-  punctuated_multiplier = 1, punctuated_advantageous_prob = 1,
-  epistatic_mutation_thresh = 1, epistatic_multiplier = 1, seed = NULL,
-  custom_model_file = NULL, input_file = NULL, output_dir = NULL,
-  ancestor_file = NULL)
+siapop(tot_life = 40000, max_pop = 10000L,
+  max_pop_mutation = 1000000000L, max_pop_mut_rate = 1,
+  start_time = 0, ancestors = 1L, ancestor_clones = 1L,
+  num_sims = 1L, allow_extinction = TRUE, num_samples = 0L,
+  sample_size = 0L, detection_threshold = 0,
+  observation_frequency = 0, observation_times = NULL,
+  birth_rate = 1.5, death_rate = 1, mutation_prob = 0,
+  fitness_distribution = NULL, custom_distribution_file = NULL,
+  alpha_fitness = 0, beta_fitness = 0, pass_prob = 1,
+  upper_fitness = NULL, lower_fitness = NULL, alpha_mutation = 0,
+  beta_mutation = 0, trace_ancestry = TRUE, count_alleles = TRUE,
+  punctuated_prob = 0, poisson_param = 1, punctuated_multiplier = 1,
+  punctuated_advantageous_prob = 1, epistatic_mutation_thresh = 1,
+  epistatic_multiplier = 1, seed = NULL, custom_model_file = NULL,
+  input_file = NULL, output_dir = NULL, ancestor_file = NULL)
 }
 \arguments{
 \item{tot_life}{total lifetime to run a simulation for}
 
 \item{max_pop}{maximum population to stop simulation}
+
+\item{max_pop_mutation}{maximum population to stop additional mutations}
+
+\item{max_pop_mut_rate}{mutation rate across all cells once max_pop_mutation
+is hit}
 
 \item{start_time}{time index to begin each simulation}
 
@@ -157,8 +163,9 @@ requires a text file.
 siapop()
 siapop(outputdir = "./")
 siapop(ancestor_file = "./ancestors.txt")
-siapop(tot_life = 10, max_pop = 1000, birth_rate = 1.1,
-               death_rate = 0.99, mutation_prob = 0.01,
+siapop(tot_life = 10, max_pop = 1000, max_pop_mutation = 1000,
+               max_pop_mut_rate = 1,
+               birth_rate = 1.1, death_rate = 0.99, mutation_prob = 0.01,
                allow_extinction = FALSE, num_sims = 1, num_samples = 1,
                alpha_fitness = 100, beta_fitness = 100,
                sample_size = 100, observation_times = c(1, 5, 10))

@@ -266,7 +266,7 @@ void ConstantCloneList::AdvanceState(double curr_time, double next_time, gsl_rng
       }
       else
       {
-        is_mutation = (rand_mut_occur <= gpcons.max_pop_mut_rate;
+        is_mutation = (rand_mut_occur <= gpcons.max_pop_mut_rate);
       }
       // Condition to determine if mutation occurs in new daughter
       if ( is_mutation )

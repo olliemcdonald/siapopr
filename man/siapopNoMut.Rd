@@ -7,8 +7,8 @@
 siapopNoMut(tot_life = 40000, ancestors = 1L, ancestor_clones = 1L,
   num_sims = 1L, num_samples = 0L, sample_size = 0L,
   allow_extinction = TRUE, detection_threshold = 0, birth_rate = 1.5,
-  death_rate = 1, seed = NULL, input_file = NULL, output_dir = NULL,
-  ancestor_file = NULL)
+  death_rate = 1, seed = NULL, input_file = NULL,
+  output_dir = NULL, ancestor_file = NULL)
 }
 \arguments{
 \item{tot_life}{total lifetime to run a simulation for}
