@@ -258,8 +258,18 @@ void ConstantCloneList::AdvanceState(double curr_time, double next_time, gsl_rng
     if ( rand_next_event <= summand + (pnode->cell_count * pnode->birth_rate) )
     {
       rand_mut_occur = gsl_ran_flat(rng, 0, 1);
+      bool is_mutation = false;
+      // Check which mutation rate to use based on population size
+      if(tot_cell_count < gpcons.max_pop_mutation)
+      {
+        is_mutation = (rand_mut_occur <= pnode->mut_prob);
+      }
+      else
+      {
+        is_mutation = (rand_mut_occur <= gpcons.max_pop_mut_rate;
+      }
       // Condition to determine if mutation occurs in new daughter
-      if ((rand_mut_occur <= pnode->mut_prob) && (tot_cell_count < gpcons.max_pop_mutation) )
+      if ( is_mutation )
       {
         // Creation of new clone
         struct clone *new_mut_node;
