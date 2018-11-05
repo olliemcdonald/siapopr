@@ -468,9 +468,10 @@ int siapop(double tot_life = 40000.0,
           ConstantGenerateFitness = (void (*)(double *, struct FitnessParameters*, gsl_rng*))GetProcAddress(lib_handle, "customdist");
 
         #else
-          lib_handle = dlopen(plugin_location, RTLD_NOW);
+          lib_handle = dlopen(plugin_location, RTLD_LAZY);
           if(!lib_handle)
           {
+            Rcpp::Rcout << dlerror();
             Rcpp::stop("invalid file name for distribution file");
           }
           ConstantGenerateFitness = (void (*)(double *, struct FitnessParameters*, gsl_rng*))dlsym(lib_handle, "customdist");
