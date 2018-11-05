@@ -3,6 +3,7 @@
 
 #include <gsl/gsl_randist.h>
 #include <math.h>
+#include "constantGlobalStructs.h"
 
 #ifdef __cplusplus
 extern "C" {
