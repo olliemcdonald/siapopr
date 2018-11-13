@@ -164,7 +164,10 @@ at 0 indicated by the probability of a passenger mutation, `pass_prob`. The
 rate for the right side of the distribution is `alpha` and the left side is
 `beta`. Bounds are provided as `upper_fitness` and `lower_fitness` to bound
 the probability distribution to this range. These parameters are not required.
-The default model assumes passenger mutations only.
+The default model assumes passenger mutations only. The value `max_fitness`
+gives the maximum value that the fitness can achieve (defined as birth_rate
+minus death rate) so that every mutation after has no functional effect on
+fitness.
 
 | Variable Name | Variable Type | Description |
 | ------------- | ------------- | ----------------------------------------------- |
@@ -175,6 +178,7 @@ The default model assumes passenger mutations only.
 | pass_prob     | numeric [0,1]           | probability that additional fitness of new mutant is 0|
 | upper_fitness | numeric                 | upper bound to fitness distribution|
 | lower_fitness | numeric <= upper_fitness | lower bound to fitness distribution|
+| max_fitness   | numeric                 | lower bound to fitness distribution|
 
 #### Fitness Distribution Functions
 There is an option to specify different distributions using the parameter `distribution_function`. For

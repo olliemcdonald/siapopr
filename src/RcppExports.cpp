@@ -7,8 +7,8 @@
 using namespace Rcpp;
 
 // siapop
-int siapop(double tot_life, int max_pop, int max_pop_mutation, double max_pop_mut_rate, double start_time, int ancestors, int ancestor_clones, int num_sims, bool allow_extinction, int num_samples, int sample_size, double detection_threshold, double observation_frequency, SEXP observation_times, double birth_rate, double death_rate, double mutation_prob, SEXP fitness_distribution, SEXP custom_distribution_file, double alpha_fitness, double beta_fitness, double pass_prob, SEXP upper_fitness, SEXP lower_fitness, double alpha_mutation, double beta_mutation, bool trace_ancestry, bool count_alleles, double punctuated_prob, double poisson_param, double punctuated_multiplier, double punctuated_advantageous_prob, double epistatic_mutation_thresh, double epistatic_multiplier, SEXP seed, SEXP custom_model_file, SEXP input_file, SEXP output_dir, SEXP ancestor_file);
-RcppExport SEXP _siapopr_siapop(SEXP tot_lifeSEXP, SEXP max_popSEXP, SEXP max_pop_mutationSEXP, SEXP max_pop_mut_rateSEXP, SEXP start_timeSEXP, SEXP ancestorsSEXP, SEXP ancestor_clonesSEXP, SEXP num_simsSEXP, SEXP allow_extinctionSEXP, SEXP num_samplesSEXP, SEXP sample_sizeSEXP, SEXP detection_thresholdSEXP, SEXP observation_frequencySEXP, SEXP observation_timesSEXP, SEXP birth_rateSEXP, SEXP death_rateSEXP, SEXP mutation_probSEXP, SEXP fitness_distributionSEXP, SEXP custom_distribution_fileSEXP, SEXP alpha_fitnessSEXP, SEXP beta_fitnessSEXP, SEXP pass_probSEXP, SEXP upper_fitnessSEXP, SEXP lower_fitnessSEXP, SEXP alpha_mutationSEXP, SEXP beta_mutationSEXP, SEXP trace_ancestrySEXP, SEXP count_allelesSEXP, SEXP punctuated_probSEXP, SEXP poisson_paramSEXP, SEXP punctuated_multiplierSEXP, SEXP punctuated_advantageous_probSEXP, SEXP epistatic_mutation_threshSEXP, SEXP epistatic_multiplierSEXP, SEXP seedSEXP, SEXP custom_model_fileSEXP, SEXP input_fileSEXP, SEXP output_dirSEXP, SEXP ancestor_fileSEXP) {
+int siapop(double tot_life, int max_pop, int max_pop_mutation, double max_pop_mut_rate, double start_time, int ancestors, int ancestor_clones, int num_sims, bool allow_extinction, int num_samples, int sample_size, double detection_threshold, double observation_frequency, SEXP observation_times, double birth_rate, double death_rate, double mutation_prob, SEXP fitness_distribution, SEXP custom_distribution_file, double alpha_fitness, double beta_fitness, double pass_prob, SEXP upper_fitness, SEXP lower_fitness, SEXP max_fitness, double alpha_mutation, double beta_mutation, bool trace_ancestry, bool count_alleles, double punctuated_prob, double poisson_param, double punctuated_multiplier, double punctuated_advantageous_prob, double epistatic_mutation_thresh, double epistatic_multiplier, SEXP seed, SEXP custom_model_file, SEXP input_file, SEXP output_dir, SEXP ancestor_file);
+RcppExport SEXP _siapopr_siapop(SEXP tot_lifeSEXP, SEXP max_popSEXP, SEXP max_pop_mutationSEXP, SEXP max_pop_mut_rateSEXP, SEXP start_timeSEXP, SEXP ancestorsSEXP, SEXP ancestor_clonesSEXP, SEXP num_simsSEXP, SEXP allow_extinctionSEXP, SEXP num_samplesSEXP, SEXP sample_sizeSEXP, SEXP detection_thresholdSEXP, SEXP observation_frequencySEXP, SEXP observation_timesSEXP, SEXP birth_rateSEXP, SEXP death_rateSEXP, SEXP mutation_probSEXP, SEXP fitness_distributionSEXP, SEXP custom_distribution_fileSEXP, SEXP alpha_fitnessSEXP, SEXP beta_fitnessSEXP, SEXP pass_probSEXP, SEXP upper_fitnessSEXP, SEXP lower_fitnessSEXP, SEXP max_fitnessSEXP, SEXP alpha_mutationSEXP, SEXP beta_mutationSEXP, SEXP trace_ancestrySEXP, SEXP count_allelesSEXP, SEXP punctuated_probSEXP, SEXP poisson_paramSEXP, SEXP punctuated_multiplierSEXP, SEXP punctuated_advantageous_probSEXP, SEXP epistatic_mutation_threshSEXP, SEXP epistatic_multiplierSEXP, SEXP seedSEXP, SEXP custom_model_fileSEXP, SEXP input_fileSEXP, SEXP output_dirSEXP, SEXP ancestor_fileSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -36,6 +36,7 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< double >::type pass_prob(pass_probSEXP);
     Rcpp::traits::input_parameter< SEXP >::type upper_fitness(upper_fitnessSEXP);
     Rcpp::traits::input_parameter< SEXP >::type lower_fitness(lower_fitnessSEXP);
+    Rcpp::traits::input_parameter< SEXP >::type max_fitness(max_fitnessSEXP);
     Rcpp::traits::input_parameter< double >::type alpha_mutation(alpha_mutationSEXP);
     Rcpp::traits::input_parameter< double >::type beta_mutation(beta_mutationSEXP);
     Rcpp::traits::input_parameter< bool >::type trace_ancestry(trace_ancestrySEXP);
@@ -51,7 +52,7 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< SEXP >::type input_file(input_fileSEXP);
     Rcpp::traits::input_parameter< SEXP >::type output_dir(output_dirSEXP);
     Rcpp::traits::input_parameter< SEXP >::type ancestor_file(ancestor_fileSEXP);
-    rcpp_result_gen = Rcpp::wrap(siapop(tot_life, max_pop, max_pop_mutation, max_pop_mut_rate, start_time, ancestors, ancestor_clones, num_sims, allow_extinction, num_samples, sample_size, detection_threshold, observation_frequency, observation_times, birth_rate, death_rate, mutation_prob, fitness_distribution, custom_distribution_file, alpha_fitness, beta_fitness, pass_prob, upper_fitness, lower_fitness, alpha_mutation, beta_mutation, trace_ancestry, count_alleles, punctuated_prob, poisson_param, punctuated_multiplier, punctuated_advantageous_prob, epistatic_mutation_thresh, epistatic_multiplier, seed, custom_model_file, input_file, output_dir, ancestor_file));
+    rcpp_result_gen = Rcpp::wrap(siapop(tot_life, max_pop, max_pop_mutation, max_pop_mut_rate, start_time, ancestors, ancestor_clones, num_sims, allow_extinction, num_samples, sample_size, detection_threshold, observation_frequency, observation_times, birth_rate, death_rate, mutation_prob, fitness_distribution, custom_distribution_file, alpha_fitness, beta_fitness, pass_prob, upper_fitness, lower_fitness, max_fitness, alpha_mutation, beta_mutation, trace_ancestry, count_alleles, punctuated_prob, poisson_param, punctuated_multiplier, punctuated_advantageous_prob, epistatic_mutation_thresh, epistatic_multiplier, seed, custom_model_file, input_file, output_dir, ancestor_file));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -130,7 +131,7 @@ END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
-    {"_siapopr_siapop", (DL_FUNC) &_siapopr_siapop, 39},
+    {"_siapopr_siapop", (DL_FUNC) &_siapopr_siapop, 40},
     {"_siapopr_siapopNoMut", (DL_FUNC) &_siapopr_siapopNoMut, 14},
     {"_siapopr_siapopTD", (DL_FUNC) &_siapopr_siapopTD, 39},
     {NULL, NULL, 0}

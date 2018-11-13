@@ -393,7 +393,12 @@ void ConstantCloneList::NewCloneFitMut::operator()(struct clone *new_clone, stru
     double additional_rate = 0;
     (*ConstantGenerateFitness)(&additional_rate, &fit_params, rng);
 
-    if (additional_rate > 0)
+    // account for the max_fitness
+    if(additional_rate + parent_clone->birth_rate > fit_params.max_fitness)
+    {
+      additional_rate = fit_params.max_fitness - parent_clone->birth_rate;
+    }
+    if (abs(additional_rate) < 10e-15)
     {
       new_clone->driver_count++;
       did_count_driver = true;

@@ -105,6 +105,7 @@ void (*CreateNewCustomClone)( struct clone *, struct clone *, struct FitnessPara
 //' @param pass_prob probability of no change in fitness
 //' @param upper_fitness upper bound to fitness distribution
 //' @param lower_fitness lower bound to fitness distribution
+//' @param max_fitness maximum value of fitness = birth_rate - death_rate achievable
 //' @param alpha_mutation mutation distribution alpha parameter. A new clone
 //'   can have a new mutation rate coming from a distribution with parameters
 //'   \code{alpha} and \code{beta}.
@@ -171,6 +172,7 @@ int siapop(double tot_life = 40000.0,
                    double pass_prob = 1.0,
                    SEXP upper_fitness = R_NilValue,
                    SEXP lower_fitness = R_NilValue,
+                   SEXP max_fitness = R_NilValue,
                    double alpha_mutation = 0.0,
                    double beta_mutation = 0.0,
                    bool trace_ancestry = true,
@@ -304,6 +306,7 @@ int siapop(double tot_life = 40000.0,
     params.convert("pass_prob", fit_params.pass_prob);
     params.convert("upper_fitness", fit_params.upper_fitness);
     params.convert("lower_fitness", fit_params.lower_fitness);
+    params.convert("max_fitness", fit_params.max_fitness);
     fit_params.is_randfitness = false;
     if( !fit_params.fitness_distribution.empty() )
     {
@@ -426,6 +429,14 @@ int siapop(double tot_life = 40000.0,
     else
     {
       fit_params.lower_fitness = -DBL_MAX;
+    }
+    if( !Rf_isNull(max_fitness) )
+    {
+      fit_params.max_fitness = *REAL(max_fitness);
+    }
+    else
+    {
+      fit_params.max_fitness = DBL_MAX;
     }
 
     fit_params.is_randfitness = false;

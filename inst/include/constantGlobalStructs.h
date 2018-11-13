@@ -76,6 +76,7 @@ struct FitnessParameters
   double pass_prob;
   double upper_fitness;
   double lower_fitness;
+  double max_fitness;
 };
 
 struct MutationParameters

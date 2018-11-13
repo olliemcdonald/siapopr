@@ -13,12 +13,13 @@ siapop(tot_life = 40000, max_pop = 10000L,
   birth_rate = 1.5, death_rate = 1, mutation_prob = 0,
   fitness_distribution = NULL, custom_distribution_file = NULL,
   alpha_fitness = 0, beta_fitness = 0, pass_prob = 1,
-  upper_fitness = NULL, lower_fitness = NULL, alpha_mutation = 0,
-  beta_mutation = 0, trace_ancestry = TRUE, count_alleles = TRUE,
-  punctuated_prob = 0, poisson_param = 1, punctuated_multiplier = 1,
-  punctuated_advantageous_prob = 1, epistatic_mutation_thresh = 1,
-  epistatic_multiplier = 1, seed = NULL, custom_model_file = NULL,
-  input_file = NULL, output_dir = NULL, ancestor_file = NULL)
+  upper_fitness = NULL, lower_fitness = NULL, max_fitness = NULL,
+  alpha_mutation = 0, beta_mutation = 0, trace_ancestry = TRUE,
+  count_alleles = TRUE, punctuated_prob = 0, poisson_param = 1,
+  punctuated_multiplier = 1, punctuated_advantageous_prob = 1,
+  epistatic_mutation_thresh = 1, epistatic_multiplier = 1,
+  seed = NULL, custom_model_file = NULL, input_file = NULL,
+  output_dir = NULL, ancestor_file = NULL)
 }
 \arguments{
 \item{tot_life}{total lifetime to run a simulation for}
@@ -80,6 +81,8 @@ with the negative side having rate \code{beta}}
 \item{upper_fitness}{upper bound to fitness distribution}
 
 \item{lower_fitness}{lower bound to fitness distribution}
+
+\item{max_fitness}{maximum value of fitness = birth_rate - death_rate achievable}
 
 \item{alpha_mutation}{mutation distribution alpha parameter. A new clone
 can have a new mutation rate coming from a distribution with parameters
