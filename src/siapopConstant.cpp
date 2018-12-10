@@ -596,6 +596,13 @@ int siapop(double tot_life = 40000.0,
   double rand_next_time;
   int count_extinct = 0;
 
+  double time_of_fraction = 0;
+  double avg_time_of_fraction= 0;
+  bool size_flag = true;
+  double fraction_of_end_size = 0.95;
+  double doubling_time = 0;
+  double avg_doubling_time = 0;
+
   // Beginning of simulation that has "sim" number of runs
   for (int sim = 1; sim <= gpcons.num_sims; sim++)
   {
@@ -759,6 +766,8 @@ int siapop(double tot_life = 40000.0,
     population.Traverse(timedata, sim, current_time, gpcons.trace_ancestry, gpcons.count_alleles);
     Rcpp::Rcout << "Ancestor Output Written...\n";
 
+    size_flag = true;
+    time_of_fraction = 0;
     // Begin single simulation with while loop that exists when hit max time, max pop, or extinction
     while ( (population.tot_cell_count < gpcons.max_pop) &&
             (population.tot_cell_count > 0) &&
@@ -795,6 +804,11 @@ int siapop(double tot_life = 40000.0,
       Rcpp::Rcout << "Time: " << current_time << "\t size: " << population.tot_cell_count << "\n";
       }
       //*/
+      if((population.tot_cell_count > 0.95 * gpcons.max_pop) && size_flag)
+      {
+        time_of_fraction = current_time;
+        size_flag = false;
+      }
     }
 
     // nonextinction checker - if set to false and goes extinction, restart that sim
@@ -813,6 +827,9 @@ int siapop(double tot_life = 40000.0,
     {
       count_detect = count_detect + 1;
       avg_sim_endtime = avg_sim_endtime + (current_time) / (double)gpcons.num_sims;
+      avg_time_of_fraction = avg_time_of_fraction + (time_of_fraction) / (double)gpcons.num_sims;
+      doubling_time = log(2.0) / (log(1.0 / fraction_of_end_size) / (current_time - time_of_fraction));
+      avg_doubling_time = avg_doubling_time + (doubling_time) / (double)gpcons.num_sims;
     }
 
     // Final Timed Output
@@ -846,6 +863,8 @@ int siapop(double tot_life = 40000.0,
   delete NewConstantClone;
 
   sim_stats << "avg_sim_endtime, " << avg_sim_endtime << "\n" <<
+    "avg_sim_fractiontime, " << avg_time_of_fraction << "\n" <<
+    "avg_doubling_time, " << avg_doubling_time << "\n" <<
     "count_detect, " << count_detect << "\n" <<
       "count_extinct, " << count_extinct  << "\n";
 
