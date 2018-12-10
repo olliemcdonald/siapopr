@@ -232,6 +232,12 @@ int siapop(double tot_life = 40000.0,
   sim_stats.setf(std::ios::fixed);
   sim_stats.precision(8);
 
+  std::ofstream time_stats;
+  sprintf(fn,"%s/time_stats.txt", output_folder);
+  time_stats.open(fn);
+  time_stats.setf(std::ios::fixed);
+  time_stats.precision(8);
+
   FitnessParameters fit_params;
   MutationParameters mut_params;
   PunctuationParameters punct_params;
@@ -830,6 +836,9 @@ int siapop(double tot_life = 40000.0,
       avg_time_of_fraction = avg_time_of_fraction + (time_of_fraction) / (double)gpcons.num_sims;
       doubling_time = log(2.0) / (log(1.0 / fraction_of_end_size) / (current_time - time_of_fraction));
       avg_doubling_time = avg_doubling_time + (doubling_time) / (double)gpcons.num_sims;
+
+
+      time_stats << sim << "\t" << doubling_time << "\n";
     }
 
     // Final Timed Output
@@ -872,6 +881,7 @@ int siapop(double tot_life = 40000.0,
   timedata.close();
   sample_data.close();
   sim_stats.close();
+  time_stats.close();
 
 #ifdef _WIN32
   if(fit_params.fitness_distribution.compare("custom") == 0)
