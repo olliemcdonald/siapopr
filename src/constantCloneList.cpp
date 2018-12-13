@@ -311,7 +311,7 @@ void ConstantCloneList::AdvanceState(double curr_time, double next_time, gsl_rng
         currnode = pnode;
         if(gpcons.count_alleles) ChangeAncestorAllele(pnode, true);
         // Reprioritize clone based on size by moving to left
-        CloneSort(pnode, true);
+        //CloneSort(pnode, true);
       }
 
       flag = true;
@@ -340,7 +340,7 @@ void ConstantCloneList::AdvanceState(double curr_time, double next_time, gsl_rng
       */
 
       // sort by moving to the right until fits
-      CloneSort(pnode, false);
+      //CloneSort(pnode, false);
 
       flag = true;
       break;
