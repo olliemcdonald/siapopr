@@ -359,6 +359,13 @@ void ConstantCloneList::AdvanceState(double curr_time, double next_time, gsl_rng
     std::cout << "rand_value:\t" << rand_next_event << "\n";
     std::cout << "total rate:\t" << tot_rate << "\n";
     std::cout << "current_summand:\t" << summand << "\n";
+
+    pnode = root;
+    while ( (pnode) )
+    {
+      std::cout << pnode->clone_id << "\t" << pnode->cell_count << "\t" << pnode->birth_rate << "\t" << pnode->death_rate "\n";
+      pnode=pnode->nextnode;
+    }
     exit(0);
   }
 }
