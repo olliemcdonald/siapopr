@@ -311,7 +311,7 @@ void ConstantCloneList::AdvanceState(double curr_time, double next_time, gsl_rng
         currnode = pnode;
         if(gpcons.count_alleles) ChangeAncestorAllele(pnode, true);
         // Reprioritize clone based on size by moving to left
-        //CloneSort(pnode, true);
+        CloneSort(pnode, true);
       }
 
       flag = true;
@@ -328,19 +328,22 @@ void ConstantCloneList::AdvanceState(double curr_time, double next_time, gsl_rng
       // decrease allele count in ancestors
       if(gpcons.count_alleles) ChangeAncestorAllele(pnode, false);
 
-      /* Couldn't figure out issue
+      /*
       // Clean up of clones with zero to speed up later runs
-      if(pnode->cell_count == 0)
+      if((pnode->cell_count == 0) && (pnode->prevnode != NULL))
       {
-        struct clone *zeronode;
-        zeronode = pnode;
-        // remove pnode by attaching it to deadlist
-        CutNodeOut(zeronode);
+        // remove pnode
+        CutNodeOut(root, pnode);
+      }
+      else
+      {
+        CloneSort(pnode, false);
       }
       */
+      CloneSort(pnode, false);
+
 
       // sort by moving to the right until fits
-      //CloneSort(pnode, false);
 
       flag = true;
       break;
@@ -350,9 +353,21 @@ void ConstantCloneList::AdvanceState(double curr_time, double next_time, gsl_rng
     summand = summand + (pnode->cell_count) * (pnode->birth_rate + pnode->death_rate);
     pnode = pnode->nextnode;
 
+
+    if(!(pnode) && !(flag)) // didn't reach total rate - reset total rate to summand and restart this run
+    {
+      tot_rate = summand;
+      summand = 0;
+      rand_next_event = gsl_ran_flat(rng, 0, tot_rate);
+      pnode = root;
+      std::cout << "warning: summand greater than rate so readjusting";
+    }
+
+
   }
 
-  if (!flag)
+
+  if (!(flag))
   {
     std::cout << "error: step not completed" << "\n";
     std::cout.precision(15);
@@ -368,6 +383,7 @@ void ConstantCloneList::AdvanceState(double curr_time, double next_time, gsl_rng
     }
     exit(0);
   }
+
 }
 
 
@@ -794,45 +810,36 @@ void ConstantCloneList::TreeTrim(double threshold, int max_pop)
 */
 void ConstantCloneList::CutNodeOut(struct clone* zeronode)
 {
-  if(zeronode->prevnode == NULL) // if root
+  if( (zeronode->prevnode) && (zeronode->nextnode) )
   {
-    if(zeronode->nextnode == NULL)
-    {
-      root = NULL;
-    }
-    else
-    {
-      root = zeronode->nextnode;
-      root->prevnode = NULL;
-    }
-  }
-  else
-  {
-    if(zeronode->nextnode != NULL)
-    {
-      zeronode->nextnode->prevnode = zeronode->prevnode;
-      zeronode->prevnode->nextnode = zeronode->nextnode;
-    }
-    else
-    {
-      zeronode->prevnode->nextnode = NULL;
-    }
+    zeronode->nextnode->prevnode = zeronode->prevnode;
+    zeronode->prevnode->nextnode = zeronode->nextnode;
+    delete zeronode;
   }
 
-  // if dead not rooted, root with first zero node,
-  //   otherwise add to end of list
-  if( deadroot == NULL)
-  {
-    deadroot = zeronode;
-    zeronode->prevnode = NULL;
-  }
-  else
-  {
-    zeronode->prevnode = currdeadnode;
-    currdeadnode->nextnode = zeronode;
-  }
-  currdeadnode = zeronode;
-  zeronode->nextnode = NULL;
+}
+
+void ConstantCloneList::CutNodeOut(struct clone* head_ref, struct clone* del)
+{
+  /* base case */
+  if (head_ref == NULL || del == NULL)
+    return;
+
+  /* If node to be deleted is head node */
+  if (head_ref == del)
+    return;
+
+  /* Change next only if node to be deleted is NOT the last node */
+  if (del->nextnode != NULL)
+    del->nextnode->prevnode = del->prevnode;
+
+  /* Change prev only if node to be deleted is NOT the first node */
+  if (del->prevnode != NULL)
+    del->prevnode->nextnode = del->nextnode;
+
+  /* Finally, free the memory occupied by del*/
+  //free(del);
+  return;
 }
 
 // This function used for TreeTrim to remove nodes that are too small

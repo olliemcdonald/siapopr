@@ -161,6 +161,7 @@ public:
   void ChangeAncestorAllele(struct clone* thisnode, bool add_daughter);
   void CloneSort(struct clone* sortnode, bool is_birth);
   void CutNodeOut(struct clone* zeronode);
+  void CutNodeOut(struct clone* head_ref, struct clone* del);
   void DeleteNode();
   void TreeTrim(double threshold, int max_pop);
 
