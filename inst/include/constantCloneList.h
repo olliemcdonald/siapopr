@@ -46,7 +46,7 @@ public:
   double tot_rate;
   int num_clones;
   int num_mutations;
-  int tot_cell_count;
+  long unsigned int tot_cell_count;
 
   ConstantCloneList() { init(); };
   void init();

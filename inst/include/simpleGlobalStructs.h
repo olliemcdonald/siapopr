@@ -41,7 +41,7 @@ struct GlobalParameters
 struct clone
 {
   std::string clone_id;
-  int cell_count;
+  long unsigned int cell_count;
   double birth_rate;
   double death_rate;
 

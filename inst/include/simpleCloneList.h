@@ -40,7 +40,7 @@ private:
 public:
   double tot_rate;
   int num_clones;
-  int tot_cell_count;
+  long unsigned int tot_cell_count;
 
   SimpleCloneList() { init(); };
   void init();

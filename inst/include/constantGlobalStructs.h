@@ -24,7 +24,7 @@
 struct GlobalParameters
 {
   double tot_life;
-  int max_pop;
+  long unsigned int max_pop;
   int ancestors;
   int ancestor_clones;
   int num_sims;
@@ -49,7 +49,7 @@ struct clone
 {
   std::string clone_id;
   int subclone_count;
-  int cell_count;
+  long unsigned int cell_count;
   int allele_count;
   int mut_count;
   int driver_count;

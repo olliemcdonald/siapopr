@@ -52,7 +52,7 @@ public:
   double tot_rate, tot_rate_homog, tot_rate_integ;
   int num_clones;
   int num_mutations;
-  int tot_cell_count;
+  long unsigned int tot_cell_count;
   double int_result_b, int_error_b, int_result_d, int_error_d;
 
   TDCloneList()
