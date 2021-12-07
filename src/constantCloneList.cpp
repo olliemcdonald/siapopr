@@ -272,6 +272,7 @@ void ConstantCloneList::AdvanceState(double curr_time, double next_time, gsl_rng
         new_mut_node->clone_time = curr_time + next_time;
         new_mut_node->mut_count = pnode->mut_count + 1;
         new_mut_node->is_driver = false;
+        new_mut_node->previously_punctuated = pnode->previously_punctuated;
         // Update parent subclones
         pnode->subclone_count = pnode->subclone_count + 1;
         new_mut_node->mut_prob = pnode->mut_prob;
@@ -418,14 +419,20 @@ void ConstantCloneList::NewCloneFitMut::operator()(struct clone *new_clone, stru
 */
 void ConstantCloneList::NewClonePunct::operator()(struct clone *new_clone, struct clone *parent_clone)
 {
+  new_clone->previously_punctuated = parent_clone->previously_punctuated;
   int number_mutations = 1;
   // generation of punctuated number of mutations
-  double rand_punct = gsl_ran_flat(rng, 0, 1);
+  double rand_punct = 1;
+  if(!(new_clone->previously_punctuated))
+  {
+    rand_punct = gsl_ran_flat(rng, 0, 1);
+  }
   double rand_advantage = 0;
   if(rand_punct < punct_params.punctuated_prob)
   {
     number_mutations = ConstantGeneratePunctuation(punct_params, rng);
     rand_advantage = gsl_ran_flat(rng, 0, 1);
+    new_clone->previously_punctuated=true;
   }
 
   bool did_count_driver = false;
@@ -555,7 +562,8 @@ void ConstantCloneList::Traverse(std::ofstream &F, int sim_number, bool count_al
            pnode->subclone_count << "\t" <<
            pnode->mut_count << "\t" <<
            pnode->driver_count << "\t" <<
-           pnode->is_driver << "\n";
+           pnode->is_driver << "\t" <<
+           pnode->previously_punctuated << "\n";
     }
 
     for (pnode = deadroot; pnode != NULL; pnode = pnode->nextnode)
@@ -571,7 +579,8 @@ void ConstantCloneList::Traverse(std::ofstream &F, int sim_number, bool count_al
            pnode->subclone_count << "\t" <<
            pnode->mut_count << "\t" <<
            pnode->driver_count << "\t" <<
-           pnode->is_driver << "\n";
+           pnode->is_driver << "\t" <<
+           pnode->previously_punctuated << "\n";
     }
   }
   else
@@ -588,7 +597,8 @@ void ConstantCloneList::Traverse(std::ofstream &F, int sim_number, bool count_al
            pnode->subclone_count << "\t" <<
            pnode->mut_count << "\t" <<
            pnode->driver_count << "\t" <<
-           pnode->is_driver << "\n";
+           pnode->is_driver << "\t" <<
+           pnode->previously_punctuated << "\n";
     }
 
     for (pnode = deadroot; pnode != NULL; pnode = pnode->nextnode)
@@ -603,7 +613,8 @@ void ConstantCloneList::Traverse(std::ofstream &F, int sim_number, bool count_al
            pnode->subclone_count << "\t" <<
            pnode->mut_count << "\t" <<
            pnode->driver_count << "\t" <<
-           pnode->is_driver << "\n";
+           pnode->is_driver << "\t" <<
+           pnode->previously_punctuated << "\n";
     }
   }
 }

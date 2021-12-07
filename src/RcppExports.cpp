@@ -6,6 +6,11 @@
 
 using namespace Rcpp;
 
+#ifdef RCPP_USE_GLOBAL_ROSTREAM
+Rcpp::Rostream<true>&  Rcpp::Rcout = Rcpp::Rcpp_cout_get();
+Rcpp::Rostream<false>& Rcpp::Rcerr = Rcpp::Rcpp_cerr_get();
+#endif
+
 // siapop
 int siapop(double tot_life, int max_pop, double start_time, int ancestors, int ancestor_clones, int num_sims, bool allow_extinction, int num_samples, int sample_size, double detection_threshold, double observation_frequency, SEXP observation_times, double birth_rate, double death_rate, double mutation_prob, SEXP fitness_distribution, SEXP custom_distribution_file, double alpha_fitness, double beta_fitness, double pass_prob, SEXP upper_fitness, SEXP lower_fitness, double alpha_mutation, double beta_mutation, bool trace_ancestry, bool count_alleles, double punctuated_prob, double poisson_param, double punctuated_multiplier, double punctuated_advantageous_prob, double epistatic_mutation_thresh, double epistatic_multiplier, SEXP seed, SEXP custom_model_file, SEXP input_file, SEXP output_dir, SEXP ancestor_file);
 RcppExport SEXP _siapopr_siapop(SEXP tot_lifeSEXP, SEXP max_popSEXP, SEXP start_timeSEXP, SEXP ancestorsSEXP, SEXP ancestor_clonesSEXP, SEXP num_simsSEXP, SEXP allow_extinctionSEXP, SEXP num_samplesSEXP, SEXP sample_sizeSEXP, SEXP detection_thresholdSEXP, SEXP observation_frequencySEXP, SEXP observation_timesSEXP, SEXP birth_rateSEXP, SEXP death_rateSEXP, SEXP mutation_probSEXP, SEXP fitness_distributionSEXP, SEXP custom_distribution_fileSEXP, SEXP alpha_fitnessSEXP, SEXP beta_fitnessSEXP, SEXP pass_probSEXP, SEXP upper_fitnessSEXP, SEXP lower_fitnessSEXP, SEXP alpha_mutationSEXP, SEXP beta_mutationSEXP, SEXP trace_ancestrySEXP, SEXP count_allelesSEXP, SEXP punctuated_probSEXP, SEXP poisson_paramSEXP, SEXP punctuated_multiplierSEXP, SEXP punctuated_advantageous_probSEXP, SEXP epistatic_mutation_threshSEXP, SEXP epistatic_multiplierSEXP, SEXP seedSEXP, SEXP custom_model_fileSEXP, SEXP input_fileSEXP, SEXP output_dirSEXP, SEXP ancestor_fileSEXP) {

@@ -54,6 +54,7 @@ struct clone
   int mut_count;
   int driver_count;
   bool is_driver;
+  bool previously_punctuated;
   double birth_rate;
   double death_rate;
   double mut_prob;
