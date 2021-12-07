@@ -39,17 +39,18 @@ to simulate clonal evolution.
 
 ### Important Notes about Windows installation
 Rtools contains the necessary resources to compile C++ files when installing
-packages in R. GSL is also required which can be downloaded from [here](http://www.stats.ox.ac.uk/pub/Rtools/goodies/multilib/local323.zip).
-After downloading, unzip to your R directory. Depending on if your computer is
-32 or 64-bit, move the library files from __local###/lib/i386__ (32-bit) or
-__local###/lib/x64__ (64-bit) to __local###/lib__.
+packages in R. GSL is also required which can be downloaded using msys2 which is in the Rtools directory. To install GSL, open the msys2 application and type/run the following commands:
 
-To set the environmental variable LIB_GSL on a Windows 7 computer, go to
-"Advanced system settings" in *Control Panel > System and Security > System*
-and click *Environmental Variables*. Create a new system variable with
+`pacman -Sy mingw-w64-x86_64-gsl`
 
-* Variable Name: __LIB_GSL__
-* Variable Value: __"C:/path/to/local323"__ (include quotes)
+`pacman -Sy mingw-w64-i686-gsl`
+
+Verify that the GSL libraries are installed by navigating to __[Your Rtools Directory]>mingw64>include>gsl__ and verifying this folder exists.
+
+Add these locations to your PATH and LIB_GSL environmental variables in R by adding the following lines to your __.Renviron__ file. If you do not have a .Renviron file, create one in your home directory and add the following lines:
+`PATH=“${RTOOLS40_HOME}\usr\bin;${PATH}”`
+
+`LIB_GSL=“${RTOOLS40_HOME}\mingw64”`
 
 ## Recommended R packages
 The following R packages are required for certain functions.
