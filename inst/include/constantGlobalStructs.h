@@ -37,7 +37,7 @@ struct GlobalParameters
   bool is_custom_model;
   double birth_rate;
   double death_rate;
-  bool previously_punctuated
+  bool previously_punctuated;
   double mutation_prob;
   bool trace_ancestry;
   bool count_alleles;
