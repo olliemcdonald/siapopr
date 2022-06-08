@@ -37,6 +37,7 @@ struct GlobalParameters
   bool is_custom_model;
   double birth_rate;
   double death_rate;
+  bool previously_punctuated
   double mutation_prob;
   bool trace_ancestry;
   bool count_alleles;
@@ -54,7 +55,6 @@ struct clone
   int mut_count;
   int driver_count;
   bool is_driver;
-  bool previously_punctuated;
   double birth_rate;
   double death_rate;
   double mut_prob;

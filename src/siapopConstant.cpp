@@ -515,12 +515,12 @@ int siapop(double tot_life = 40000.0,
   if(gpcons.count_alleles)
   {
     clonedata << "run\tunique_id\tnumcells\tallelefreq\tbirthrate\tdeathrate\tmutprob\t"
-    "initialtime\tsubclone_count\tnum_mut\tnum_drivers\tis_driver\tpreviously_punctuated" << "\n";
+    "initialtime\tsubclone_count\tnum_mut\tnum_drivers\tis_driver" << "\n";
   }
   else
   {
     clonedata << "run\tunique_id\tnumcells\tbirthrate\tdeathrate\tmutprob\t"
-    "initialtime\tsubclone_count\tnum_mut\tnum_drivers\tis_driver\tpreviously_punctuated" << "\n";
+    "initialtime\tsubclone_count\tnum_mut\tnum_drivers\tis_driver" << "\n";
   }
 
   std::ofstream timedata;
@@ -663,7 +663,6 @@ int siapop(double tot_life = 40000.0,
         ancestor->mut_count = 0;
         ancestor->driver_count = 0;
         ancestor->is_driver = false;
-        ancestor->previously_punctuated = false;
 
         population.InsertAncestor(ancestor);
       }
@@ -722,7 +721,6 @@ int siapop(double tot_life = 40000.0,
           ancestor->mut_count = !ancestor_map["num_mut"].empty() ? stoi(ancestor_map["num_mut"]) : 0;
           ancestor->driver_count = !ancestor_map["num_drivers"].empty() ? stoi(ancestor_map["num_drivers"]) : 0;
           ancestor->is_driver = !ancestor_map["is_driver"].empty() ? stoi(ancestor_map["is_driver"]) : false;
-          ancestor->previously_punctuated = !ancestor_map["previously_punctuated"].empty() ? stoi(ancestor_map["previously_punctuated"]) : false;
 
           population.InsertAncestor(ancestor);
 
