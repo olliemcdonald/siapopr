@@ -192,6 +192,7 @@ int siapop(double tot_life = 40000.0,
 
   //  declaring random number generator and setting seed
   constant_rng = gsl_rng_alloc(gsl_rng_mt19937);
+  gpcons.previously_punctuated = false;
   if( Rf_isNull(seed) )
   {
     gpcons.seed = std::chrono::high_resolution_clock::now().time_since_epoch().count();

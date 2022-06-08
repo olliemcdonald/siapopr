@@ -3,6 +3,11 @@ bin
 build
 test
 lib/*
+*.o
+*.so
+config.log
+config.status
+Makevars
 
 # Ignore executables
 bin/*
