@@ -201,6 +201,7 @@ int siapopTD(double tot_life = 40000.0,
                   bool trace_ancestry = true,
                   bool count_alleles = true,
                   double punctuated_prob = 0.0,
+                  double decay_rate = 0.0,
                   double poisson_param = 1.0,
                   double punctuated_multiplier = 1.0,
                   double punctuated_advantageous_prob = 1.0,
@@ -366,6 +367,7 @@ int siapopTD(double tot_life = 40000.0,
     }
 
     params.convert("punctuated_prob", punct_params.punctuated_prob);
+    params.convert("decay_rate", punct_params.decay_rate);
     params.convert("poisson_param", punct_params.poisson_param);
     params.convert("punctuated_multiplier", punct_params.punctuated_multiplier);
     params.convert("punctuated_advantageous_prob", punct_params.punctuated_advantageous_prob);
@@ -524,6 +526,7 @@ int siapopTD(double tot_life = 40000.0,
     }
 
     punct_params.punctuated_prob = punctuated_prob;
+    punct_params.decay_rate = decay_rate;
     punct_params.poisson_param = poisson_param;
     punct_params.punctuated_multiplier = punctuated_multiplier;
     punct_params.punctuated_advantageous_prob = punctuated_advantageous_prob;

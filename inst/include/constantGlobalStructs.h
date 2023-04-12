@@ -88,6 +88,7 @@ struct PunctuationParameters
 {
     bool is_punctuated;
     double punctuated_prob;
+    double decay_rate;
     double poisson_param;
     double punctuated_multiplier;
     double punctuated_advantageous_prob;

@@ -422,7 +422,11 @@ void ConstantCloneList::NewClonePunct::operator()(struct clone *new_clone, struc
   // generation of punctuated number of mutations
   double rand_punct = gsl_ran_flat(rng, 0, 1);
   double rand_advantage = 0;
-  if(rand_punct < punct_params.punctuated_prob)
+  // FOR JACOB - THE CLONE_TIME IS THE CURRENT TIME WHEN THE CLONE WAS CREATED. MULTIPLYING THIS BY
+  // THE DECAY RATE (NEW PARAMETER) SHOULD GIVE AN EXONENTIALLY DECAYING FUNCTION WITH AN INTERCEPT
+  // AT THE PUNCTUATED_PROB
+  double punct_decay = punct_params.punctuated_prob * exp(-1.0 * new_clone->clone_time * punct_params.decay_rate);
+  if(rand_punct < punct_decay)
   {
     number_mutations = ConstantGeneratePunctuation(punct_params, rng);
     rand_advantage = gsl_ran_flat(rng, 0, 1);
@@ -441,7 +445,7 @@ void ConstantCloneList::NewClonePunct::operator()(struct clone *new_clone, struc
       did_count_driver = true;
       new_clone->birth_rate = fmax(0, additional_rate + new_clone->birth_rate);
 
-      if(rand_punct < punct_params.punctuated_prob)
+      if(rand_punct < punct_decay)
       {
         additional_rate = additional_rate * punct_params.punctuated_multiplier;
         // the additional rate can go to the birth or the death rate

@@ -504,7 +504,11 @@ void TDCloneList::NewClonePunct::operator()(struct clone *new_clone, struct clon
 
   double rand_punct = gsl_ran_flat(rng, 0, 1);
   double rand_advantage = 0;
-  if(rand_punct < punct_params.punctuated_prob)
+  // FOR JACOB - THE CLONE_TIME IS THE CURRENT TIME WHEN THE CLONE WAS CREATED. MULTIPLYING THIS BY
+  // THE DECAY RATE (NEW PARAMETER) SHOULD GIVE AN EXONENTIALLY DECAYING FUNCTION WITH AN INTERCEPT
+  // AT THE PUNCTUATED_PROB
+  double punct_decay = punct_params.punctuated_prob * exp(-1.0 * new_clone->clone_time * punct_params.decay_rate);
+  if(rand_punct < punct_decay)
   {
     number_mutations = TDGeneratePunctuation(punct_params, rng);
     rand_advantage = gsl_ran_flat(rng, 0, 1);
