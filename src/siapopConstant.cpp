@@ -116,6 +116,7 @@ void (*CreateNewCustomClone)( struct clone *, struct clone *, struct FitnessPara
 //'   population.
 //' @param punctuated_prob probability that a new clone has a burst of multiple
 //'   mutations
+//' @param min_punctuated_prob minimum (lower asymptote) to punctuated probability (additive)
 //' @param decay_rate rate of decay of punctuated probability over time
 //' @param poisson_param parameter of a poisson distribution used to determine
 //'   the number of mutations in a new clone given a burst occurs
@@ -171,6 +172,7 @@ int siapop(double tot_life = 40000.0,
                    bool trace_ancestry = true,
                    bool count_alleles = true,
                    double punctuated_prob = 0.0,
+                   double min_punctuated_prob = 0.0,
                    double decay_rate = 0.0,
                    double poisson_param = 1.0,
                    double punctuated_multiplier = 1.0,
@@ -335,6 +337,7 @@ int siapop(double tot_life = 40000.0,
 
     params.convert("punctuated_prob", punct_params.punctuated_prob);
     params.convert("decay_rate", punct_params.decay_rate);
+    params.convert("min_punctuated_prob", punct_params.min_punctuated_prob);
     params.convert("poisson_param", punct_params.poisson_param);
     params.convert("punctuated_multiplier", punct_params.punctuated_multiplier);
     params.convert("punctuated_advantageous_prob", punct_params.punctuated_advantageous_prob);
@@ -493,6 +496,7 @@ int siapop(double tot_life = 40000.0,
 
     punct_params.punctuated_prob = punctuated_prob;
     punct_params.decay_rate = decay_rate;
+    punct_params.min_punctuated_prob = min_punctuated_prob;
     punct_params.poisson_param = poisson_param;
     punct_params.punctuated_multiplier = punctuated_multiplier;
     punct_params.punctuated_advantageous_prob = punctuated_advantageous_prob;

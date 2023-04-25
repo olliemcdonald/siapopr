@@ -507,7 +507,7 @@ void TDCloneList::NewClonePunct::operator()(struct clone *new_clone, struct clon
   // FOR JACOB - THE CLONE_TIME IS THE CURRENT TIME WHEN THE CLONE WAS CREATED. MULTIPLYING THIS BY
   // THE DECAY RATE (NEW PARAMETER) SHOULD GIVE AN EXONENTIALLY DECAYING FUNCTION WITH AN INTERCEPT
   // AT THE PUNCTUATED_PROB
-  double punct_decay = punct_params.punctuated_prob * exp(-1.0 * new_clone->clone_time * punct_params.decay_rate);
+  double punct_decay = punct_params.min_punctuated_prob + punct_params.punctuated_prob * exp(-1.0 * new_clone->clone_time * punct_params.decay_rate);
   if(rand_punct < punct_decay)
   {
     number_mutations = TDGeneratePunctuation(punct_params, rng);

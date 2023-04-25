@@ -77,6 +77,7 @@ void ConstantParameterList::init()
     insert(std::make_pair("trace_ancestry", "0"));
     insert(std::make_pair("count_alleles", "0"));
     insert(std::make_pair("punctuated_prob", "0"));
+    insert(std::make_pair("min_punctuated_prob", "0"));
     insert(std::make_pair("decay_rate", "0"));
     insert(std::make_pair("poisson_param", "1"));
     insert(std::make_pair("punctuated_fitness_multiplier", "1"));
